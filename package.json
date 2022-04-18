@@ -2,14 +2,26 @@
   "name": "hdl",
   "version": "1.0.0",
   "description": "Hardware Description Library",
-  "main": "dist/hl.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "author": "Nathan Soufflet",
   "scripts": {
     "test": "jest",
     "typeCheck": "tsc --noEmit",
-    "build": "esbuild src/main.ts --bundle --outfile=dist/hdl.js --platform=node",
-    "watch": "esbuild src/main.ts --bundle --outfile=dist/hdl.js --platform=node --watch"
+    "esbuild": "esbuild examples/srlatch.ts --bundle --outfile=dist/srlatch.js --platform=node",
+    "build": "tsc",
+    "watch": "esbuild examples/srlatch.ts --bundle --outfile=dist/srlatch.js --platform=node --watch"
   },
+  "keywords": [
+    "hardware-description",
+    "hardware-design",
+    "logic-gates",
+    "simulation",
+    "circuit-design"
+  ],
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.6.2",
@@ -17,5 +29,9 @@
     "esbuild": "^0.14.27",
     "jest": "^27.5.1",
     "ts-jest": "^27.1.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nathsou/hdl.git"
   }
 }

@@ -1,8 +1,8 @@
 import { writeFileSync } from 'fs';
-import { createBasicModules } from './basic';
-import { bin, createCircuit, width } from "./core";
-import { createGraphDotFile } from './graph';
-import { createSim, deref } from './sim';
+import { createBasicModules } from '../src/basic';
+import { bin, createCircuit, width } from "../src/core";
+import { createGraphDotFile } from '../src/graph';
+import { createSim, deref } from '../src/sim';
 
 const { circuit, createModule } = createCircuit();
 const { arith } = createBasicModules(circuit);
@@ -11,7 +11,7 @@ const top = createModule({
   name: 'top',
   inputs: {},
   outputs: { leds: width[8], overflow: width[1] },
-  connect: (_, out) => {
+  connect(_, out) {
     const fa = arith.adderSubtractor8();
 
     fa.in.a = bin(16, 8);

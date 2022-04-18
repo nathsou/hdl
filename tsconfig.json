@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "module": "esnext",
-    "target": "ES2020",
+    "target": "ES2017",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "strict": true,
+    "outDir": "lib",
   },
   "exclude": [
     "node_modules",
-    "src/tests"
+    "src/tests",
+    "examples",
+    "lib"
   ]
 }

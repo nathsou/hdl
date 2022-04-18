@@ -1,5 +1,5 @@
 import { Circuit, CircuitState, ModuleId, ModuleNode, NodeState, PinId, RawConnection, State } from "./core";
-import { all, join } from "./utils";
+import { all, complementarySet, join } from "./utils";
 
 export const deref = (state: CircuitState, pin: PinId): State => {
   const s = state[pin];
@@ -46,7 +46,7 @@ const initState = (circuit: Circuit): CircuitState => {
   return state;
 };
 
-const isGate = (circ: Circuit, modId: ModuleId) => circ.modules.get(modId)!.simulate != null;
+const isPrimitiveModule = ({ modules }: Circuit, modId: ModuleId) => modules.get(modId)!.simulate != null;
 
 const sourceNet = (circ: Circuit, net: string): string => {
   const { id, in: inp } = circ.nets.get(net)!;
@@ -55,7 +55,7 @@ const sourceNet = (circ: Circuit, net: string): string => {
     throw new Error(`Multiple input pins for net '${net}'`);
   }
 
-  if (isGate(circ, id)) {
+  if (isPrimitiveModule(circ, id)) {
     return net;
   }
 
@@ -82,10 +82,9 @@ export const removeCompoundModules = (circ: Circuit): Circuit => {
     signatures: circ.signatures,
   };
 
-  // only keep gates
+  // only keep primitive modules
   for (const [modId, node] of circ.modules.entries()) {
     if (node.simulate != null) {
-
       const newPins = {
         in: Object.fromEntries(
           Object.entries(node.pins.in).map(([pin, conns]) => [
@@ -115,7 +114,7 @@ const levelize = (circuit: Circuit) => {
   const { modules: gates } = removeCompoundModules(circuit);
 
   const remainingGates = new Set<ModuleId>();
-  const readyGates = new Set<ModuleId>();
+  const readyGates = complementarySet(remainingGates);
   const dependencies = new Map<ModuleId, Set<ModuleId>>(
     [...gates.keys()].map(id => [id, new Set()])
   );
@@ -144,9 +143,12 @@ const levelize = (circuit: Circuit) => {
       }
     }
 
+    if (newlyReadyGates.length === 0) {
+      throw new Error('Circuit has feedback loops, use event-driven simulation instead.');
+    }
+
     for (const gateId of newlyReadyGates) {
       order.push(gateId);
-      readyGates.add(gateId);
       remainingGates.delete(gateId);
     }
   }
@@ -156,23 +158,20 @@ const levelize = (circuit: Circuit) => {
 
 export const createSim = (circ: Circuit) => {
   const state = initState(circ);
-
   const executionOrder = levelize(circ);
+  const gates = executionOrder.map(id => ({
+    simulate: circ.modules.get(id)!.simulate!,
+    inp: new Proxy({}, simulationHandler(id, circ.modules.get(id)!, circ, state, true)),
+    out: new Proxy({}, simulationHandler(id, circ.modules.get(id)!, circ, state, false)),
+  }));
 
   const step = () => {
-    for (const modId of executionOrder) {
-      const mod = circ.modules.get(modId)!;
-      mod.simulate!(
-        new Proxy({}, simulationHandler(modId, mod, circ, state, true)),
-        new Proxy({}, simulationHandler(modId, mod, circ, state, false))
-      );
+    for (const { simulate, inp, out } of gates) {
+      simulate(inp, out);
     }
   };
 
-  return {
-    step,
-    state,
-  };
+  return { state, step };
 };
 
 const simulationHandler = (id: number, mod: ModuleNode, circuit: Circuit, state: CircuitState, isInput: boolean): ProxyHandler<any> => {

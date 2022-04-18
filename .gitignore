@@ -1,10 +1,5 @@
 /node_modules
 .DS_Store
 /dist
-circuit.json
-circuit.gv
-circuit.svg
-circuit.png
-circuit_simpl.gv
-circuit_simpl.svg
+out
 sim.json

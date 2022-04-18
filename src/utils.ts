@@ -27,3 +27,9 @@ export const all = <T>(as: Iterable<T>, pred: (v: T) => boolean): boolean => {
 
   return true;
 };
+
+export const complementarySet = <T>(set: Set<T>) => {
+  return {
+    has: (v: T) => !set.has(v),
+  };
+};

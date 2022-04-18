@@ -7,7 +7,7 @@ export const createGates = (circuit: Circuit) => {
     name: 'not',
     inputs: { d: width[1] },
     outputs: { q: width[1] },
-    simulate: (inp, out) => {
+    simulate(inp, out) {
       out.q = inp.d === 0 ? 1 : 0;
     },
   }, circuit);
@@ -19,8 +19,17 @@ export const createGates = (circuit: Circuit) => {
     name: 'and',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
-    simulate: (inp, out) => {
+    simulate(inp, out) {
       out.q = (inp.a && inp.b) ? 1 : 0;
+    },
+  }, circuit);
+
+  const nand = createPrimitiveModule({
+    name: 'nand',
+    inputs: { a: width[1], b: width[1] },
+    outputs: { q: width[1] },
+    simulate(inp, out) {
+      out.q = (inp.a && inp.b) ? 0 : 1;
     },
   }, circuit);
 
@@ -28,7 +37,7 @@ export const createGates = (circuit: Circuit) => {
     name: 'or',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
-    simulate: (inp, out) => {
+    simulate(inp, out) {
       out.q = (inp.a || inp.b) ? 1 : 0;
     },
   }, circuit);
@@ -37,7 +46,7 @@ export const createGates = (circuit: Circuit) => {
     name: 'xor',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
-    simulate: (inp, out) => {
+    simulate(inp, out) {
       out.q = (inp.a || inp.b) && !(inp.a && inp.b) ? 1 : 0;
     },
   }, circuit);
@@ -52,7 +61,7 @@ export const createGates = (circuit: Circuit) => {
     name: 'logical_and3',
     inputs: { d: width[3] },
     outputs: { q: width[1] },
-    connect: (inp, out) => {
+    connect(inp, out) {
       const and1 = and();
       const and2 = and();
 
@@ -69,6 +78,7 @@ export const createGates = (circuit: Circuit) => {
     and,
     or,
     xor,
+    nand,
     not4,
     not8,
     and4,

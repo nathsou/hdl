@@ -358,7 +358,7 @@ export const extend4 = <
       return acc;
     }, {} as Record<InputPin, 4>),
     outputs: { [outputPin]: width[4] } as { [K in OutputPin]: 4 },
-    connect: (inp, out) => {
+    connect(inp, out) {
       const c3 = baseComp();
       const c2 = baseComp();
       const c1 = baseComp();
@@ -393,7 +393,7 @@ export const extend8 = <
       return acc;
     }, {} as Record<InputPin, 8>),
     outputs: { [outputPin]: width[8] } as { [K in OutputPin]: 8 },
-    connect: (inp, out) => {
+    connect(inp, out) {
       const hi = baseComp();
       const lo = baseComp();
 

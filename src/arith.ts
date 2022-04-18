@@ -12,7 +12,7 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     name: 'half_adder',
     inputs: { a: width[1], b: width[1] },
     outputs: { sum: width[1], carry: width[1] },
-    connect: (inp, out) => {
+    connect(inp, out) {
       const and1 = gates.and();
       const xor1 = gates.xor();
 
@@ -40,7 +40,7 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     name: 'full_adder',
     inputs: { a: width[1], b: width[1], carry_in: width[1] },
     outputs: { sum: width[1], carry_out: width[1] },
-    connect: (inp, out) => {
+    connect(inp, out) {
       const xor1 = gates.xor();
       const xor2 = gates.xor();
       const and1 = gates.and();
@@ -69,7 +69,7 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     name: 'adder4',
     inputs: { a: width[4], b: width[4], carry_in: width[1] },
     outputs: { sum: width[4], carry_out: width[1] },
-    connect: (inp, out) => {
+    connect(inp, out) {
       const adder0 = fullAdder();
       const adder1 = fullAdder();
       const adder2 = fullAdder();
@@ -106,7 +106,7 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     name: 'adder8',
     inputs: { a: width[8], b: width[8], carry_in: width[1] },
     outputs: { sum: width[8], carry_out: width[1] },
-    connect: (inp, out) => {
+    connect(inp, out) {
       const low = adder4();
       const high = adder4();
 
@@ -127,7 +127,7 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     name: 'adder_subtractor8',
     inputs: { a: width[8], b: width[8], subtract: width[1] },
     outputs: { sum: width[8], carry_out: width[1] },
-    connect: (inp, out) => {
+    connect(inp, out) {
       const adder = adder8();
       const xors = gates.xor8();
 
