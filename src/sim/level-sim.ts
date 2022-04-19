@@ -1,4 +1,4 @@
-import { Circuit, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
+import { checkConnections, Circuit, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
 import { withoutCompoundModules } from "./rewrite";
 import { all, complementarySet } from "../utils";
 import { createState, SimulationData, simulationHandler, Simulator } from "./sim";
@@ -54,6 +54,7 @@ export const createLevelizedSimulator = <
   Out extends Record<string, number>
 >(top: Module<In, Out>): Simulator<In> => {
   const { id: topId, circuit } = metadata(top);
+  checkConnections(top);
   const state = createState(circuit);
   const executionOrder = levelize(circuit);
 

@@ -1,5 +1,5 @@
 import { Circuit, createModule, width } from "../core";
-import { gen, last } from "../utils";
+import { gen, genConnections, last } from "../utils";
 import { Gates } from "./gates";
 import { extendN, Multi } from "./meta";
 
@@ -89,15 +89,14 @@ export const createArith = (circ: Circuit, gates: Gates) => {
   }, circ);
 
   const adderSubtractorN = <N extends Multi>(N: N) => createModule({
-    name: 'adder_subtractor8',
+    name: `adder_subtractor${N}`,
     inputs: { a: N, b: N, subtract: width[1] },
     outputs: { sum: N, carry_out: width[1] },
     connect(inp, out) {
       const adder = adderN(N)();
       const xors = extendN(circ)(N, gates.xor, ['a', 'b'], ['q'], `xor${N}`)();
 
-      /// @ts-ignore
-      xors.in.a = gen(N, () => inp.subtract);
+      xors.in.a = genConnections(N, () => inp.subtract);
       xors.in.b = inp.b;
 
       adder.in.carry_in = inp.subtract;

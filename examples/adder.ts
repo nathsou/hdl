@@ -1,4 +1,4 @@
-import { createCircuit, width } from "../src/core";
+import { checkConnections, createCircuit, metadata, width } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { bin } from "../src/utils";
 
@@ -27,7 +27,7 @@ const top = createModule({
 
 const main = () => {
   const mod = top();
-  const sim = createSimulator(mod, 'event-driven');
+  const sim = createSimulator(mod, 'levelization');
 
   const logOutput = () => {
     const res = sim.state.read(mod.out.leds);
@@ -36,6 +36,9 @@ const main = () => {
   };
 
   sim.input({ a: bin(2 ** (N - 1) - 1, N), b: bin(2 ** (N - 1), N), subtract: 0 });
+  logOutput();
+
+  sim.input({ a: bin(2 ** (N - 1), N), b: bin(2 ** (N - 1), N), subtract: 0 });
   logOutput();
 
   sim.input({ a: bin(202, N), b: bin(31, N), subtract: 1 });

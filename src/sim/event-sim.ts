@@ -1,5 +1,5 @@
 import Queue from 'mnemonist/queue';
-import { MapStates, metadata, Module, ModuleId, Net, State } from "../core";
+import { checkConnections, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
 import { targetPrimitiveMods, withoutCompoundModules } from './rewrite';
 import { map, some, uniq } from "../utils";
 import { createState, SimulationData, simulationHandler, Simulator } from './sim';
@@ -14,6 +14,7 @@ export const createEventDrivenSimulator = <
   Out extends Record<string, number>
 >(topModule: Module<In, Out>): Simulator<In> => {
   const { id: topId, circuit } = metadata(topModule);
+  checkConnections(topModule);
   const state = createState(circuit);
   const primCircuit = withoutCompoundModules(circuit);
   const eventQueue = new Queue<SimEvent>();
