@@ -20,6 +20,13 @@ export type Module<In extends Record<string, number>, Out extends Record<string,
   out: MapConnections<Out>,
 };
 
+export type ModuleWithMetadata<In extends Record<string, number>, Out extends Record<string, number>> = Module<In, Out> & {
+  meta: {
+    id: ModuleId,
+    circuit: Circuit,
+  },
+};
+
 export type State = 0 | 1;
 export type Connection = RawConnection | State;
 
@@ -34,7 +41,7 @@ export type MapStates<T extends Record<string, number>> = {
 export type ModuleId = number;
 
 export type RawConnection = {
-  componentId: ModuleId,
+  modId: ModuleId,
   pin: string,
 };
 
@@ -49,10 +56,10 @@ export type ModuleNode = {
   simulate?: (inputs: object, outputs: object) => void,
 };
 
-export type NodeStateConst = { type: 'const', value: 0 | 1 };
-export type NodeStateRef = { type: 'ref', ref: PinId };
+export type NodeStateConst = { type: 'const', value: 0 | 1, initialized: boolean };
+export type NodeStateRef = { type: 'ref', ref: Net, initialized: boolean };
 export type NodeState = NodeStateConst | NodeStateRef;
-export type PinId = `${string}:${ModuleId | string}`;
+export type Net = string;
 export type CircuitState = Record<string, NodeState>;
 
 let _nextId = 0;
@@ -61,7 +68,7 @@ const nextId = () => _nextId++;
 export const isRawConnection = (x: any): x is RawConnection => {
   return (
     typeof x === 'object' &&
-    typeof x.componentId === 'number' &&
+    typeof x.modId === 'number' &&
     typeof x.pin === 'string'
   );
 };
@@ -77,12 +84,24 @@ export const isNodeState = (x: any): x is NodeState => {
   return typeof x.ref === 'string';
 };
 
+const constantsModule = (circuit: Circuit) => createPrimitiveModule({
+  name: '<consts>',
+  inputs: {},
+  outputs: { vcc: width[1], gnd: width[1] },
+  simulate(_, out) {
+    out.vcc = 1;
+    out.gnd = 0;
+  }
+}, circuit);
+
 export const createCircuit = () => {
   const circuit: Circuit = {
     modules: new Map(),
     signatures: new Map(),
     nets: new Map(),
   };
+
+  constantsModule(circuit)();
 
   const _createPrimitiveModule = <In extends Record<string, number>, Out extends Record<string, number>>(
     def: Omit<PrimitiveModuleDef<In, Out>, 'type'>
@@ -117,32 +136,13 @@ export const createModule = <In extends Record<string, number>, Out extends Reco
   return _createModule({ ...def, type: 'compound' }, circuit);
 };
 
-const consts = (() => {
-  let consts: Module<{}, { vcc: 1, gnd: 1 }> | null = null;
-
-  return (circ: Circuit) => {
-    if (consts === null) {
-      const constsMod = createPrimitiveModule({
-        name: '<consts>',
-        inputs: {},
-        outputs: { vcc: width[1], gnd: width[1] },
-        simulate(_, out) {
-          out.vcc = 1;
-          out.gnd = 0;
-        }
-      }, circ);
-
-      consts = constsMod();
-    }
-
-    return consts;
-  };
-})();
-
 const connectionHandler = (id: number, mod: ModuleDef<any, any>, circuit: Circuit, isInput: boolean): ProxyHandler<any> => {
   const sig = mod[isInput ? 'inputs' : 'outputs'];
   const prefix = isInput ? 'in' : 'out';
-  const connectionOf = (v: Connection) => v === 0 ? consts(circuit).out.gnd : v === 1 ? consts(circuit).out.vcc : v;
+  const connectionOf = (v: Connection) =>
+    v === 0 ? { pin: 'gnd', modId: 0 } :
+      v === 1 ? { pin: 'vcc', modId: 0 } :
+        v;
 
   return {
     get: (_, pin) => {
@@ -153,11 +153,11 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any>, circuit: Circui
       const width = sig[pin];
 
       if (width === 1) {
-        return { componentId: id, pin };
+        return { modId: id, pin };
       } else {
         const out: RawConnection[] = [];
         for (let n = 0; n < width; n++) {
-          out.push({ componentId: id, pin: `${pin}${width - n - 1}` });
+          out.push({ modId: id, pin: `${pin}${width - n - 1}` });
         }
 
         return out;
@@ -179,7 +179,7 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any>, circuit: Circui
 
       const connect = (modId: ModuleId, dir: 'in' | 'out', pin: string, target: RawConnection) => {
         const net = `${pin}:${modId}`;
-        const targetNet = `${target.pin}:${target.componentId}`;
+        const targetNet = `${target.pin}:${target.modId}`;
 
         pushRecord(circuit.modules.get(modId)!.pins[dir], pin, target);
 
@@ -188,7 +188,7 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any>, circuit: Circui
         }
 
         if (!circuit.nets.has(targetNet)) {
-          circuit.nets.set(targetNet, { in: [], out: [], id: target.componentId });
+          circuit.nets.set(targetNet, { in: [], out: [], id: target.modId });
         }
 
         circuit.nets.get(net)!.in.push(targetNet);
@@ -298,7 +298,11 @@ const _createModule = <In extends Record<string, number>, Out extends Record<str
       node.simulate = f;
     }
 
-    return { in: inputs, out: outputs };
+    return {
+      in: inputs,
+      out: outputs,
+      meta: { id, circuit },
+    };
   };
 };
 

@@ -1,37 +1,35 @@
 import { createBasicModules } from '../src/basic';
 import { createCircuit, width } from "../src/core";
-import { createSim, deref } from '../src/sim';
+import { createEventDrivenSim } from '../src/event-sim';
 
 const { circuit, createModule } = createCircuit();
 const { mem } = createBasicModules(circuit);
 
 const top = createModule({
   name: 'top',
-  inputs: {},
-  outputs: { leds: width[1] },
-  connect(_, out) {
+  inputs: { s: width[1], r: width[1] },
+  outputs: { leds: width[2] },
+  connect(inp, out) {
     const latch = mem.srLatch();
 
-    latch.in.s = 1;
-    latch.in.r = 0;
+    latch.in.s = inp.s;
+    latch.in.r = inp.r;
 
-    out.leds = latch.out.q;
+    out.leds = [latch.out.q, latch.out.qbar];
   },
 });
 
 
 const main = () => {
-  top();
+  const t = top();
 
-  const { state, step } = createSim(circuit);
+  const sim = createEventDrivenSim(t);
 
-  step();
+  sim.input({ s: 1, r: 0 });
+  console.log(sim.state.read(t.out.leds));
 
-  const res = [
-    deref(state, 'leds:0'),
-  ];
-
-  console.log(res);
+  sim.input({ s: 0, r: 1 });
+  console.log(sim.state.read(t.out.leds));
 };
 
 main();

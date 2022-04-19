@@ -16,8 +16,8 @@ export const createMemoryModules = (circ: Circuit, gates: Gates) => {
       botNand.in.a = topNand.out.q;
       botNand.in.b = inp.r;
 
-      out.q = topNand.out.q;
-      out.qbar = botNand.out.q;
+      out.q = botNand.out.q;
+      out.qbar = topNand.out.q;
     },
   }, circ);
 

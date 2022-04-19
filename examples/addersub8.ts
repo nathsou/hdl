@@ -1,22 +1,20 @@
-import { writeFileSync } from 'fs';
 import { createBasicModules } from '../src/basic';
 import { bin, createCircuit, width } from "../src/core";
-import { createGraphDotFile } from '../src/graph';
-import { createSim, deref } from '../src/sim';
+import { createEventDrivenSim } from '../src/event-sim';
 
 const { circuit, createModule } = createCircuit();
 const { arith } = createBasicModules(circuit);
 
 const top = createModule({
   name: 'top',
-  inputs: {},
+  inputs: { a: width[8], b: width[8], subtract: width[1] },
   outputs: { leds: width[8], overflow: width[1] },
-  connect(_, out) {
+  connect(inp, out) {
     const fa = arith.adderSubtractor8();
 
-    fa.in.a = bin(16, 8);
-    fa.in.b = bin(7, 8);
-    fa.in.subtract = 0;
+    fa.in.a = inp.a;
+    fa.in.b = inp.b;
+    fa.in.subtract = inp.subtract;
 
     out.leds = fa.out.sum;
     out.overflow = fa.out.carry_out;
@@ -25,26 +23,17 @@ const top = createModule({
 
 
 const main = () => {
-  top();
+  const t = top();
+  const sim = createEventDrivenSim(t);
 
-  const { state, step } = createSim(circuit);
+  sim.input({ a: bin(17, 8), b: bin(7, 8), subtract: 0 });
+  const res1 = sim.state.read(t.out.leds);
 
-  writeFileSync('circuit.gv', createGraphDotFile(circuit));
+  sim.input({ a: bin(202, 8), b: bin(31, 8), subtract: 1 });
+  const res2 = sim.state.read(t.out.leds);
 
-  step();
-
-  const res = [
-    deref(state, 'leds7:0'),
-    deref(state, 'leds6:0'),
-    deref(state, 'leds5:0'),
-    deref(state, 'leds4:0'),
-    deref(state, 'leds3:0'),
-    deref(state, 'leds2:0'),
-    deref(state, 'leds1:0'),
-    deref(state, 'leds0:0'),
-  ];
-
-  console.log({ overflow: deref(state, 'overflow:0') }, res.join(''), parseInt(res.join(''), 2));
+  console.log(res1.join(''), parseInt(res1.join(''), 2));
+  console.log(res2.join(''), parseInt(res2.join(''), 2));
 };
 
 main();

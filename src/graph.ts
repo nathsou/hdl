@@ -2,7 +2,7 @@ import { Circuit, gen, ModuleNode, RawConnection } from "./core";
 import { join, joinWithEndingSep } from "./utils";
 
 export const createGraphDotFile = (circuit: Circuit) => {
-  const label = (c: RawConnection) => `"${c.pin}:${c.componentId}"`;
+  const label = (c: RawConnection) => `"${c.pin}:${c.modId}"`;
   const edges = new Set<string>();
 
   const subgraph = (mod: ModuleNode) => {
@@ -16,7 +16,7 @@ export const createGraphDotFile = (circuit: Circuit) => {
     });
 
     for (const [pin, connections] of Object.entries(mod.pins.in)) {
-      const start: RawConnection = { componentId: mod.id, pin };
+      const start: RawConnection = { modId: mod.id, pin };
       for (const conn of connections) {
         const label1 = label(start);
         const label2 = label(conn);
@@ -27,7 +27,7 @@ export const createGraphDotFile = (circuit: Circuit) => {
     }
 
     for (const [pin, connections] of Object.entries(mod.pins.out)) {
-      const start: RawConnection = { componentId: mod.id, pin };
+      const start: RawConnection = { modId: mod.id, pin };
       for (const conn of connections) {
         const label1 = label(start);
         const label2 = label(conn);
