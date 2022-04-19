@@ -1,4 +1,4 @@
-import { Circuit, createPrimitiveModule, width } from "./core";
+import { Circuit, createPrimitiveModule, width } from "../core";
 
 export const createTransitors = (circ: Circuit) => {
   const npn = createPrimitiveModule({

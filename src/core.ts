@@ -1,3 +1,4 @@
+import { createBasicModules } from "./primitive-modules/basic";
 import { join } from "./utils";
 
 export type Circuit = {
@@ -119,6 +120,7 @@ export const createCircuit = () => {
     circuit,
     createPrimitiveModule: _createPrimitiveModule,
     createModule: _createCompoundModule,
+    primitives: createBasicModules(circuit),
   };
 };
 
@@ -304,6 +306,13 @@ const _createModule = <In extends Record<string, number>, Out extends Record<str
       meta: { id, circuit },
     };
   };
+};
+
+export const metadata = <
+  In extends Record<string, number>,
+  Out extends Record<string, number>
+>(mod: Module<In, Out>): ModuleWithMetadata<In, Out>['meta'] => {
+  return (mod as ModuleWithMetadata<In, Out>).meta;
 };
 
 type BaseModuleDef<In extends Record<string, number>, Out extends Record<string, number>> = {

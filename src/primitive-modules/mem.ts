@@ -1,4 +1,4 @@
-import { Circuit, createModule, width } from "./core";
+import { Circuit, createModule, width } from "../core";
 import { Gates } from "./gates";
 
 export const createMemoryModules = (circ: Circuit, gates: Gates) => {

@@ -1,5 +1,5 @@
 import { createArith } from "./arith";
-import { Circuit } from "./core";
+import { Circuit } from "../core";
 import { createGates } from "./gates";
 import { createMemoryModules } from "./mem";
 import { createTransitors } from "./transitors";

@@ -1,4 +1,4 @@
-import { Circuit, createModule, high4, low4, rep8, width } from "./core";
+import { Circuit, createModule, high4, low4, rep8, width } from "../core";
 import { Gates } from "./gates";
 
 export const createArith = (circ: Circuit, gates: Gates) => {

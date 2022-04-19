@@ -1,9 +1,7 @@
-import { createBasicModules } from '../src/basic';
 import { createCircuit, width } from "../src/core";
-import { createEventDrivenSim } from '../src/event-sim';
+import { createSimulator } from '../src/sim/sim';
 
-const { circuit, createModule } = createCircuit();
-const { mem } = createBasicModules(circuit);
+const { createModule, primitives: { mem } } = createCircuit();
 
 const top = createModule({
   name: 'top',
@@ -21,15 +19,14 @@ const top = createModule({
 
 
 const main = () => {
-  const t = top();
-
-  const sim = createEventDrivenSim(t);
+  const mod = top();
+  const sim = createSimulator(mod, 'event-driven');
 
   sim.input({ s: 1, r: 0 });
-  console.log(sim.state.read(t.out.leds));
+  console.log(sim.state.read(mod.out.leds));
 
   sim.input({ s: 0, r: 1 });
-  console.log(sim.state.read(t.out.leds));
+  console.log(sim.state.read(mod.out.leds));
 };
 
 main();

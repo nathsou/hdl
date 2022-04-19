@@ -1,4 +1,4 @@
-import { Circuit, createModule, createPrimitiveModule, extend4, extend8, width } from "./core";
+import { Circuit, createModule, createPrimitiveModule, extend4, extend8, width } from "../core";
 
 export type Gates = ReturnType<typeof createGates>;
 
