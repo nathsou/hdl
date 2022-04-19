@@ -1,5 +1,6 @@
-import { bin, createCircuit, width } from "../src/core";
+import { createCircuit, width } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
+import { bin } from "../src/utils";
 
 const { createModule, primitives: { arith } } = createCircuit();
 
@@ -24,14 +25,26 @@ const main = () => {
   const mod = top();
   const sim = createSimulator(mod, 'levelization');
 
+  const logOutput = () => {
+    const res = sim.state.read(mod.out.leds);
+    const overflow = sim.state.read(mod.out.overflow);
+    console.log({ overflow }, res.join(''), parseInt(res.join(''), 2));
+  };
+
   sim.input({ a: bin(17, 8), b: bin(7, 8), subtract: 0 });
-  const res1 = sim.state.read(mod.out.leds);
+  logOutput();
 
   sim.input({ a: bin(202, 8), b: bin(31, 8), subtract: 1 });
-  const res2 = sim.state.read(mod.out.leds);
+  logOutput();
 
-  console.log(res1.join(''), parseInt(res1.join(''), 2));
-  console.log(res2.join(''), parseInt(res2.join(''), 2));
+  sim.input({ a: bin(42, 8), b: bin(23, 8), subtract: 0 });
+  logOutput();
+
+  sim.input({ a: bin(127, 8), b: bin(128, 8), subtract: 0 });
+  logOutput();
+
+  sim.input({ a: bin(129, 8), b: bin(127, 8), subtract: 0 });
+  logOutput();
 };
 
 main();

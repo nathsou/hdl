@@ -1,5 +1,5 @@
-import { Circuit, gen, ModuleNode, RawConnection } from "./core";
-import { join, joinWithEndingSep } from "./utils";
+import { Circuit, ModuleNode, RawConnection } from "./core";
+import { gen, join, joinWithEndingSep } from "./utils";
 
 export const createGraphDotFile = (circuit: Circuit) => {
   const label = (c: RawConnection) => `"${c.pin}:${c.modId}"`;

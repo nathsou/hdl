@@ -127,28 +127,24 @@ const overwriteState = (c: NodeState, with_: State) => {
   }
 };
 
-export type ModuleSimulationData = {
-  mod: ModuleNode,
-  circuit: Circuit,
-  state: CircuitState,
-};
+export type SimulationData = { mod: ModuleNode };
 
-export const simulationHandler = (data: ModuleSimulationData, isInput: boolean): ProxyHandler<any> => {
+export const simulationHandler = (circuit: Circuit, state: CircuitState, data: SimulationData, isInput: boolean): ProxyHandler<any> => {
   return {
     get: (_, pin) => {
       if (typeof pin !== 'string') {
         throw new Error(`Pin name must be a string`);
       }
 
-      const sig = data.circuit.signatures.get(data.mod.name)![isInput ? 'inputs' : 'outputs'];
+      const sig = circuit.signatures.get(data.mod.name)![isInput ? 'inputs' : 'outputs'];
       const width = sig[pin];
 
       if (width === 1) {
-        return deref(data.state, `${pin}:${data.mod.id}`);
+        return deref(state, `${pin}:${data.mod.id}`);
       } else {
         const out: State[] = [];
         for (let n = 0; n < width; n++) {
-          out.push(deref(data.state, `${pin}${width - n - 1}:${data.mod.id}`));
+          out.push(deref(state, `${pin}${width - n - 1}:${data.mod.id}`));
         }
 
         return out;
@@ -159,7 +155,7 @@ export const simulationHandler = (data: ModuleSimulationData, isInput: boolean):
         throw new Error(`Pin name must be a string`);
       }
 
-      const sig = data.circuit.signatures.get(data.mod.name)![isInput ? 'inputs' : 'outputs'];
+      const sig = circuit.signatures.get(data.mod.name)![isInput ? 'inputs' : 'outputs'];
       const prefix = isInput ? 'in' : 'out';
 
       const outputWidth = Array.isArray(value) ? value.length : 1;
@@ -170,14 +166,14 @@ export const simulationHandler = (data: ModuleSimulationData, isInput: boolean):
       }
 
       if (value === 0 || value === 1) {
-        overwriteState(data.state[`${pin}:${data.mod.id}`], value);
+        overwriteState(state[`${pin}:${data.mod.id}`], value);
         return true;
       }
 
       if (Array.isArray(value)) {
         value.forEach((v, n) => {
           if (v === 0 || v === 1) {
-            overwriteState(data.state[`${pin}${expectedWidth - n - 1}:${data.mod.id}`], v);
+            overwriteState(state[`${pin}${expectedWidth - n - 1}:${data.mod.id}`], v);
           } else {
             throw new Error(`Invalid node state for ${data.mod.name}:${data.mod.id}.${prefix}.${pin}`);
           }

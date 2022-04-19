@@ -2,7 +2,7 @@ import Queue from 'mnemonist/queue';
 import { MapStates, metadata, Module, ModuleId, Net, State } from "../core";
 import { targetPrimitiveMods, withoutCompoundModules } from './rewrite';
 import { map, some, uniq } from "../utils";
-import { createState, ModuleSimulationData, simulationHandler, Simulator } from './sim';
+import { createState, SimulationData, simulationHandler, Simulator } from './sim';
 
 type SimEvent = {
   net: Net,
@@ -86,14 +86,12 @@ export const createEventDrivenSimulator = <
     }
   };
 
-  const simData: ModuleSimulationData = {
-    circuit,
-    state: state.raw,
+  const simData: SimulationData = {
     mod: circuit.modules.get(topId)!,
   };
 
-  const inputs = new Proxy({}, simulationHandler(simData, true));
-  const outputs = new Proxy({}, simulationHandler(simData, false));
+  const inputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, true));
+  const outputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, false));
 
   const processGates = () => {
     while (gateQueue.size > 0) {

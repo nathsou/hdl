@@ -1,5 +1,5 @@
 import { createBasicModules } from "./primitive-modules/basic";
-import { join } from "./utils";
+import { join, pushRecord } from "./utils";
 
 export type Circuit = {
   modules: CircuitModules,
@@ -335,109 +335,12 @@ export type ModuleDef<In extends Record<string, number>, Out extends Record<stri
   | PrimitiveModuleDef<In, Out>
   | CompoundModuleDef<In, Out>;
 
-const pushRecord = <T extends Record<K, V[]>, K extends string, V>(record: T, key: K, value: V) => {
-  if (record[key] === undefined) {
-    record[key] = [value] as T[K];
-  } else {
-    record[key].push(value);
-  }
-};
-
 export const width = {
   1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8,
   9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14, 15: 15, 16: 16,
   17: 17, 18: 18, 19: 19, 20: 20, 21: 21, 22: 22, 23: 23, 24: 24,
   25: 25, 26: 26, 27: 27, 28: 28, 29: 29, 30: 30, 31: 31, 32: 32,
 } as const;
-
-export const high4 = <D extends [...Tuple<T, 4>, ...T[]], T>(data: D): Tuple<T, 4> => {
-  return [data[0], data[1], data[2], data[3]];
-};
-
-export const low4 = <D extends [...Tuple<T, 4>, ...T[]], T>(data: D): Tuple<T, 4> => {
-  const len = data.length;
-  return [data[len - 4], data[len - 3], data[len - 2], data[len - 1]];
-};
-
-export const extend4 = <
-  InputPin extends string,
-  OutputPin extends string,
-  Comp extends Module<{ [K in InputPin]: 1 }, { [K in OutputPin]: 1 }>
->(baseComp: () => Comp, inputPins: InputPin[], outputPin: OutputPin, name: string, circuit: Circuit) => {
-  return createModule({
-    name,
-    inputs: inputPins.reduce((acc, pin) => {
-      acc[pin] = 4;
-      return acc;
-    }, {} as Record<InputPin, 4>),
-    outputs: { [outputPin]: width[4] } as { [K in OutputPin]: 4 },
-    connect(inp, out) {
-      const c3 = baseComp();
-      const c2 = baseComp();
-      const c1 = baseComp();
-      const c0 = baseComp();
-
-      for (const inputPin of inputPins) {
-        /// @ts-ignore
-        c0.in[inputPin] = inp[inputPin][3];
-        /// @ts-ignore
-        c1.in[inputPin] = inp[inputPin][2];
-        /// @ts-ignore
-        c2.in[inputPin] = inp[inputPin][1];
-        /// @ts-ignore
-        c3.in[inputPin] = inp[inputPin][0];
-      }
-
-      // @ts-ignore
-      out[outputPin] = [c3.out[outputPin], c2.out[outputPin], c1.out[outputPin], c0.out[outputPin]];
-    },
-  }, circuit);
-};
-
-export const extend8 = <
-  InputPin extends string,
-  OutputPin extends string,
-  Comp extends Module<{ [K in InputPin]: 4 }, { [K in OutputPin]: 4 }>
->(baseComp: () => Comp, inputPins: InputPin[], outputPin: OutputPin, name: string, circuit: Circuit) => {
-  return createModule({
-    name,
-    inputs: inputPins.reduce((acc, pin) => {
-      acc[pin] = 8;
-      return acc;
-    }, {} as Record<InputPin, 8>),
-    outputs: { [outputPin]: width[8] } as { [K in OutputPin]: 8 },
-    connect(inp, out) {
-      const hi = baseComp();
-      const lo = baseComp();
-
-      for (const inputPin of inputPins) {
-        /// @ts-ignore
-        hi.in[inputPin] = high4(inp[inputPin]);
-        /// @ts-ignore
-        lo.in[inputPin] = low4(inp[inputPin]);
-      }
-
-      // @ts-ignore
-      out[outputPin] = [...hi.out[outputPin], ...lo.out[outputPin]];
-    },
-  }, circuit);
-};
-
-export const gen = <T>(count: number, factory: (n: number) => T): T[] => {
-  const result = [];
-  for (let i = 0; i < count; i++) {
-    result.push(factory(i));
-  }
-  return result;
-};
-
-export const rep4 = <T extends Connection>(c: T): Tuple<T, 4> => {
-  return [c, c, c, c];
-};
-
-export const rep8 = <T extends Connection>(c: T): Tuple<T, 8> => {
-  return [c, c, c, c, c, c, c, c];
-};
 
 export type Tuple<T, Len extends number> =
   Len extends 0 ? [] :
@@ -474,12 +377,3 @@ export type Tuple<T, Len extends number> =
   Len extends 31 ? [...Tuple<T, 30>, T] :
   Len extends 32 ? [...Tuple<T, 31>, T] :
   T[];
-
-export const bin = <W extends number>(n: number, width: W): Tuple<State, W> => {
-  return n
-    .toString(2)
-    .slice(0, width)
-    .padStart(width, '0')
-    .split('')
-    .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
-};

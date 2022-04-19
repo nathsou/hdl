@@ -1,3 +1,4 @@
+import { Connection, State, Tuple } from "./core";
 
 export function* join<T>(a: Iterable<T>, b: Iterable<T>): IterableIterator<T> {
   for (const x of a) {
@@ -78,4 +79,46 @@ export const pushUnique = <T>(values: T[], value: T): void => {
 
 export const compact = <T>(values: (T | null | undefined)[]): T[] => {
   return values.filter(v => v != null) as T[];
+};
+
+export const pushRecord = <T extends Record<K, V[]>, K extends string, V>(record: T, key: K, value: V) => {
+  if (record[key] === undefined) {
+    record[key] = [value] as T[K];
+  } else {
+    record[key].push(value);
+  }
+};
+
+export const gen = <T>(count: number, factory: (n: number) => T): T[] => {
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(factory(i));
+  }
+  return result;
+};
+
+export const rep4 = <T extends Connection>(c: T): Tuple<T, 4> => {
+  return [c, c, c, c];
+};
+
+export const rep8 = <T extends Connection>(c: T): Tuple<T, 8> => {
+  return [c, c, c, c, c, c, c, c];
+};
+
+export const high4 = <D extends [...Tuple<T, 4>, ...T[]], T>(data: D): Tuple<T, 4> => {
+  return [data[0], data[1], data[2], data[3]];
+};
+
+export const low4 = <D extends [...Tuple<T, 4>, ...T[]], T>(data: D): Tuple<T, 4> => {
+  const len = data.length;
+  return [data[len - 4], data[len - 3], data[len - 2], data[len - 1]];
+};
+
+export const bin = <W extends number>(n: number, width: W): Tuple<State, W> => {
+  return n
+    .toString(2)
+    .slice(0, width)
+    .padStart(width, '0')
+    .split('')
+    .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
 };

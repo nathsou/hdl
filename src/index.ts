@@ -2,6 +2,7 @@ export * from './primitive-modules/arith';
 export * from './primitive-modules/basic';
 export * from './primitive-modules/gates';
 export * from './primitive-modules/mem';
+export * from './primitive-modules/meta';
 export * from './primitive-modules/transitors';
 export * from './sim/event-sim';
 export * from './sim/level-sim';

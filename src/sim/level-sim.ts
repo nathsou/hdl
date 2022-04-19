@@ -1,7 +1,7 @@
 import { Circuit, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
 import { withoutCompoundModules } from "./rewrite";
 import { all, complementarySet } from "../utils";
-import { createState, ModuleSimulationData, simulationHandler, Simulator } from "./sim";
+import { createState, SimulationData, simulationHandler, Simulator } from "./sim";
 
 export const levelize = (circuit: Circuit) => {
   const { modules: gates } = withoutCompoundModules(circuit);
@@ -57,14 +57,12 @@ export const createLevelizedSimulator = <
   const state = createState(circuit);
   const executionOrder = levelize(circuit);
 
-  const simData: ModuleSimulationData = {
-    circuit,
-    state: state.raw,
+  const simData: SimulationData = {
     mod: circuit.modules.get(topId)!,
   };
 
-  const inputs = new Proxy({}, simulationHandler(simData, true));
-  const outputs = new Proxy({}, simulationHandler(simData, false));
+  const inputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, true));
+  const outputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, false));
 
   const gates = executionOrder.map(id => circuit.modules.get(id)!);
 
