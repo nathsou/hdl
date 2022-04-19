@@ -11,9 +11,9 @@
   "scripts": {
     "test": "jest",
     "typeCheck": "tsc --noEmit",
-    "esbuild": "esbuild examples/addersub8.ts --bundle --outfile=dist/addersub8.js --platform=node",
+    "esbuild": "esbuild examples/adder.ts --bundle --outfile=dist/adder.js --platform=node",
     "build": "tsc",
-    "watch": "esbuild examples/addersub8.ts --bundle --outfile=dist/addersub8.js --platform=node --watch"
+    "watch": "esbuild examples/adder.ts --bundle --outfile=dist/adder.js --platform=node --watch"
   },
   "keywords": [
     "hardware-description",

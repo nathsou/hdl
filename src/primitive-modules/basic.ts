@@ -3,7 +3,7 @@ import { Circuit } from "../core";
 import { createGates } from "./gates";
 import { createMemoryModules } from "./mem";
 import { createTransitors } from "./transitors";
-import { extend4, extend8 } from './meta';
+import { extendN } from './meta';
 
 export const createBasicModules = (circ: Circuit) => {
   const transitors = createTransitors(circ);
@@ -11,8 +11,7 @@ export const createBasicModules = (circ: Circuit) => {
   const arith = createArith(circ, gates);
   const mem = createMemoryModules(circ, gates);
   const meta = {
-    extend4,
-    extend8
+    extendN: extendN(circ),
   };
 
   return {

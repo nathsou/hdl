@@ -89,12 +89,12 @@ export const pushRecord = <T extends Record<K, V[]>, K extends string, V>(record
   }
 };
 
-export const gen = <T>(count: number, factory: (n: number) => T): T[] => {
+export const gen = <N extends number, T>(count: N, factory: (n: number) => T): Tuple<T, N> => {
   const result = [];
   for (let i = 0; i < count; i++) {
     result.push(factory(i));
   }
-  return result;
+  return result as Tuple<T, N>;
 };
 
 export const rep4 = <T extends Connection>(c: T): Tuple<T, 4> => {

@@ -340,6 +340,10 @@ export const width = {
   9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14, 15: 15, 16: 16,
   17: 17, 18: 18, 19: 19, 20: 20, 21: 21, 22: 22, 23: 23, 24: 24,
   25: 25, 26: 26, 27: 27, 28: 28, 29: 29, 30: 30, 31: 31, 32: 32,
+  33: 33, 34: 34, 35: 35, 36: 36, 37: 37, 38: 38, 39: 39, 40: 40,
+  41: 41, 42: 42, 43: 43, 44: 44, 45: 45, 46: 46, 47: 47, 48: 48,
+  49: 49, 50: 50, 51: 51, 52: 52, 53: 53, 54: 54, 55: 55, 56: 56,
+  57: 57, 58: 58, 59: 59, 60: 60, 61: 61, 62: 62, 63: 63, 64: 64,
 } as const;
 
 export type Tuple<T, Len extends number> =
@@ -376,4 +380,36 @@ export type Tuple<T, Len extends number> =
   Len extends 30 ? [...Tuple<T, 29>, T] :
   Len extends 31 ? [...Tuple<T, 30>, T] :
   Len extends 32 ? [...Tuple<T, 31>, T] :
+  Len extends 33 ? [...Tuple<T, 32>, T] :
+  Len extends 34 ? [...Tuple<T, 33>, T] :
+  Len extends 35 ? [...Tuple<T, 34>, T] :
+  Len extends 36 ? [...Tuple<T, 35>, T] :
+  Len extends 37 ? [...Tuple<T, 36>, T] :
+  Len extends 38 ? [...Tuple<T, 37>, T] :
+  Len extends 39 ? [...Tuple<T, 38>, T] :
+  Len extends 40 ? [...Tuple<T, 39>, T] :
+  Len extends 41 ? [...Tuple<T, 40>, T] :
+  Len extends 42 ? [...Tuple<T, 41>, T] :
+  Len extends 43 ? [...Tuple<T, 42>, T] :
+  Len extends 44 ? [...Tuple<T, 43>, T] :
+  Len extends 45 ? [...Tuple<T, 44>, T] :
+  Len extends 46 ? [...Tuple<T, 45>, T] :
+  Len extends 47 ? [...Tuple<T, 46>, T] :
+  Len extends 48 ? [...Tuple<T, 47>, T] :
+  Len extends 49 ? [...Tuple<T, 48>, T] :
+  Len extends 50 ? [...Tuple<T, 49>, T] :
+  Len extends 51 ? [...Tuple<T, 50>, T] :
+  Len extends 52 ? [...Tuple<T, 51>, T] :
+  Len extends 53 ? [...Tuple<T, 52>, T] :
+  Len extends 54 ? [...Tuple<T, 53>, T] :
+  Len extends 55 ? [...Tuple<T, 54>, T] :
+  Len extends 56 ? [...Tuple<T, 55>, T] :
+  Len extends 57 ? [...Tuple<T, 56>, T] :
+  Len extends 58 ? [...Tuple<T, 57>, T] :
+  Len extends 59 ? [...Tuple<T, 58>, T] :
+  Len extends 60 ? [...Tuple<T, 59>, T] :
+  Len extends 61 ? [...Tuple<T, 60>, T] :
+  Len extends 62 ? [...Tuple<T, 61>, T] :
+  Len extends 63 ? [...Tuple<T, 62>, T] :
+  Len extends 64 ? [...Tuple<T, 63>, T] :
   T[];

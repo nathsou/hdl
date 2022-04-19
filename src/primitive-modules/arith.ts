@@ -1,6 +1,7 @@
 import { Circuit, createModule, width } from "../core";
-import { high4, low4, rep8 } from "../utils";
+import { gen, last } from "../utils";
 import { Gates } from "./gates";
+import { extendN, Multi } from "./meta";
 
 export const createArith = (circ: Circuit, gates: Gates) => {
   // a  b  c  s
@@ -66,73 +67,37 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     },
   }, circ);
 
-  const adder4 = createModule({
-    name: 'adder4',
-    inputs: { a: width[4], b: width[4], carry_in: width[1] },
-    outputs: { sum: width[4], carry_out: width[1] },
+  const adderN = <N extends Multi>(N: N) => createModule({
+    name: `adder${N}`,
+    inputs: { a: N, b: N, carry_in: width[1] },
+    outputs: { sum: N, carry_out: width[1] },
     connect(inp, out) {
-      const adder0 = fullAdder();
-      const adder1 = fullAdder();
-      const adder2 = fullAdder();
-      const adder3 = fullAdder();
+      const adders = gen(N, fullAdder);
 
-      adder0.in.carry_in = inp.carry_in;
-      adder0.in.a = inp.a[3];
-      adder0.in.b = inp.b[3];
+      for (let i = 0; i < N; i++) {
+        adders[i].in.carry_in = i === 0 ? inp.carry_in : adders[i - 1].out.carry_out;
+        // @ts-ignore
+        adders[i].in.a = inp.a[N - 1 - i];
+        // @ts-ignore
+        adders[i].in.b = inp.b[N - 1 - i];
+      }
 
-      adder1.in.carry_in = adder0.out.carry_out;
-      adder1.in.a = inp.a[2];
-      adder1.in.b = inp.b[2];
-
-      adder2.in.carry_in = adder1.out.carry_out;
-      adder2.in.a = inp.a[1];
-      adder2.in.b = inp.b[1];
-
-      adder3.in.carry_in = adder2.out.carry_out;
-      adder3.in.a = inp.a[0];
-      adder3.in.b = inp.b[0];
-
-      out.sum = [
-        adder3.out.sum,
-        adder2.out.sum,
-        adder1.out.sum,
-        adder0.out.sum,
-      ];
-
-      out.carry_out = adder3.out.carry_out;
+      // @ts-ignore
+      out.sum = gen(N, i => adders[N - 1 - i].out.sum);
+      out.carry_out = last(adders).out.carry_out;
     },
   }, circ);
 
-  const adder8 = createModule({
-    name: 'adder8',
-    inputs: { a: width[8], b: width[8], carry_in: width[1] },
-    outputs: { sum: width[8], carry_out: width[1] },
-    connect(inp, out) {
-      const low = adder4();
-      const high = adder4();
-
-      low.in.carry_in = inp.carry_in;
-      low.in.a = low4(inp.a);
-      low.in.b = low4(inp.b);
-
-      high.in.carry_in = low.out.carry_out;
-      high.in.a = high4(inp.a);
-      high.in.b = high4(inp.b);
-
-      out.sum = [...high.out.sum, ...low.out.sum];
-      out.carry_out = high.out.carry_out;
-    },
-  }, circ);
-
-  const adderSubtractor8 = createModule({
+  const adderSubtractorN = <N extends Multi>(N: N) => createModule({
     name: 'adder_subtractor8',
-    inputs: { a: width[8], b: width[8], subtract: width[1] },
-    outputs: { sum: width[8], carry_out: width[1] },
+    inputs: { a: N, b: N, subtract: width[1] },
+    outputs: { sum: N, carry_out: width[1] },
     connect(inp, out) {
-      const adder = adder8();
-      const xors = gates.xor8();
+      const adder = adderN(N)();
+      const xors = extendN(circ)(N, gates.xor, ['a', 'b'], ['q'], `xor${N}`)();
 
-      xors.in.a = rep8(inp.subtract);
+      /// @ts-ignore
+      xors.in.a = gen(N, () => inp.subtract);
       xors.in.b = inp.b;
 
       adder.in.carry_in = inp.subtract;
@@ -147,8 +112,7 @@ export const createArith = (circ: Circuit, gates: Gates) => {
   return {
     halfAdder,
     fullAdder,
-    adder4,
-    adder8,
-    adderSubtractor8,
+    adderN,
+    adderSubtractorN,
   };
 };
