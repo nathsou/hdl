@@ -1,4 +1,5 @@
 import { Circuit, createModule, Module, width } from "../core";
+import { high4, low4 } from "../utils";
 
 export const extend4 = <
   InputPin extends string,
