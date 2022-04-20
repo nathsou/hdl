@@ -31,12 +31,16 @@ export type ModuleWithMetadata<In extends Record<string, number>, Out extends Re
 export type State = 0 | 1;
 export type Connection = RawConnection | State;
 
+export type Num = keyof typeof width;
+
+export type MultiIO<N extends number, T> = N extends 1 ? T : Tuple<T, N>;
+
 export type MapConnections<T extends Record<string, number>> = {
-  [Pin in keyof T]: T[Pin] extends 1 ? Connection : Tuple<Connection, T[Pin]>
+  [Pin in keyof T]: MultiIO<T[Pin], Connection>
 };
 
 export type MapStates<T extends Record<string, number>> = {
-  [Pin in keyof T]: T[Pin] extends 1 ? State : Tuple<State, T[Pin]>
+  [Pin in keyof T]: MultiIO<T[Pin], State>
 };
 
 export type ModuleId = number;

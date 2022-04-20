@@ -1,4 +1,4 @@
-import { checkConnections, createCircuit, metadata, width } from "../src/core";
+import { createCircuit, width } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { bin } from "../src/utils";
 
@@ -27,7 +27,7 @@ const top = createModule({
 
 const main = () => {
   const mod = top();
-  const sim = createSimulator(mod, 'levelization');
+  const sim = createSimulator(mod, 'event-driven');
 
   const logOutput = () => {
     const res = sim.state.read(mod.out.leds);

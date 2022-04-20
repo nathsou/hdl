@@ -15,16 +15,8 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     inputs: { a: width[1], b: width[1] },
     outputs: { sum: width[1], carry: width[1] },
     connect(inp, out) {
-      const and1 = gates.and();
-      const xor1 = gates.xor();
-
-      and1.in.a = inp.a;
-      and1.in.b = inp.b;
-      xor1.in.a = inp.a;
-      xor1.in.b = inp.b;
-
-      out.sum = xor1.out.q;
-      out.carry = and1.out.q;
+      out.sum = gates.xor(inp.a, inp.b);
+      out.carry = gates.and(inp.a, inp.b);
     },
   }, circ);
 
@@ -43,27 +35,16 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     inputs: { a: width[1], b: width[1], carry_in: width[1] },
     outputs: { sum: width[1], carry_out: width[1] },
     connect(inp, out) {
-      const xor1 = gates.xor();
-      const xor2 = gates.xor();
-      const and1 = gates.and();
-      const and2 = gates.and();
-      const or1 = gates.or();
+      const xor1 = gates.xor(inp.a, inp.b);
 
       // sum
-      xor1.in.a = inp.a;
-      xor1.in.b = inp.b;
-      xor2.in.a = xor1.out.q;
-      xor2.in.b = inp.carry_in;
-      out.sum = xor2.out.q;
+      out.sum = gates.xor(xor1, inp.carry_in);
 
       // carry
-      and1.in.a = inp.carry_in;
-      and1.in.b = xor1.out.q;
-      and2.in.a = inp.a;
-      and2.in.b = inp.b;
-      or1.in.a = and1.out.q;
-      or1.in.b = and2.out.q;
-      out.carry_out = or1.out.q;
+      out.carry_out = gates.or(
+        gates.and(inp.carry_in, xor1),
+        gates.and(inp.a, inp.b)
+      );
     },
   }, circ);
 
@@ -94,7 +75,7 @@ export const createArith = (circ: Circuit, gates: Gates) => {
     outputs: { sum: N, carry_out: width[1] },
     connect(inp, out) {
       const adder = adderN(N)();
-      const xors = extendN(circ)(N, gates.xor, ['a', 'b'], ['q'], `xor${N}`)();
+      const xors = extendN(circ)(N, gates.xor_, ['a', 'b'], ['q'], `xor${N}`)();
 
       xors.in.a = genConnections(N, () => inp.subtract);
       xors.in.b = inp.b;

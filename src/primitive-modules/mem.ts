@@ -7,21 +7,66 @@ export const createMemoryModules = (circ: Circuit, gates: Gates) => {
     inputs: { s: width[1], r: width[1] },
     outputs: { q: width[1], qbar: width[1] },
     connect(inp, out) {
-      const topNand = gates.nand();
-      const botNand = gates.nand();
+      const top = gates.nor_();
+      const bot = gates.nor_();
 
-      topNand.in.a = inp.s;
-      topNand.in.b = botNand.out.q;
+      top.in.a = inp.s;
+      top.in.b = bot.out.q;
 
-      botNand.in.a = topNand.out.q;
-      botNand.in.b = inp.r;
+      bot.in.a = top.out.q;
+      bot.in.b = inp.r;
 
-      out.q = botNand.out.q;
-      out.qbar = topNand.out.q;
+      out.q = bot.out.q;
+      out.qbar = top.out.q;
+    },
+  }, circ);
+
+  const dLatch = createModule({
+    name: 'd_latch',
+    inputs: { d: width[1], enable: width[1] },
+    outputs: { q: width[1], qbar: width[1] },
+    connect(inp, out) {
+      const sr = srLatch();
+
+      sr.in.s = gates.and(inp.d, inp.enable);
+      sr.in.r = gates.and(gates.not(inp.d), inp.enable);
+
+      out.q = sr.out.q;
+      out.qbar = sr.out.qbar;
+    },
+  }, circ);
+
+  const dFlipFlop = createModule({
+    name: 'd_flip_flop',
+    inputs: { d: width[1], clk: width[1] },
+    outputs: { q: width[1], qbar: width[1] },
+    connect(inp, out) {
+      const latch = dLatch();
+      latch.in.d = inp.d;
+      latch.in.enable = inp.clk;
+      out.q = latch.out.q;
+      out.qbar = latch.out.qbar;
+    },
+  }, circ);
+
+  const jkFlipFlop = createModule({
+    name: 'jk_flip_flop',
+    inputs: { j: width[1], k: width[1], clk: width[1] },
+    outputs: { q: width[1], qbar: width[1] },
+    connect(inp, out) {
+      const sr = srLatch();
+      sr.in.s = gates.and(sr.out.qbar, gates.and(inp.j, inp.clk));
+      sr.in.r = gates.and(sr.out.q, gates.and(inp.k, inp.clk));
+
+      out.q = sr.out.q;
+      out.qbar = sr.out.qbar;
     },
   }, circ);
 
   return {
     srLatch,
+    dLatch,
+    dFlipFlop,
+    jkFlipFlop,
   };
 };

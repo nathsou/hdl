@@ -94,7 +94,12 @@ export const gen = <N extends number, T>(count: N, factory: (n: number) => T): T
   for (let i = 0; i < count; i++) {
     result.push(factory(i));
   }
+
   return result as Tuple<T, N>;
+};
+
+export const mapTuple = <N extends number, T, U>(values: Tuple<T, N>, f: (v: T) => U): Tuple<U, N> => {
+  return values.map(f) as Tuple<U, N>;
 };
 
 export const genConnections = <N extends number, T>(count: N, factory: (n: number) => T): N extends 1 ? T : Tuple<T, N> => {

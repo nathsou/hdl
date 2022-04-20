@@ -5,15 +5,16 @@ const { createModule, primitives: { mem } } = createCircuit();
 
 const top = createModule({
   name: 'top',
-  inputs: { s: width[1], r: width[1] },
+  inputs: { j: width[1], k: width[1], clk: width[1] },
   outputs: { leds: width[2] },
   connect(inp, out) {
-    const latch = mem.srLatch();
+    const ff = mem.jkFlipFlop();
 
-    latch.in.s = inp.s;
-    latch.in.r = inp.r;
+    ff.in.j = inp.j;
+    ff.in.k = inp.k;
+    ff.in.clk = inp.clk;
 
-    out.leds = [latch.out.q, latch.out.qbar];
+    out.leds = [ff.out.q, ff.out.qbar];
   },
 });
 
@@ -22,10 +23,13 @@ const main = () => {
   const mod = top();
   const sim = createSimulator(mod, 'event-driven');
 
-  sim.input({ s: 1, r: 0 });
+  sim.input({ j: 0, k: 0, clk: 0 });
   console.log(sim.state.read(mod.out.leds));
 
-  sim.input({ s: 0, r: 1 });
+  sim.input({ j: 1, k: 0, clk: 1 });
+  console.log(sim.state.read(mod.out.leds));
+
+  sim.input({ j: 0, k: 1, clk: 0 });
   console.log(sim.state.read(mod.out.leds));
 };
 
