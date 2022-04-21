@@ -8,7 +8,7 @@ const top = createModule({
   inputs: { j: width[1], k: width[1], clk: width[1] },
   outputs: { leds: width[2] },
   connect(inp, out) {
-    const ff = mem.jkFlipFlop();
+    const ff = mem.leaderFollowerJKFlipFlop();
 
     ff.in.j = inp.j;
     ff.in.k = inp.k;
@@ -23,14 +23,13 @@ const main = () => {
   const mod = top();
   const sim = createSimulator(mod, 'event-driven');
 
-  sim.input({ j: 0, k: 0, clk: 0 });
-  console.log(sim.state.read(mod.out.leds));
+  for (let i = 0; i < 10; i++) {
+    sim.input({ j: 0, k: 0, clk: 0 });
+    console.log(sim.state.read(mod.out.leds));
 
-  sim.input({ j: 1, k: 0, clk: 1 });
-  console.log(sim.state.read(mod.out.leds));
-
-  sim.input({ j: 0, k: 1, clk: 0 });
-  console.log(sim.state.read(mod.out.leds));
+    sim.input({ j: 1, k: 1, clk: 1 });
+    console.log(sim.state.read(mod.out.leds));
+  }
 };
 
 main();
