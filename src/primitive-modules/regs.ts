@@ -42,7 +42,7 @@ export const createRegisters = (
     inputs: { count_enable: width[1], clk: width[1] },
     outputs: { q: N },
     connect(inp, out) {
-      const adder = adderN(N)();
+      const adder = adderN(N);
       const reg = regN(N)();
 
       reg.in.clk = inp.clk;
@@ -101,7 +101,13 @@ export const createRegisters = (
   }, circ);
 
   return {
-    counterN, counterNJKs, counterNSim,
-    regN,
+    counterN: <N extends Multi>(N: N) => counterN(N)(),
+    counterNJKs: <N extends Multi>(N: N) => counterNJKs(N)(),
+    counterNSim: <N extends Multi>(N: N) => counterNSim(N)(),
+    reg2: regN(2),
+    reg4: regN(4),
+    reg8: regN(8),
+    reg16: regN(16),
+    regN: <N extends Multi>(N: N) => regN(N)(),
   };
 };

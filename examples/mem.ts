@@ -4,18 +4,16 @@ import { forwardInputs } from "../src/utils";
 
 const { createModule, primitives: { regs, gates } } = createCircuit();
 
-const N = 4;
-
-const counterN = regs.counterN(N);
+const N = 16;
 
 const top = createModule({
   name: 'top',
   inputs: { clk: width[1], transmit: width[1] },
   outputs: { leds: width[N] },
   connect(inp, out) {
-    const reg = regs.regN(N)();
-    const buffer = gates.tristateBufferN(N)();
-    const counter = counterN();
+    const reg = regs.regN(N);
+    const buffer = gates.tristateN(N);
+    const counter = regs.counterN(N);
 
     forwardInputs({ clk: inp.clk }, [reg, counter]);
 

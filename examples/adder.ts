@@ -6,14 +6,12 @@ const { createModule, primitives: { arith } } = createCircuit();
 
 const N = 32;
 
-const adderSubtractorN = arith.adderSubtractorN(N);
-
 const top = createModule({
   name: 'top',
   inputs: { a: width[N], b: width[N], subtract: width[1] },
   outputs: { leds: width[N], overflow: width[1] },
   connect(inp, out) {
-    const adder = adderSubtractorN();
+    const adder = arith.adderSubtractorN(N);
 
     adder.in.a = inp.a;
     adder.in.b = inp.b;

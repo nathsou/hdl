@@ -1,7 +1,7 @@
 import { Circuit, createModule, width } from "../core";
 import { gen, genConnections, last } from "../utils";
 import { GateModules } from "./gates";
-import { extendN, Multi } from "./meta";
+import { Multi } from "./meta";
 
 export type ArithmeticModules = ReturnType<typeof createArith>;
 
@@ -77,7 +77,7 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
     outputs: { sum: N, carry_out: width[1] },
     connect(inp, out) {
       const adder = adderN(N)();
-      const xors = extendN(circ)(N, gates.xor_, ['a', 'b'], ['q'], `xor${N}`)();
+      const xors = gates.xorN(N);
 
       xors.in.a = genConnections(N, () => inp.subtract);
       xors.in.b = inp.b;
@@ -92,9 +92,13 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
   }, circ);
 
   return {
-    halfAdder,
-    fullAdder,
-    adderN,
-    adderSubtractorN,
+    halfAdder1: halfAdder,
+    adder1: fullAdder,
+    adder2: adderN(2),
+    adder4: adderN(4),
+    adder8: adderN(8),
+    adder16: adderN(16),
+    adderN: <N extends Multi>(N: N) => adderN(N)(),
+    adderSubtractorN: <N extends Multi>(N: N) => adderSubtractorN(N)(),
   };
 };

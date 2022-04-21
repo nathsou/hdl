@@ -1,5 +1,5 @@
 import { Circuit, createModule, Module, width } from "../core";
-import { gen } from "../utils";
+import { gen, genConnections } from "../utils";
 
 export type Multi = Exclude<keyof typeof width, 0 | 1>;
 
@@ -30,8 +30,7 @@ export const extendN = (circuit: Circuit) => <
       }
 
       for (const outputPin of outputPins) {
-        // @ts-ignore
-        out[outputPin] = gen(N, i => comps[N - 1 - i].out[outputPin]);
+        out[outputPin] = genConnections(N, i => comps[N - 1 - i].out[outputPin]);
       }
     },
   }, circuit);

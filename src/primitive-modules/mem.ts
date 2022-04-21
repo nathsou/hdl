@@ -3,14 +3,14 @@ import { GateModules } from "./gates";
 
 export type MemoryModules = ReturnType<typeof createMemoryModules>;
 
-export const createMemoryModules = (circ: Circuit, { and, nor_, not }: GateModules) => {
+export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModules) => {
   const srLatch = createModule({
     name: 'sr_latch',
     inputs: { s: width[1], r: width[1] },
     outputs: { q: width[1], qbar: width[1] },
     connect(inp, out) {
-      const top = nor_();
-      const bot = nor_();
+      const top = nor1();
+      const bot = nor1();
 
       top.in.a = inp.s;
       top.in.b = bot.out.q;

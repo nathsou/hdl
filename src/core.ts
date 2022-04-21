@@ -68,8 +68,11 @@ export type NodeState = NodeStateConst | NodeStateRef;
 export type Net = string;
 export type CircuitState = Record<string, NodeState>;
 
-let _nextId = 0;
-const nextId = () => _nextId++;
+const globalState = {
+  nextId: 0,
+};
+
+const nextId = () => globalState.nextId++;
 
 export const isRawConnection = (x: any): x is RawConnection => {
   return (

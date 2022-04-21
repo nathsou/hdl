@@ -1,10 +1,10 @@
-import { Circuit, Connection, createPrimitiveModule, MultiIO, State, Tuple, width } from "../core";
-import { Multi } from "./meta";
+import { Circuit, Connection, createPrimitiveModule, Module, width } from "../core";
+import { extendN, Multi } from "./meta";
 
 export type GateModules = ReturnType<typeof createGates>;
 
 export const createGates = (circuit: Circuit) => {
-  const not_ = createPrimitiveModule({
+  const not1 = createPrimitiveModule({
     name: 'not',
     inputs: { d: width[1] },
     outputs: { q: width[1] },
@@ -14,12 +14,12 @@ export const createGates = (circuit: Circuit) => {
   }, circuit);
 
   const not = (d: Connection): Connection => {
-    const gate = not_();
+    const gate = not1();
     gate.in.d = d;
     return gate.out.q;
   };
 
-  const and_ = createPrimitiveModule({
+  const and = createPrimitiveModule({
     name: 'and',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
@@ -28,14 +28,7 @@ export const createGates = (circuit: Circuit) => {
     },
   }, circuit);
 
-  const and = (a: Connection, b: Connection): Connection => {
-    const g = and_();
-    g.in.a = a;
-    g.in.b = b;
-    return g.out.q;
-  };
-
-  const nand_ = createPrimitiveModule({
+  const nand = createPrimitiveModule({
     name: 'nand',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
@@ -44,14 +37,8 @@ export const createGates = (circuit: Circuit) => {
     },
   }, circuit);
 
-  const nand = (a: Connection, b: Connection): Connection => {
-    const g = nand_();
-    g.in.a = a;
-    g.in.b = b;
-    return g.out.q;
-  };
 
-  const or_ = createPrimitiveModule({
+  const or = createPrimitiveModule({
     name: 'or',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
@@ -60,14 +47,8 @@ export const createGates = (circuit: Circuit) => {
     },
   }, circuit);
 
-  const or = (a: Connection, b: Connection): Connection => {
-    const g = or_();
-    g.in.a = a;
-    g.in.b = b;
-    return g.out.q;
-  };
 
-  const nor_ = createPrimitiveModule({
+  const nor = createPrimitiveModule({
     name: 'nor',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
@@ -76,14 +57,7 @@ export const createGates = (circuit: Circuit) => {
     },
   }, circuit);
 
-  const nor = (a: Connection, b: Connection): Connection => {
-    const g = nor_();
-    g.in.a = a;
-    g.in.b = b;
-    return g.out.q;
-  };
-
-  const xor_ = createPrimitiveModule({
+  const xor = createPrimitiveModule({
     name: 'xor',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
@@ -92,28 +66,14 @@ export const createGates = (circuit: Circuit) => {
     },
   }, circuit);
 
-  const xor = (a: Connection, b: Connection): Connection => {
-    const g = xor_();
-    g.in.a = a;
-    g.in.b = b;
-    return g.out.q;
-  };
-
-  const xnor_ = createPrimitiveModule({
-    name: 'xor',
+  const xnor = createPrimitiveModule({
+    name: 'xnor',
     inputs: { a: width[1], b: width[1] },
     outputs: { q: width[1] },
     simulate(inp, out) {
       out.q = (inp.a || inp.b) && !(inp.a && inp.b) ? 0 : 1;
     },
   }, circuit);
-
-  const xnor = (a: Connection, b: Connection): Connection => {
-    const g = xnor_();
-    g.in.a = a;
-    g.in.b = b;
-    return g.out.q;
-  };
 
   const tristateBufferN = <N extends number>(N: N) => createPrimitiveModule({
     name: `tristate_buffer${N}`,
@@ -126,14 +86,58 @@ export const createGates = (circuit: Circuit) => {
     },
   }, circuit);
 
+  const binaryGateShorthand = (gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>) => {
+    return (a: Connection, b: Connection): Connection => {
+      const g = gate();
+      g.in.a = a;
+      g.in.b = b;
+      return g.out.q;
+    };
+  };
+
+  type ExtendedGate<Name extends string> = {
+    [_ in Name]: (a: Connection, b: Connection) => Connection
+  } & {
+      [N in (1 | 2 | 4 | 8 | 16 | 32) as `${Name}${N}`]: () => Module<{ a: N, b: N }, { q: N }>
+    } & {
+      [_ in `${Name}N`]: <N extends Multi>(N: N) => Module<{ a: N, b: N }, { q: N }>
+    };
+
+  const ext = extendN(circuit);
+  const extendBinary = <Name extends string>(
+    gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>,
+    name: Name
+  ): ExtendedGate<Name> => {
+
+    return {
+      [name]: binaryGateShorthand(gate),
+      [name + 1]: gate,
+      [name + '2']: ext(2, gate, ['a', 'b'], ['q'], `${name}2`),
+      [name + '4']: ext(4, gate, ['a', 'b'], ['q'], `${name}4`),
+      [name + '8']: ext(8, gate, ['a', 'b'], ['q'], `${name}8`),
+      [name + '16']: ext(16, gate, ['a', 'b'], ['q'], `${name}16`),
+      [name + 'N']: <N extends Multi>(N: N) => ext(N, gate, ['a', 'b'], ['q'], `${name}${N}`)(),
+    } as ExtendedGate<Name>;
+  };
+
   return {
-    not, not_,
-    and, and_,
-    nand, nand_,
-    or, or_,
-    nor, nor_,
-    xor, xor_,
-    xnor, xnor_,
-    tristateBufferN,
+    not,
+    not1,
+    not2: ext(2, not1, ['d'], ['q'], 'not2'),
+    not4: ext(4, not1, ['d'], ['q'], 'not4'),
+    not8: ext(8, not1, ['d'], ['q'], 'not8'),
+    not16: ext(16, not1, ['d'], ['q'], 'not16'),
+    ...extendBinary(and, 'and'),
+    ...extendBinary(nand, 'nand'),
+    ...extendBinary(or, 'or'),
+    ...extendBinary(nor, 'nor'),
+    ...extendBinary(xor, 'xor'),
+    ...extendBinary(xnor, 'xnor'),
+    tristate1: tristateBufferN(1),
+    tristate2: tristateBufferN(2),
+    tristate4: tristateBufferN(4),
+    tristate8: tristateBufferN(8),
+    tristate16: tristateBufferN(16),
+    tristateN: <N extends Multi>(N: N) => tristateBufferN(N)(),
   };
 };
