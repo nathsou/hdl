@@ -65,7 +65,7 @@ export const createLevelizedSimulator = <
   const inputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, true));
   const outputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, false));
 
-  const gates = executionOrder.map(id => circuit.modules.get(id)!);
+  const mods = executionOrder.map(id => circuit.modules.get(id)!);
 
   const input = (input: MapStates<In>): void => {
     // update the input vector
@@ -86,10 +86,10 @@ export const createLevelizedSimulator = <
       state.write(net, newState);
     }
 
-    // simulate the gates
-    for (const gate of gates) {
-      simData.mod = gate;
-      gate.simulate!(inputs, outputs);
+    // simulate the primitive modules
+    for (const mod of mods) {
+      simData.mod = mod;
+      mod.simulate!(inputs, outputs, mod.state!);
     }
   };
 

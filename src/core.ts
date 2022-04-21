@@ -58,7 +58,8 @@ export type ModuleNode = {
     in: Record<string, RawConnection[]>,
     out: Record<string, RawConnection[]>,
   },
-  simulate?: (inputs: object, outputs: object) => void,
+  simulate?: (inputs: object, outputs: object, state: object) => void,
+  state?: object,
 };
 
 export type NodeStateConst = { type: 'const', value: 0 | 1, initialized: boolean };
@@ -108,8 +109,12 @@ export const createCircuit = () => {
 
   constantsModule(circuit)();
 
-  const _createPrimitiveModule = <In extends Record<string, number>, Out extends Record<string, number>>(
-    def: Omit<PrimitiveModuleDef<In, Out>, 'type'>
+  const _createPrimitiveModule = <
+    In extends Record<string, number>,
+    Out extends Record<string, number>,
+    State extends {}
+  >(
+    def: Omit<PrimitiveModuleDef<In, Out, State>, 'type'>
   ): (() => Module<In, Out>) => {
     return createPrimitiveModule(def, circuit);
   };
@@ -128,8 +133,12 @@ export const createCircuit = () => {
   };
 };
 
-export const createPrimitiveModule = <In extends Record<string, number>, Out extends Record<string, number>>(
-  def: Omit<PrimitiveModuleDef<In, Out>, 'type'>,
+export const createPrimitiveModule = <
+  In extends Record<string, number>,
+  Out extends Record<string, number>,
+  State extends {}
+>(
+  def: Omit<PrimitiveModuleDef<In, Out, State>, 'type'>,
   circuit: Circuit,
 ): (() => Module<In, Out>) => {
   return _createModule({ ...def, type: 'primitive' }, circuit);
@@ -142,7 +151,7 @@ export const createModule = <In extends Record<string, number>, Out extends Reco
   return _createModule({ ...def, type: 'compound' }, circuit);
 };
 
-const connectionHandler = (id: number, mod: ModuleDef<any, any>, circuit: Circuit, isInput: boolean): ProxyHandler<any> => {
+const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: Circuit, isInput: boolean): ProxyHandler<any> => {
   const sig = mod[isInput ? 'inputs' : 'outputs'];
   const prefix = isInput ? 'in' : 'out';
   const connectionOf = (v: Connection) =>
@@ -227,8 +236,12 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any>, circuit: Circui
 
 const subModulesStack: ModuleNode[][] = [];
 
-const _createModule = <In extends Record<string, number>, Out extends Record<string, number>>(
-  mod: ModuleDef<In, Out>,
+const _createModule = <
+  In extends Record<string, number>,
+  Out extends Record<string, number>,
+  State extends {}
+>(
+  mod: ModuleDef<In, Out, State>,
   circuit: Circuit,
 ): (() => Module<In, Out>) => {
   const duplicatePin = Object.keys(mod.inputs).find(pin => mod.outputs[pin] !== undefined);
@@ -306,13 +319,9 @@ const _createModule = <In extends Record<string, number>, Out extends Record<str
     }
 
     if (mod.type === 'primitive') {
-      const f = mod.simulate.length > 0 ? mod.simulate : (mod.simulate as Function)();
-
-      if (typeof f !== 'function') {
-        throw new Error(`Simulation function for ${mod.name} must receive at least one argument`);
-      }
-
-      node.simulate = f;
+      /// @ts-ignore
+      node.simulate = mod.simulate;
+      node.state = mod.state ?? {};
     }
 
     return {
@@ -365,18 +374,27 @@ type BaseModuleDef<In extends Record<string, number>, Out extends Record<string,
   outputs: Out,
 };
 
-export type PrimitiveModuleDef<In extends Record<string, number>, Out extends Record<string, number>> = BaseModuleDef<In, Out> & {
-  type: 'primitive',
-  simulate: ((inputs: MapStates<In>, outputs: MapStates<Out>) => void) | (() => (inputs: MapStates<In>, outputs: MapStates<Out>) => void),
-};
+export type PrimitiveModuleDef<
+  In extends Record<string, number>,
+  Out extends Record<string, number>,
+  State extends {}
+  > = BaseModuleDef<In, Out> & {
+    type: 'primitive',
+    state?: State,
+    simulate: (inputs: MapStates<In>, outputs: MapStates<Out>, state: State) => void,
+  };
 
 export type CompoundModuleDef<In extends Record<string, number>, Out extends Record<string, number>> = BaseModuleDef<In, Out> & {
   type: 'compound',
   connect: (inputs: MapConnections<In>, outputs: MapConnections<Out>) => void,
 };
 
-export type ModuleDef<In extends Record<string, number>, Out extends Record<string, number>> =
-  | PrimitiveModuleDef<In, Out>
+export type ModuleDef<
+  In extends Record<string, number>,
+  Out extends Record<string, number>,
+  State extends {}
+  > =
+  | PrimitiveModuleDef<In, Out, State>
   | CompoundModuleDef<In, Out>;
 
 export const width = {

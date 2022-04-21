@@ -1,6 +1,8 @@
 import { Circuit, createModule, width } from "../core";
 import { Gates } from "./gates";
 
+export type LatchesAndFlipFlops = ReturnType<typeof createMemoryModules>;
+
 export const createMemoryModules = (circ: Circuit, { and, nor_, not }: Gates) => {
   const srLatch = createModule({
     name: 'sr_latch',

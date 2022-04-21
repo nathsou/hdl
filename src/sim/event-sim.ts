@@ -1,7 +1,7 @@
 import Queue from 'mnemonist/queue';
 import { checkConnections, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
 import { targetPrimitiveMods, withoutCompoundModules } from './rewrite';
-import { map, some, uniq } from "../utils";
+import { gen, map, some, uniq } from "../utils";
 import { createState, SimulationData, simulationHandler, Simulator } from './sim';
 
 type SimEvent = {
@@ -94,22 +94,38 @@ export const createEventDrivenSimulator = <
   const inputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, true));
   const outputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, false));
 
+  const outputNets = new Map(map(primCircuit.modules.values(), mod => {
+    const outputNets: string[] = [];
+    const sig = primCircuit.signatures.get(mod.name)!.outputs;
+
+    for (const pin of Object.keys(mod.pins.out)) {
+      const width = sig[pin];
+
+      if (width === 1) {
+        outputNets.push(`${pin}:${mod.id}`);
+      } else {
+        outputNets.push(...gen(width, n => `${pin}${n}:${mod.id}`));
+      }
+    }
+
+    return [mod.id, outputNets];
+  }));
+
   const processGates = () => {
     while (gateQueue.size > 0) {
       const modId = gateQueue.dequeue()!;
       const mod = primCircuit.modules.get(modId)!;
-      const ouputPins = Object.keys(mod.pins.out);
-      const prevOutput = ouputPins.map(pin => state.deref(`${pin}:${modId}`));
+      const outNets = outputNets.get(modId)!;
+      const prevOutput = outNets.map(net => state.deref(net));
       simData.mod = mod;
 
-      mod.simulate!(inputs, outputs);
+      mod.simulate!(inputs, outputs, mod.state!);
 
-      const newOutput = ouputPins.map(pin => state.deref(`${pin}:${modId}`));
-
-      for (let i = 0; i < ouputPins.length; i++) {
-        const net = `${ouputPins[i]}:${modId}`;
-        if (prevOutput[i] !== newOutput[i] || !state.raw[net].initialized) {
-          eventQueue.enqueue({ net, newState: newOutput[i] });
+      for (let i = 0; i < outNets.length; i++) {
+        const net = outNets[i];
+        const newOutput = state.deref(net);
+        if (prevOutput[i] !== newOutput || !state.raw[net].initialized) {
+          eventQueue.enqueue({ net, newState: newOutput });
         }
       }
     }

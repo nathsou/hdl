@@ -1,20 +1,23 @@
 import { createCircuit, width } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 
-const { createModule, primitives: { mem } } = createCircuit();
+const { createModule, primitives: { regs } } = createCircuit();
+
+const N = 16;
+
+const counterN = regs.counterN(N);
 
 const top = createModule({
   name: 'top',
-  inputs: { j: width[1], k: width[1], clk: width[1] },
-  outputs: { leds: width[2] },
+  inputs: { clk: width[1] },
+  outputs: { leds: width[N] },
   connect(inp, out) {
-    const ff = mem.leaderFollowerJKFlipFlop();
+    const counter = counterN();
 
-    ff.in.j = inp.j;
-    ff.in.k = inp.k;
-    ff.in.clk = inp.clk;
+    counter.in.clk = inp.clk;
+    counter.in.count_enable = 1;
 
-    out.leds = [ff.out.q, ff.out.qbar];
+    out.leds = counter.out.q;
   },
 });
 
@@ -23,12 +26,10 @@ const main = () => {
   const mod = top();
   const sim = createSimulator(mod, 'event-driven');
 
-  for (let i = 0; i < 10; i++) {
-    sim.input({ j: 0, k: 0, clk: 0 });
-    console.log(sim.state.read(mod.out.leds));
-
-    sim.input({ j: 1, k: 1, clk: 1 });
-    console.log(sim.state.read(mod.out.leds));
+  for (let i = 0; i < 2 ** N; i++) {
+    sim.input({ clk: 0 });
+    sim.input({ clk: 1 });
+    console.log(sim.state.read(mod.out.leds).join(''));
   }
 };
 

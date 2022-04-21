@@ -1,4 +1,4 @@
-import { Connection, State, Tuple } from "./core";
+import { Connection, Module, State, Tuple } from "./core";
 
 export function* join<T>(a: Iterable<T>, b: Iterable<T>): IterableIterator<T> {
   for (const x of a) {
@@ -139,4 +139,22 @@ export const bin = <W extends number>(n: number, width: W): Tuple<State, W> => {
     .padStart(width, '0')
     .split('')
     .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
+};
+
+export const forwardInputs = <
+  Pins extends keyof Mapping,
+  Mapping extends Record<Pins, Connection>,
+  In extends Record<Pins, 1>
+>(
+  mapping: Mapping,
+  modules: Module<In, any>[]
+): void => {
+  const entries = Object.entries(mapping);
+
+  for (const mod of modules) {
+    for (const [pin, connection] of entries) {
+      /// @ts-ignore
+      mod.in[pin] = connection;
+    }
+  }
 };
