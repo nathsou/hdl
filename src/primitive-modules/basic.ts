@@ -11,7 +11,7 @@ export const createBasicModules = (circ: Circuit) => {
   const gates = createGates(circ);
   const arith = createArith(circ, gates);
   const mem = createMemoryModules(circ, gates);
-  const regs = createRegisters(circ, gates, mem);
+  const regs = createRegisters(circ, gates, mem, arith);
   const meta = {
     extendN: extendN(circ),
   };

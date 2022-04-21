@@ -1,9 +1,9 @@
 import { Circuit, createModule, width } from "../core";
-import { Gates } from "./gates";
+import { GateModules } from "./gates";
 
-export type LatchesAndFlipFlops = ReturnType<typeof createMemoryModules>;
+export type MemoryModules = ReturnType<typeof createMemoryModules>;
 
-export const createMemoryModules = (circ: Circuit, { and, nor_, not }: Gates) => {
+export const createMemoryModules = (circ: Circuit, { and, nor_, not }: GateModules) => {
   const srLatch = createModule({
     name: 'sr_latch',
     inputs: { s: width[1], r: width[1] },

@@ -1,14 +1,16 @@
-import { Circuit, createModule, createPrimitiveModule, width } from "../core";
-import { bin, forwardInputs, gen, genConnections } from "../utils";
-import { Gates } from "./gates";
-import { LatchesAndFlipFlops } from "./mem";
+import { Circuit, createModule, createPrimitiveModule, State, width } from "../core";
+import { forwardInputs, gen, genConnections } from "../utils";
+import { ArithmeticModules } from "./arith";
+import { GateModules } from "./gates";
+import { MemoryModules } from "./mem";
 import { Multi } from "./meta";
 
 export const createRegisters = (
-  circ: Circuit, { and }: Gates,
-  { leaderFollowerJKFlipFlop: jkFF }: LatchesAndFlipFlops
+  circ: Circuit, { and }: GateModules,
+  { leaderFollowerJKFlipFlop: jkFF }: MemoryModules,
+  { adderN }: ArithmeticModules
 ) => {
-  const counterN = <N extends Multi>(N: N) => createModule({
+  const counterNJKs = <N extends Multi>(N: N) => createModule({
     name: `counter${N}`,
     inputs: { count_enable: width[1], clk: width[1] },
     outputs: { q: N },
@@ -35,20 +37,71 @@ export const createRegisters = (
     },
   }, circ);
 
-  const counterSimN = <N extends Multi>(N: N) => createPrimitiveModule({
+  const counterN = <N extends Multi>(N: N) => createModule({
     name: `counter${N}`,
     inputs: { count_enable: width[1], clk: width[1] },
     outputs: { q: N },
-    state: { count: 0 },
-    simulate(inp, out, state) {
-      /// @ts-ignore
-      out.q = bin(state.count, N);
+    connect(inp, out) {
+      const adder = adderN(N)();
+      const reg = regN(N)();
 
-      if (inp.count_enable && inp.clk) {
-        state.count += 1;
-      }
+      reg.in.clk = inp.clk;
+      reg.in.load = inp.count_enable;
+      adder.in.carry_in = inp.count_enable;
+      adder.in.a = reg.out.q;
+      adder.in.b = genConnections(N, () => 0);
+      reg.in.d = adder.out.sum;
+
+      out.q = reg.out.q;
     },
   }, circ);
 
-  return { counterN, counterSimN };
+  const counterNSim = <N extends Multi>(N: N) => createPrimitiveModule({
+    name: `counter${N}`,
+    inputs: { count_enable: width[1], clk: width[1] },
+    outputs: { q: N },
+    state: { bits: genConnections<State, N>(N, () => 0) },
+    simulate(inp, out, { bits }) {
+      if (inp.count_enable && inp.clk) {
+        let carry = 1;
+        for (let i = N - 1; i >= 0; i--) {
+          const sum = carry + bits[i];
+          if (sum === 0) {
+            carry = 0;
+            bits[i] = 0;
+          } else if (sum === 1) {
+            carry = 0;
+            bits[i] = 1;
+          } else {
+            carry = 1;
+            bits[i] = 0;
+          }
+        }
+      }
+
+      out.q = bits;
+    },
+  }, circ);
+
+  const regN = <N extends Multi>(N: N) => createPrimitiveModule({
+    name: `reg${N}`,
+    inputs: { d: N, load: width[1], clk: width[1] },
+    outputs: { q: N },
+    state: { data: genConnections<State, N>(N, () => 0), last_clk: 0 },
+    simulate(inp, out, state) {
+      const rising = inp.clk && !state.last_clk;
+
+      if (rising && inp.load) {
+        state.data = inp.d;
+        out.q = state.data;
+      }
+
+      state.last_clk = inp.clk;
+    },
+  }, circ);
+
+  return {
+    counterN, counterNJKs, counterNSim,
+    regN,
+  };
 };

@@ -1,4 +1,4 @@
-import { Connection, Module, State, Tuple } from "./core";
+import { Connection, Module, MultiIO, State, Tuple } from "./core";
 
 export function* join<T>(a: Iterable<T>, b: Iterable<T>): IterableIterator<T> {
   for (const x of a) {
@@ -102,7 +102,7 @@ export const mapTuple = <N extends number, T, U>(values: Tuple<T, N>, f: (v: T) 
   return values.map(f) as Tuple<U, N>;
 };
 
-export const genConnections = <N extends number, T>(count: N, factory: (n: number) => T): N extends 1 ? T : Tuple<T, N> => {
+export const genConnections = <T, N extends number>(count: N, factory: (n: number) => T): MultiIO<N, T> => {
   const result = [];
   for (let i = 0; i < count; i++) {
     result.push(factory(i));
@@ -144,10 +144,10 @@ export const bin = <W extends number>(n: number, width: W): Tuple<State, W> => {
 export const forwardInputs = <
   Pins extends keyof Mapping,
   Mapping extends Record<Pins, Connection>,
-  In extends Record<Pins, 1>
+  Mods extends Module<Record<Pins, 1>, any>[]
 >(
   mapping: Mapping,
-  modules: Module<In, any>[]
+  modules: Mods
 ): void => {
   const entries = Object.entries(mapping);
 

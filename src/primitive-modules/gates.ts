@@ -1,7 +1,7 @@
-import { Circuit, Connection, createPrimitiveModule, Module, MultiIO, Num, Tuple, width } from "../core";
-import { gen, genConnections, mapTuple } from "../utils";
+import { Circuit, Connection, createPrimitiveModule, MultiIO, State, Tuple, width } from "../core";
+import { Multi } from "./meta";
 
-export type Gates = ReturnType<typeof createGates>;
+export type GateModules = ReturnType<typeof createGates>;
 
 export const createGates = (circuit: Circuit) => {
   const not_ = createPrimitiveModule({
@@ -115,6 +115,17 @@ export const createGates = (circuit: Circuit) => {
     return g.out.q;
   };
 
+  const tristateBufferN = <N extends number>(N: N) => createPrimitiveModule({
+    name: `tristate_buffer${N}`,
+    inputs: { d: N, enable: width[1] },
+    outputs: { q: N },
+    simulate(inp, out) {
+      if (inp.enable) {
+        out.q = inp.d;
+      }
+    },
+  }, circuit);
+
   return {
     not, not_,
     and, and_,
@@ -123,5 +134,6 @@ export const createGates = (circuit: Circuit) => {
     nor, nor_,
     xor, xor_,
     xnor, xnor_,
+    tristateBufferN,
   };
 };

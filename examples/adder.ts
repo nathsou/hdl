@@ -27,7 +27,7 @@ const top = createModule({
 
 const main = () => {
   const mod = top();
-  const sim = createSimulator(mod, 'event-driven');
+  const sim = createSimulator(mod, 'levelization');
 
   const logOutput = () => {
     const res = sim.state.read(mod.out.leds);

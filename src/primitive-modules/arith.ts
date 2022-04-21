@@ -1,9 +1,11 @@
 import { Circuit, createModule, width } from "../core";
 import { gen, genConnections, last } from "../utils";
-import { Gates } from "./gates";
+import { GateModules } from "./gates";
 import { extendN, Multi } from "./meta";
 
-export const createArith = (circ: Circuit, gates: Gates) => {
+export type ArithmeticModules = ReturnType<typeof createArith>;
+
+export const createArith = (circ: Circuit, gates: GateModules) => {
   // a  b  c  s
   // 0  0  0  0
   // 0  1  0  1
