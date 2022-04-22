@@ -103,16 +103,16 @@ export const mapTuple = <N extends number, T, U>(values: Tuple<T, N>, f: (v: T) 
 };
 
 export const genConnections = <T, N extends number>(count: N, factory: (n: number) => T): MultiIO<N, T> => {
-  const result = [];
+  const result = Array<T>(count);
   for (let i = 0; i < count; i++) {
     result.push(factory(i));
   }
 
   if (count === 1) {
-    return result[0] as N extends 1 ? T : Tuple<T, N>;
+    return result[0] as MultiIO<N, T>;
   }
 
-  return result as N extends 1 ? T : Tuple<T, N>;
+  return result as MultiIO<N, T>;
 };
 
 export const rep4 = <T extends Connection>(c: T): Tuple<T, 4> => {

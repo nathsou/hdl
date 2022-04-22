@@ -3,18 +3,16 @@ import { Circuit } from "../core";
 import { createGates } from "./gates";
 import { createMemoryModules } from "./mem";
 import { createTransitors } from "./transitors";
-import { extendN } from './meta';
+import { createMetaModules } from './meta';
 import { createRegisters } from "./regs";
 
 export const createBasicModules = (circ: Circuit) => {
+  const meta = createMetaModules(circ);
   const transitors = createTransitors(circ);
-  const gates = createGates(circ);
+  const gates = createGates(circ, meta);
   const arith = createArith(circ, gates);
   const mem = createMemoryModules(circ, gates);
   const regs = createRegisters(circ, gates, mem, arith);
-  const meta = {
-    extendN: extendN(circ),
-  };
 
   return {
     transitors,

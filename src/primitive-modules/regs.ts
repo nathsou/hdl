@@ -1,9 +1,8 @@
-import { Circuit, createModule, createPrimitiveModule, State, width } from "../core";
+import { Circuit, createModule, createPrimitiveModule, State, Multi } from "../core";
 import { forwardInputs, gen, genConnections } from "../utils";
 import { ArithmeticModules } from "./arith";
 import { GateModules } from "./gates";
 import { MemoryModules } from "./mem";
-import { Multi } from "./meta";
 
 export const createRegisters = (
   circ: Circuit, { and }: GateModules,
@@ -12,7 +11,7 @@ export const createRegisters = (
 ) => {
   const counterNJKs = <N extends Multi>(N: N) => createModule({
     name: `counter${N}`,
-    inputs: { count_enable: width[1], clk: width[1] },
+    inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
     connect(inp, out) {
       const jks = gen(N, jkFF);
@@ -39,7 +38,7 @@ export const createRegisters = (
 
   const counterN = <N extends Multi>(N: N) => createModule({
     name: `counter${N}`,
-    inputs: { count_enable: width[1], clk: width[1] },
+    inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
     connect(inp, out) {
       const adder = adderN(N);
@@ -58,7 +57,7 @@ export const createRegisters = (
 
   const counterNSim = <N extends Multi>(N: N) => createPrimitiveModule({
     name: `counter${N}`,
-    inputs: { count_enable: width[1], clk: width[1] },
+    inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
     state: { bits: genConnections<State, N>(N, () => 0) },
     simulate(inp, out, { bits }) {
@@ -85,7 +84,7 @@ export const createRegisters = (
 
   const regN = <N extends Multi>(N: N) => createPrimitiveModule({
     name: `reg${N}`,
-    inputs: { d: N, load: width[1], clk: width[1] },
+    inputs: { d: N, load: 1, clk: 1 },
     outputs: { q: N },
     state: { data: genConnections<State, N>(N, () => 0), last_clk: 0 },
     simulate(inp, out, state) {

@@ -1,4 +1,4 @@
-import { createCircuit, width } from "../src/core";
+import { createCircuit } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { forwardInputs } from "../src/utils";
 
@@ -8,8 +8,8 @@ const N = 16;
 
 const top = createModule({
   name: 'top',
-  inputs: { clk: width[1], transmit: width[1] },
-  outputs: { leds: width[N] },
+  inputs: { clk: 1, transmit: 1 },
+  outputs: { leds: N },
   connect(inp, out) {
     const reg = regs.regN(N);
     const buffer = gates.tristateN(N);

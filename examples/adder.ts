@@ -1,4 +1,4 @@
-import { createCircuit, width } from "../src/core";
+import { createCircuit } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { bin } from "../src/utils";
 
@@ -8,8 +8,8 @@ const N = 32;
 
 const top = createModule({
   name: 'top',
-  inputs: { a: width[N], b: width[N], subtract: width[1] },
-  outputs: { leds: width[N], overflow: width[1] },
+  inputs: { a: N, b: N, subtract: 1 },
+  outputs: { leds: N, overflow: 1 },
   connect(inp, out) {
     const adder = arith.adderSubtractorN(N);
 

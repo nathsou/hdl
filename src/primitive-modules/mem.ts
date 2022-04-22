@@ -1,4 +1,4 @@
-import { Circuit, createModule, width } from "../core";
+import { Circuit, createModule } from "../core";
 import { GateModules } from "./gates";
 
 export type MemoryModules = ReturnType<typeof createMemoryModules>;
@@ -6,8 +6,8 @@ export type MemoryModules = ReturnType<typeof createMemoryModules>;
 export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModules) => {
   const srLatch = createModule({
     name: 'sr_latch',
-    inputs: { s: width[1], r: width[1] },
-    outputs: { q: width[1], qbar: width[1] },
+    inputs: { s: 1, r: 1 },
+    outputs: { q: 1, qbar: 1 },
     connect(inp, out) {
       const top = nor1();
       const bot = nor1();
@@ -25,8 +25,8 @@ export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModul
 
   const srLatchWithEnable = createModule({
     name: 'sr_latch_with_enable',
-    inputs: { s: width[1], r: width[1], enable: width[1] },
-    outputs: { q: width[1], qbar: width[1] },
+    inputs: { s: 1, r: 1, enable: 1 },
+    outputs: { q: 1, qbar: 1 },
     connect(inp, out) {
       const sr = srLatch();
 
@@ -40,8 +40,8 @@ export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModul
 
   const dLatch = createModule({
     name: 'd_latch',
-    inputs: { d: width[1], enable: width[1] },
-    outputs: { q: width[1], qbar: width[1] },
+    inputs: { d: 1, enable: 1 },
+    outputs: { q: 1, qbar: 1 },
     connect(inp, out) {
       const sr = srLatchWithEnable();
 
@@ -56,8 +56,8 @@ export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModul
 
   const dFlipFlop = createModule({
     name: 'd_flip_flop',
-    inputs: { d: width[1], clk: width[1] },
-    outputs: { q: width[1], qbar: width[1] },
+    inputs: { d: 1, clk: 1 },
+    outputs: { q: 1, qbar: 1 },
     connect(inp, out) {
       const latch = dLatch();
       latch.in.d = inp.d;
@@ -70,8 +70,8 @@ export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModul
   // also known as master-slave JK flip-flop
   const leaderFollowerJKFlipFlop = createModule({
     name: 'leader_follower_jk_flip_flop',
-    inputs: { j: width[1], k: width[1], clk: width[1] },
-    outputs: { q: width[1], qbar: width[1] },
+    inputs: { j: 1, k: 1, clk: 1 },
+    outputs: { q: 1, qbar: 1 },
     connect(inp, out) {
       const leader = srLatchWithEnable();
       const follower = srLatchWithEnable();

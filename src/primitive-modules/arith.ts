@@ -1,7 +1,6 @@
-import { Circuit, createModule, width } from "../core";
+import { Circuit, createModule, Multi } from "../core";
 import { gen, genConnections, last } from "../utils";
 import { GateModules } from "./gates";
-import { Multi } from "./meta";
 
 export type ArithmeticModules = ReturnType<typeof createArith>;
 
@@ -14,8 +13,8 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
 
   const halfAdder = createModule({
     name: 'half_adder',
-    inputs: { a: width[1], b: width[1] },
-    outputs: { sum: width[1], carry: width[1] },
+    inputs: { a: 1, b: 1 },
+    outputs: { sum: 1, carry: 1 },
     connect(inp, out) {
       out.sum = gates.xor(inp.a, inp.b);
       out.carry = gates.and(inp.a, inp.b);
@@ -34,8 +33,8 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
 
   const fullAdder = createModule({
     name: 'full_adder',
-    inputs: { a: width[1], b: width[1], carry_in: width[1] },
-    outputs: { sum: width[1], carry_out: width[1] },
+    inputs: { a: 1, b: 1, carry_in: 1 },
+    outputs: { sum: 1, carry_out: 1 },
     connect(inp, out) {
       const xor1 = gates.xor(inp.a, inp.b);
 
@@ -52,8 +51,8 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
 
   const adderN = <N extends Multi>(N: N) => createModule({
     name: `adder${N}`,
-    inputs: { a: N, b: N, carry_in: width[1] },
-    outputs: { sum: N, carry_out: width[1] },
+    inputs: { a: N, b: N, carry_in: 1 },
+    outputs: { sum: N, carry_out: 1 },
     connect(inp, out) {
       const adders = gen(N, fullAdder);
 
@@ -73,8 +72,8 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
 
   const adderSubtractorN = <N extends Multi>(N: N) => createModule({
     name: `adder_subtractor${N}`,
-    inputs: { a: N, b: N, subtract: width[1] },
-    outputs: { sum: N, carry_out: width[1] },
+    inputs: { a: N, b: N, subtract: 1 },
+    outputs: { sum: N, carry_out: 1 },
     connect(inp, out) {
       const adder = adderN(N)();
       const xors = gates.xorN(N);

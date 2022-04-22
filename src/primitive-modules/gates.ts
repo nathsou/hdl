@@ -1,13 +1,13 @@
-import { Circuit, Connection, createPrimitiveModule, Module, width } from "../core";
-import { extendN, Multi } from "./meta";
+import { Circuit, Connection, createPrimitiveModule, Module, Num, Multi } from "../core";
+import { MetaModules } from "./meta";
 
 export type GateModules = ReturnType<typeof createGates>;
 
-export const createGates = (circuit: Circuit) => {
+export const createGates = (circuit: Circuit, meta: MetaModules) => {
   const not1 = createPrimitiveModule({
     name: 'not',
-    inputs: { d: width[1] },
-    outputs: { q: width[1] },
+    inputs: { d: 1 },
+    outputs: { q: 1 },
     simulate(inp, out) {
       out.q = inp.d === 0 ? 1 : 0;
     },
@@ -21,8 +21,8 @@ export const createGates = (circuit: Circuit) => {
 
   const and = createPrimitiveModule({
     name: 'and',
-    inputs: { a: width[1], b: width[1] },
-    outputs: { q: width[1] },
+    inputs: { a: 1, b: 1 },
+    outputs: { q: 1 },
     simulate(inp, out) {
       out.q = (inp.a && inp.b) ? 1 : 0;
     },
@@ -30,8 +30,8 @@ export const createGates = (circuit: Circuit) => {
 
   const nand = createPrimitiveModule({
     name: 'nand',
-    inputs: { a: width[1], b: width[1] },
-    outputs: { q: width[1] },
+    inputs: { a: 1, b: 1 },
+    outputs: { q: 1 },
     simulate(inp, out) {
       out.q = (inp.a && inp.b) ? 0 : 1;
     },
@@ -40,8 +40,8 @@ export const createGates = (circuit: Circuit) => {
 
   const or = createPrimitiveModule({
     name: 'or',
-    inputs: { a: width[1], b: width[1] },
-    outputs: { q: width[1] },
+    inputs: { a: 1, b: 1 },
+    outputs: { q: 1 },
     simulate(inp, out) {
       out.q = (inp.a || inp.b) ? 1 : 0;
     },
@@ -50,8 +50,8 @@ export const createGates = (circuit: Circuit) => {
 
   const nor = createPrimitiveModule({
     name: 'nor',
-    inputs: { a: width[1], b: width[1] },
-    outputs: { q: width[1] },
+    inputs: { a: 1, b: 1 },
+    outputs: { q: 1 },
     simulate(inp, out) {
       out.q = (inp.a || inp.b) ? 0 : 1;
     },
@@ -59,8 +59,8 @@ export const createGates = (circuit: Circuit) => {
 
   const xor = createPrimitiveModule({
     name: 'xor',
-    inputs: { a: width[1], b: width[1] },
-    outputs: { q: width[1] },
+    inputs: { a: 1, b: 1 },
+    outputs: { q: 1 },
     simulate(inp, out) {
       out.q = (inp.a || inp.b) && !(inp.a && inp.b) ? 1 : 0;
     },
@@ -68,16 +68,16 @@ export const createGates = (circuit: Circuit) => {
 
   const xnor = createPrimitiveModule({
     name: 'xnor',
-    inputs: { a: width[1], b: width[1] },
-    outputs: { q: width[1] },
+    inputs: { a: 1, b: 1 },
+    outputs: { q: 1 },
     simulate(inp, out) {
       out.q = (inp.a || inp.b) && !(inp.a && inp.b) ? 0 : 1;
     },
   }, circuit);
 
-  const tristateBufferN = <N extends number>(N: N) => createPrimitiveModule({
+  const tristateBufferN = <N extends Num>(N: N) => createPrimitiveModule({
     name: `tristate_buffer${N}`,
-    inputs: { d: N, enable: width[1] },
+    inputs: { d: N, enable: 1 },
     outputs: { q: N },
     simulate(inp, out) {
       if (inp.enable) {
@@ -98,12 +98,11 @@ export const createGates = (circuit: Circuit) => {
   type ExtendedGate<Name extends string> = {
     [_ in Name]: (a: Connection, b: Connection) => Connection
   } & {
-      [N in (1 | 2 | 4 | 8 | 16 | 32) as `${Name}${N}`]: () => Module<{ a: N, b: N }, { q: N }>
+      [N in (1 | 2 | 4 | 8 | 16) as `${Name}${N}`]: () => Module<{ a: N, b: N }, { q: N }>
     } & {
       [_ in `${Name}N`]: <N extends Multi>(N: N) => Module<{ a: N, b: N }, { q: N }>
     };
 
-  const ext = extendN(circuit);
   const extendBinary = <Name extends string>(
     gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>,
     name: Name
@@ -111,22 +110,22 @@ export const createGates = (circuit: Circuit) => {
 
     return {
       [name]: binaryGateShorthand(gate),
-      [name + 1]: gate,
-      [name + '2']: ext(2, gate, ['a', 'b'], ['q'], `${name}2`),
-      [name + '4']: ext(4, gate, ['a', 'b'], ['q'], `${name}4`),
-      [name + '8']: ext(8, gate, ['a', 'b'], ['q'], `${name}8`),
-      [name + '16']: ext(16, gate, ['a', 'b'], ['q'], `${name}16`),
-      [name + 'N']: <N extends Multi>(N: N) => ext(N, gate, ['a', 'b'], ['q'], `${name}${N}`)(),
+      [name + '1']: gate,
+      [name + '2']: meta.extendN(2, gate, ['a', 'b'], ['q'], `${name}2`),
+      [name + '4']: meta.extendN(4, gate, ['a', 'b'], ['q'], `${name}4`),
+      [name + '8']: meta.extendN(8, gate, ['a', 'b'], ['q'], `${name}8`),
+      [name + '16']: meta.extendN(16, gate, ['a', 'b'], ['q'], `${name}16`),
+      [name + 'N']: <N extends Multi>(N: N) => meta.extendN(N, gate, ['a', 'b'], ['q'], `${name}${N}`)(),
     } as ExtendedGate<Name>;
   };
 
   return {
     not,
     not1,
-    not2: ext(2, not1, ['d'], ['q'], 'not2'),
-    not4: ext(4, not1, ['d'], ['q'], 'not4'),
-    not8: ext(8, not1, ['d'], ['q'], 'not8'),
-    not16: ext(16, not1, ['d'], ['q'], 'not16'),
+    not2: meta.extendN(2, not1, ['d'], ['q'], 'not2'),
+    not4: meta.extendN(4, not1, ['d'], ['q'], 'not4'),
+    not8: meta.extendN(8, not1, ['d'], ['q'], 'not8'),
+    not16: meta.extendN(16, not1, ['d'], ['q'], 'not16'),
     ...extendBinary(and, 'and'),
     ...extendBinary(nand, 'nand'),
     ...extendBinary(or, 'or'),
