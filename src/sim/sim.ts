@@ -1,8 +1,8 @@
-import { Circuit, CircuitState, Connection, MapStates, Module, ModuleNode, Net, NodeState, State, Tuple } from "../core";
-import { connectionToNet } from "./rewrite";
-import { join } from "../utils";
+import { Circuit, CircuitState, Connection, MapStates, Module, ModuleNode, Net, NodeState, State } from "../core";
+import { Iter, Tuple } from "../utils";
 import { createEventDrivenSimulator } from "./event-sim";
 import { createLevelizedSimulator } from "./level-sim";
+import { connectionToNet } from "./rewrite";
 
 const deref = (state: CircuitState, net: Net): State => {
   const s = state[net];
@@ -31,7 +31,7 @@ export const initState = (circuit: Circuit): CircuitState => {
   for (const [id, mod] of circuit.modules.entries()) {
     const sig = circuit.signatures.get(mod.name)!;
 
-    for (const [pin, width] of join(Object.entries(sig.inputs), Object.entries(sig.outputs))) {
+    for (const [pin, width] of Iter.join(Object.entries(sig.inputs), Object.entries(sig.outputs))) {
       if (width === 1) {
         state[`${pin}:${id}`] = { type: 'const', value: 0, initialized: false };
       } else {
@@ -43,7 +43,7 @@ export const initState = (circuit: Circuit): CircuitState => {
   }
 
   for (const [id, node] of circuit.modules.entries()) {
-    for (const [pin, connections] of join(Object.entries(node.pins.in), Object.entries(node.pins.out))) {
+    for (const [pin, connections] of Iter.join(Object.entries(node.pins.in), Object.entries(node.pins.out))) {
       for (const conn of connections) {
         if (circuit.modules.get(conn.modId)!.name === '<consts>') {
           state[`${pin}:${id}`] = {

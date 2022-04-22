@@ -1,5 +1,5 @@
-import { Circuit, CircuitState, Connection, ModuleId, Net, RawConnection, State, Tuple } from "../core";
-import { filter, join } from "../utils";
+import { Circuit, ModuleId, Net, RawConnection } from "../core";
+import { Iter, mapObject } from "../utils";
 
 const isPrimitiveModule = ({ modules }: Circuit, modId: ModuleId) => modules.get(modId)!.simulate != null;
 
@@ -59,18 +59,8 @@ export const withoutCompoundModules = (circ: Circuit): Circuit => {
   for (const [modId, node] of circ.modules.entries()) {
     if (node.simulate != null) {
       const newPins = {
-        in: Object.fromEntries(
-          Object.entries(node.pins.in).map(([pin, conns]) => [
-            pin,
-            sourceNets(circ, conns.map(connectionToNet)).map(netToConnection)
-          ])
-        ),
-        out: Object.fromEntries(
-          Object.entries(node.pins.out).map(([pin, conns]) => [
-            pin,
-            sourceNets(circ, conns.map(connectionToNet)).map(netToConnection)
-          ])
-        ),
+        in: mapObject(node.pins.in, conns => sourceNets(circ, conns.map(connectionToNet)).map(netToConnection)),
+        out: mapObject(node.pins.out, conns => sourceNets(circ, conns.map(connectionToNet)).map(netToConnection)),
       };
 
       newCirc.modules.set(modId, {
@@ -80,7 +70,7 @@ export const withoutCompoundModules = (circ: Circuit): Circuit => {
     }
   }
 
-  for (const [net, io] of filter(circ.nets.entries(), ([, { id }]) => isPrimitiveModule(circ, id))) {
+  for (const [net, io] of Iter.filter(circ.nets.entries(), ([, { id }]) => isPrimitiveModule(circ, id))) {
     newCirc.nets.set(net, {
       in: sourceNets(circ, io.in),
       out: sourceNets(circ, io.out),

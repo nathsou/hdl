@@ -1,5 +1,5 @@
 import { Circuit, ModuleNode, RawConnection } from "./core";
-import { gen, join, joinWithEndingSep } from "./utils";
+import { Tuple, Iter, joinWithEndingSep } from "./utils";
 
 export const createGraphDotFile = (circuit: Circuit) => {
   const label = (c: RawConnection) => `"${c.pin}:${c.modId}"`;
@@ -7,12 +7,12 @@ export const createGraphDotFile = (circuit: Circuit) => {
 
   const subgraph = (mod: ModuleNode) => {
     const sig = circuit.signatures.get(mod.name)!;
-    const nodes = [...join(Object.entries(sig.inputs), Object.entries(sig.outputs))].flatMap(([pin, width]) => {
+    const nodes = [...Iter.join(Object.entries(sig.inputs), Object.entries(sig.outputs))].flatMap(([pin, width]) => {
       if (width === 1) {
         return [`"${pin}:${mod.id}" [label="${pin}"]`];
       }
 
-      return gen(width, n => `"${pin}${n}:${mod.id}" [label="${pin}${n}"]`);
+      return Tuple.gen(width, n => `"${pin}${n}:${mod.id}" [label="${pin}${n}"]`);
     });
 
     for (const [pin, connections] of Object.entries(mod.pins.in)) {

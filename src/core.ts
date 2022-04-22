@@ -1,5 +1,5 @@
 import { createBasicModules } from "./primitive-modules/basic";
-import { filter, join, last, pushRecord } from "./utils";
+import { Iter, last, mapObject, pushRecord, shallowEqualObject, Tuple } from "./utils";
 
 export type Circuit = {
   modules: CircuitModules,
@@ -30,6 +30,39 @@ export type ModuleWithMetadata<In extends Record<string, number>, Out extends Re
 
 export type State = 0 | 1;
 export type Connection = RawConnection | State;
+
+export const Connection = {
+  gen: <T, N extends number>(count: N, factory: (n: number) => T): MultiIO<N, T> => {
+    if (count === 1) {
+      return factory(0) as MultiIO<N, T>;
+    }
+
+    const result = Array<T>(count);
+
+    for (let i = 0; i < count; i++) {
+      result[i] = factory(i);
+    }
+
+    return result as MultiIO<N, T>;
+  },
+  forward: <
+    Pins extends keyof Mapping,
+    Mapping extends Record<Pins, Connection>,
+    Mods extends Module<Record<Pins, 1>, any>[]
+  >(
+    mapping: Mapping,
+    modules: Mods
+  ): void => {
+    const entries = Object.entries(mapping);
+
+    for (const mod of modules) {
+      for (const [pin, connection] of entries) {
+        /// @ts-ignore
+        mod.in[pin] = connection;
+      }
+    }
+  },
+};
 
 export type Num =
   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
@@ -78,9 +111,14 @@ export type NodeState = NodeStateConst | NodeStateRef;
 export type Net = string;
 export type CircuitState = Record<string, NodeState>;
 
-const globalState = {
+type GlobalState = {
+  nextId: number,
+  subModulesStack: ModuleNode[][],
+};
+
+const globalState: GlobalState = {
   nextId: 0,
-  subModulesStack: Array<ModuleNode[]>(),
+  subModulesStack: [],
 };
 
 const nextId = () => globalState.nextId++;
@@ -269,13 +307,8 @@ const _createModule = <
     });
   } else {
     const prevSig = circuit.signatures.get(mod.name)!;
-    const sameInputs =
-      Object.keys(mod.inputs).length === Object.keys(prevSig.inputs).length &&
-      Object.keys(mod.inputs).every(pin => prevSig.inputs[pin] === mod.inputs[pin]);
-
-    const sameOutputs =
-      Object.keys(mod.outputs).length === Object.keys(prevSig.outputs).length &&
-      Object.keys(mod.outputs).every(pin => prevSig.outputs[pin] === mod.outputs[pin]);
+    const sameInputs = shallowEqualObject(mod.inputs, prevSig.inputs);
+    const sameOutputs = shallowEqualObject(mod.outputs, prevSig.outputs);
 
     if (!sameInputs || !sameOutputs) {
       throw new Error(`Duplicate module definition with mismatching signature for '${mod.name}'`);
@@ -285,11 +318,11 @@ const _createModule = <
   return () => {
     const id = nextId();
     const pins: ModuleNode['pins'] = {
-      in: Object.fromEntries(Object.keys(mod.inputs).map(pin => [pin, []])),
-      out: Object.fromEntries(Object.keys(mod.outputs).map(pin => [pin, []])),
+      in: mapObject(mod.inputs, () => []),
+      out: mapObject(mod.outputs, () => []),
     };
 
-    for (const pin of join(Object.keys(mod.inputs), Object.keys(mod.outputs))) {
+    for (const pin of Iter.join(Object.keys(mod.inputs), Object.keys(mod.outputs))) {
       circuit.nets.set(`${pin}:${id}`, { in: [], out: [], id });
     }
 
@@ -348,7 +381,7 @@ const _createModule = <
 export const checkConnections = (topMod: Module<any, any>): void => {
   const { circuit, id: topModId } = metadata(topMod);
   // do not check connections for the top module and primitive modules
-  for (const mod of filter(circuit.modules.values(), m => m.id !== topModId && m.simulate == null)) {
+  for (const mod of Iter.filter(circuit.modules.values(), m => m.id !== topModId && m.simulate == null)) {
     const sig = circuit.signatures.get(mod.name)!;
     [true, false].forEach(isInput => {
       for (const [pin, width] of Object.entries(sig[isInput ? 'inputs' : 'outputs'])) {
@@ -408,71 +441,3 @@ export type ModuleDef<
   > =
   | PrimitiveModuleDef<In, Out, State>
   | CompoundModuleDef<In, Out>;
-
-export type Tuple<T, Len extends number> =
-  Len extends 0 ? [] :
-  Len extends 1 ? [T] :
-  Len extends 2 ? [T, T] :
-  Len extends 3 ? [T, T, T] :
-  Len extends 4 ? [T, T, T, T] :
-  Len extends 5 ? [T, T, T, T, T] :
-  Len extends 6 ? [...Tuple<T, 5>, T] :
-  Len extends 7 ? [...Tuple<T, 6>, T] :
-  Len extends 8 ? [...Tuple<T, 7>, T] :
-  Len extends 9 ? [...Tuple<T, 8>, T] :
-  Len extends 10 ? [...Tuple<T, 9>, T] :
-  Len extends 11 ? [...Tuple<T, 10>, T] :
-  Len extends 12 ? [...Tuple<T, 11>, T] :
-  Len extends 13 ? [...Tuple<T, 12>, T] :
-  Len extends 14 ? [...Tuple<T, 13>, T] :
-  Len extends 15 ? [...Tuple<T, 14>, T] :
-  Len extends 16 ? [...Tuple<T, 15>, T] :
-  Len extends 17 ? [...Tuple<T, 16>, T] :
-  Len extends 18 ? [...Tuple<T, 17>, T] :
-  Len extends 19 ? [...Tuple<T, 18>, T] :
-  Len extends 20 ? [...Tuple<T, 19>, T] :
-  Len extends 21 ? [...Tuple<T, 20>, T] :
-  Len extends 22 ? [...Tuple<T, 21>, T] :
-  Len extends 23 ? [...Tuple<T, 22>, T] :
-  Len extends 24 ? [...Tuple<T, 23>, T] :
-  Len extends 25 ? [...Tuple<T, 24>, T] :
-  Len extends 26 ? [...Tuple<T, 25>, T] :
-  Len extends 27 ? [...Tuple<T, 26>, T] :
-  Len extends 28 ? [...Tuple<T, 27>, T] :
-  Len extends 29 ? [...Tuple<T, 28>, T] :
-  Len extends 30 ? [...Tuple<T, 29>, T] :
-  Len extends 31 ? [...Tuple<T, 30>, T] :
-  Len extends 32 ? [...Tuple<T, 31>, T] :
-  Len extends 33 ? [...Tuple<T, 32>, T] :
-  Len extends 34 ? [...Tuple<T, 33>, T] :
-  Len extends 35 ? [...Tuple<T, 34>, T] :
-  Len extends 36 ? [...Tuple<T, 35>, T] :
-  Len extends 37 ? [...Tuple<T, 36>, T] :
-  Len extends 38 ? [...Tuple<T, 37>, T] :
-  Len extends 39 ? [...Tuple<T, 38>, T] :
-  Len extends 40 ? [...Tuple<T, 39>, T] :
-  Len extends 41 ? [...Tuple<T, 40>, T] :
-  Len extends 42 ? [...Tuple<T, 41>, T] :
-  Len extends 43 ? [...Tuple<T, 42>, T] :
-  Len extends 44 ? [...Tuple<T, 43>, T] :
-  Len extends 45 ? [...Tuple<T, 44>, T] :
-  Len extends 46 ? [...Tuple<T, 45>, T] :
-  Len extends 47 ? [...Tuple<T, 46>, T] :
-  Len extends 48 ? [...Tuple<T, 47>, T] :
-  Len extends 49 ? [...Tuple<T, 48>, T] :
-  Len extends 50 ? [...Tuple<T, 49>, T] :
-  Len extends 51 ? [...Tuple<T, 50>, T] :
-  Len extends 52 ? [...Tuple<T, 51>, T] :
-  Len extends 53 ? [...Tuple<T, 52>, T] :
-  Len extends 54 ? [...Tuple<T, 53>, T] :
-  Len extends 55 ? [...Tuple<T, 54>, T] :
-  Len extends 56 ? [...Tuple<T, 55>, T] :
-  Len extends 57 ? [...Tuple<T, 56>, T] :
-  Len extends 58 ? [...Tuple<T, 57>, T] :
-  Len extends 59 ? [...Tuple<T, 58>, T] :
-  Len extends 60 ? [...Tuple<T, 59>, T] :
-  Len extends 61 ? [...Tuple<T, 60>, T] :
-  Len extends 62 ? [...Tuple<T, 61>, T] :
-  Len extends 63 ? [...Tuple<T, 62>, T] :
-  Len extends 64 ? [...Tuple<T, 63>, T] :
-  T[];

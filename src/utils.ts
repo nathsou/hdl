@@ -1,14 +1,53 @@
-import { Connection, Module, MultiIO, State, Tuple } from "./core";
+import { State } from "./core";
 
-export function* join<T>(a: Iterable<T>, b: Iterable<T>): IterableIterator<T> {
-  for (const x of a) {
-    yield x;
-  }
+export const Iter = {
+  join: function* <T>(a: Iterable<T>, b: Iterable<T>): IterableIterator<T> {
+    for (const x of a) {
+      yield x;
+    }
 
-  for (const x of b) {
-    yield x;
-  }
-}
+    for (const x of b) {
+      yield x;
+    }
+  },
+  all: <T>(as: Iterable<T>, pred: (v: T) => boolean): boolean => {
+    for (const a of as) {
+      if (!pred(a)) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+  some: <T>(as: Iterable<T>, pred: (v: T) => boolean): boolean => {
+    for (const a of as) {
+      if (pred(a)) {
+        return true;
+      }
+    }
+
+    return false;
+  },
+  find: <T>(as: Iterable<T>, pred: (v: T) => boolean): T | undefined => {
+    for (const a of as) {
+      if (pred(a)) {
+        return a;
+      }
+    }
+  },
+  map: function* map<T, U>(as: Iterable<T>, f: (x: T) => U): IterableIterator<U> {
+    for (const a of as) {
+      yield f(a);
+    }
+  },
+  filter: function* filter<T>(as: Iterable<T>, pred: (x: T) => boolean): IterableIterator<T> {
+    for (const a of as) {
+      if (pred(a)) {
+        yield a;
+      }
+    }
+  },
+};
 
 export const joinWithEndingSep = (strs: string[], sep: string): string => {
   return strs.join(sep) + (strs.length > 0 ? sep : '');
@@ -18,48 +57,6 @@ export const swapRemove = <T>(values: T[], index: number): void => {
   [values[index], values[values.length - 1]] = [values[values.length - 1], values[index]];
   values.pop();
 };
-
-export const all = <T>(as: Iterable<T>, pred: (v: T) => boolean): boolean => {
-  for (const a of as) {
-    if (!pred(a)) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-export const some = <T>(as: Iterable<T>, pred: (v: T) => boolean): boolean => {
-  for (const a of as) {
-    if (pred(a)) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-export const find = <T>(as: Iterable<T>, pred: (v: T) => boolean): T | undefined => {
-  for (const a of as) {
-    if (pred(a)) {
-      return a;
-    }
-  }
-};
-
-export function* map<T, U>(as: Iterable<T>, f: (x: T) => U): IterableIterator<U> {
-  for (const a of as) {
-    yield f(a);
-  }
-}
-
-export function* filter<T>(as: Iterable<T>, pred: (x: T) => boolean): IterableIterator<T> {
-  for (const a of as) {
-    if (pred(a)) {
-      yield a;
-    }
-  }
-}
 
 export const complementarySet = <T>(set: Set<T>) => {
   return {
@@ -89,72 +86,114 @@ export const pushRecord = <T extends Record<K, V[]>, K extends string, V>(record
   }
 };
 
-export const gen = <N extends number, T>(count: N, factory: (n: number) => T): Tuple<T, N> => {
-  const result = [];
-  for (let i = 0; i < count; i++) {
-    result.push(factory(i));
-  }
-
-  return result as Tuple<T, N>;
+export const mapObject = <K extends string, V, T>(obj: Record<K, V>, f: (v: V, k: K) => T) => {
+  return Object.fromEntries(
+    (Object.entries<V>(obj) as [K, V][]).map(([k, v]) => [k, f(v, k)])
+  ) as Record<K, T>;
 };
 
-export const mapTuple = <N extends number, T, U>(values: Tuple<T, N>, f: (v: T) => U): Tuple<U, N> => {
-  return values.map(f) as Tuple<U, N>;
+export const shallowEqualObject = <V>(a: Record<string, V>, b: Record<string, V>): boolean => {
+  const keysa = Object.keys(a);
+  const keysb = Object.keys(b);
+
+  return keysa.length === keysb.length && keysa.every(k => a[k] === b[k]);
 };
 
-export const genConnections = <T, N extends number>(count: N, factory: (n: number) => T): MultiIO<N, T> => {
-  const result = Array<T>(count);
-  for (let i = 0; i < count; i++) {
-    result.push(factory(i));
-  }
-
-  if (count === 1) {
-    return result[0] as MultiIO<N, T>;
-  }
-
-  return result as MultiIO<N, T>;
-};
-
-export const rep4 = <T extends Connection>(c: T): Tuple<T, 4> => {
-  return [c, c, c, c];
-};
-
-export const rep8 = <T extends Connection>(c: T): Tuple<T, 8> => {
-  return [c, c, c, c, c, c, c, c];
-};
-
-export const high4 = <D extends [...Tuple<T, 4>, ...T[]], T>(data: D): Tuple<T, 4> => {
-  return [data[0], data[1], data[2], data[3]];
-};
-
-export const low4 = <D extends [...Tuple<T, 4>, ...T[]], T>(data: D): Tuple<T, 4> => {
-  const len = data.length;
-  return [data[len - 4], data[len - 3], data[len - 2], data[len - 1]];
-};
-
-export const bin = <W extends number>(n: number, width: W): Tuple<State, W> => {
-  return n
-    .toString(2)
-    .slice(0, width)
-    .padStart(width, '0')
-    .split('')
-    .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
-};
-
-export const forwardInputs = <
-  Pins extends keyof Mapping,
-  Mapping extends Record<Pins, Connection>,
-  Mods extends Module<Record<Pins, 1>, any>[]
->(
-  mapping: Mapping,
-  modules: Mods
-): void => {
-  const entries = Object.entries(mapping);
-
-  for (const mod of modules) {
-    for (const [pin, connection] of entries) {
-      /// @ts-ignore
-      mod.in[pin] = connection;
+export const Tuple = {
+  map: <N extends number, T, U>(values: Tuple<T, N>, f: (v: T) => U): Tuple<U, N> => {
+    return values.map(f) as Tuple<U, N>;
+  },
+  gen: <N extends number, T>(count: N, factory: (n: number) => T): Tuple<T, N> => {
+    const result = Array<T>();
+    for (let i = 0; i < count; i++) {
+      result[i] = factory(i);
     }
-  }
+
+    return result as Tuple<T, N>;
+  },
+  rep: <T, N extends number>(count: N, c: T): Tuple<T, N> => {
+    return Tuple.gen(count, () => c);
+  },
+  low: <T, N extends number, Vs extends Tuple<T, N>>(count: N, values: Vs): Tuple<T, N> => {
+    return Tuple.gen(count, i => values[values.length - count - i]);
+  },
+  high: <T, N extends number, Vs extends Tuple<T, N>>(count: N, values: Vs): Tuple<T, N> => {
+    return Tuple.gen(count, i => values[i]);
+  },
+  bin: <W extends number>(n: number | bigint, width: W): Tuple<State, W> => {
+    return n
+      .toString(2)
+      .slice(0, width)
+      .padStart(width, '0')
+      .split('')
+      .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
+  },
 };
+
+export type Tuple<T, Len extends number> =
+  Len extends 0 ? [] :
+  Len extends 1 ? [T] :
+  Len extends 2 ? [T, T] :
+  Len extends 3 ? [T, T, T] :
+  Len extends 4 ? [T, T, T, T] :
+  Len extends 5 ? [T, T, T, T, T] :
+  Len extends 6 ? [...Tuple<T, 5>, T] :
+  Len extends 7 ? [...Tuple<T, 6>, T] :
+  Len extends 8 ? [...Tuple<T, 7>, T] :
+  Len extends 9 ? [...Tuple<T, 8>, T] :
+  Len extends 10 ? [...Tuple<T, 9>, T] :
+  Len extends 11 ? [...Tuple<T, 10>, T] :
+  Len extends 12 ? [...Tuple<T, 11>, T] :
+  Len extends 13 ? [...Tuple<T, 12>, T] :
+  Len extends 14 ? [...Tuple<T, 13>, T] :
+  Len extends 15 ? [...Tuple<T, 14>, T] :
+  Len extends 16 ? [...Tuple<T, 15>, T] :
+  Len extends 17 ? [...Tuple<T, 16>, T] :
+  Len extends 18 ? [...Tuple<T, 17>, T] :
+  Len extends 19 ? [...Tuple<T, 18>, T] :
+  Len extends 20 ? [...Tuple<T, 19>, T] :
+  Len extends 21 ? [...Tuple<T, 20>, T] :
+  Len extends 22 ? [...Tuple<T, 21>, T] :
+  Len extends 23 ? [...Tuple<T, 22>, T] :
+  Len extends 24 ? [...Tuple<T, 23>, T] :
+  Len extends 25 ? [...Tuple<T, 24>, T] :
+  Len extends 26 ? [...Tuple<T, 25>, T] :
+  Len extends 27 ? [...Tuple<T, 26>, T] :
+  Len extends 28 ? [...Tuple<T, 27>, T] :
+  Len extends 29 ? [...Tuple<T, 28>, T] :
+  Len extends 30 ? [...Tuple<T, 29>, T] :
+  Len extends 31 ? [...Tuple<T, 30>, T] :
+  Len extends 32 ? [...Tuple<T, 31>, T] :
+  Len extends 33 ? [...Tuple<T, 32>, T] :
+  Len extends 34 ? [...Tuple<T, 33>, T] :
+  Len extends 35 ? [...Tuple<T, 34>, T] :
+  Len extends 36 ? [...Tuple<T, 35>, T] :
+  Len extends 37 ? [...Tuple<T, 36>, T] :
+  Len extends 38 ? [...Tuple<T, 37>, T] :
+  Len extends 39 ? [...Tuple<T, 38>, T] :
+  Len extends 40 ? [...Tuple<T, 39>, T] :
+  Len extends 41 ? [...Tuple<T, 40>, T] :
+  Len extends 42 ? [...Tuple<T, 41>, T] :
+  Len extends 43 ? [...Tuple<T, 42>, T] :
+  Len extends 44 ? [...Tuple<T, 43>, T] :
+  Len extends 45 ? [...Tuple<T, 44>, T] :
+  Len extends 46 ? [...Tuple<T, 45>, T] :
+  Len extends 47 ? [...Tuple<T, 46>, T] :
+  Len extends 48 ? [...Tuple<T, 47>, T] :
+  Len extends 49 ? [...Tuple<T, 48>, T] :
+  Len extends 50 ? [...Tuple<T, 49>, T] :
+  Len extends 51 ? [...Tuple<T, 50>, T] :
+  Len extends 52 ? [...Tuple<T, 51>, T] :
+  Len extends 53 ? [...Tuple<T, 52>, T] :
+  Len extends 54 ? [...Tuple<T, 53>, T] :
+  Len extends 55 ? [...Tuple<T, 54>, T] :
+  Len extends 56 ? [...Tuple<T, 55>, T] :
+  Len extends 57 ? [...Tuple<T, 56>, T] :
+  Len extends 58 ? [...Tuple<T, 57>, T] :
+  Len extends 59 ? [...Tuple<T, 58>, T] :
+  Len extends 60 ? [...Tuple<T, 59>, T] :
+  Len extends 61 ? [...Tuple<T, 60>, T] :
+  Len extends 62 ? [...Tuple<T, 61>, T] :
+  Len extends 63 ? [...Tuple<T, 62>, T] :
+  Len extends 64 ? [...Tuple<T, 63>, T] :
+  T[];

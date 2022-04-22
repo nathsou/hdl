@@ -1,6 +1,6 @@
 import { checkConnections, Circuit, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
 import { withoutCompoundModules } from "./rewrite";
-import { all, complementarySet } from "../utils";
+import { Iter, complementarySet } from "../utils";
 import { createState, SimulationData, simulationHandler, Simulator } from "./sim";
 
 export const levelize = (circuit: Circuit) => {
@@ -31,7 +31,7 @@ export const levelize = (circuit: Circuit) => {
 
     for (const gateId of remainingGates) {
       const deps = dependencies.get(gateId)!;
-      if (all(deps, id => readyGates.has(id))) {
+      if (Iter.all(deps, id => readyGates.has(id))) {
         newlyReadyGates.push(gateId);
       }
     }

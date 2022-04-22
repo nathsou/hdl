@@ -1,8 +1,9 @@
 import { createCircuit } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
-import { bin } from "../src/utils";
+import { Tuple } from "../src/utils";
 
 const { createModule, primitives: { arith } } = createCircuit();
+const { bin } = Tuple;
 
 const N = 32;
 

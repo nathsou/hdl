@@ -1,7 +1,7 @@
 import Queue from 'mnemonist/queue';
 import { checkConnections, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
 import { targetPrimitiveMods, withoutCompoundModules } from './rewrite';
-import { gen, map, some, uniq } from "../utils";
+import { Tuple, Iter, uniq } from "../utils";
 import { createState, SimulationData, simulationHandler, Simulator } from './sim';
 
 type SimEvent = {
@@ -20,7 +20,7 @@ export const createEventDrivenSimulator = <
   const eventQueue = new Queue<SimEvent>();
   const gateQueue = new Queue<ModuleId>();
   const fanouts = new Map<Net, any>(
-    map(circuit.nets.entries(), ([net, { out }]) => [
+    Iter.map(circuit.nets.entries(), ([net, { out }]) => [
       net,
       uniq(targetPrimitiveMods(circuit, out))
     ])
@@ -80,7 +80,7 @@ export const createEventDrivenSimulator = <
       state.raw[event.net].initialized = true;
 
       for (const modId of fanouts.get(event.net)!) {
-        if (!some(gateQueue, id => id === modId)) {
+        if (!Iter.some(gateQueue, id => id === modId)) {
           gateQueue.enqueue(modId);
         }
       }
@@ -94,7 +94,7 @@ export const createEventDrivenSimulator = <
   const inputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, true));
   const outputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, false));
 
-  const outputNets = new Map(map(primCircuit.modules.values(), mod => {
+  const outputNets = new Map(Iter.map(primCircuit.modules.values(), mod => {
     const outputNets: string[] = [];
     const sig = primCircuit.signatures.get(mod.name)!.outputs;
 
@@ -104,7 +104,7 @@ export const createEventDrivenSimulator = <
       if (width === 1) {
         outputNets.push(`${pin}:${mod.id}`);
       } else {
-        outputNets.push(...gen(width, n => `${pin}${n}:${mod.id}`));
+        outputNets.push(...Tuple.gen(width, n => `${pin}${n}:${mod.id}`));
       }
     }
 

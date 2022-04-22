@@ -1,5 +1,5 @@
-import { Circuit, createModule, Multi } from "../core";
-import { gen, genConnections, last } from "../utils";
+import { Circuit, createModule, Multi, Connection } from "../core";
+import { Tuple, last } from "../utils";
 import { GateModules } from "./gates";
 
 export type ArithmeticModules = ReturnType<typeof createArith>;
@@ -54,18 +54,15 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
     inputs: { a: N, b: N, carry_in: 1 },
     outputs: { sum: N, carry_out: 1 },
     connect(inp, out) {
-      const adders = gen(N, fullAdder);
+      const adders = Tuple.gen(N, fullAdder);
 
       for (let i = 0; i < N; i++) {
         adders[i].in.carry_in = i === 0 ? inp.carry_in : adders[i - 1].out.carry_out;
-        // @ts-ignore
         adders[i].in.a = inp.a[N - 1 - i];
-        // @ts-ignore
         adders[i].in.b = inp.b[N - 1 - i];
       }
 
-      // @ts-ignore
-      out.sum = gen(N, i => adders[N - 1 - i].out.sum);
+      out.sum = Connection.gen(N, i => adders[N - 1 - i].out.sum);
       out.carry_out = last(adders).out.carry_out;
     },
   }, circ);
@@ -78,7 +75,7 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
       const adder = adderN(N)();
       const xors = gates.xorN(N);
 
-      xors.in.a = genConnections(N, () => inp.subtract);
+      xors.in.a = Connection.gen(N, () => inp.subtract);
       xors.in.b = inp.b;
 
       adder.in.carry_in = inp.subtract;
