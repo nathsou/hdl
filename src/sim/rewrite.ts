@@ -3,26 +3,22 @@ import { Iter, mapObject } from "../utils";
 
 const isPrimitiveModule = ({ modules }: Circuit, modId: ModuleId) => modules.get(modId)!.simulate != null;
 
-const sourceNet = (circ: Circuit, net: string): string => {
-  const { id, in: inp } = circ.nets.get(net)!;
-
-  if (inp.length > 1) {
-    throw new Error(`Multiple input pins for net '${net}'`);
-  }
-
-  if (isPrimitiveModule(circ, id)) {
-    return net;
-  }
-
-  if (inp.length === 0) {
-    return net;
-  }
-
-  return sourceNet(circ, inp[0]);
-};
-
 export const sourceNets = (circ: Circuit, nets: string[]): string[] => {
-  return nets.map(net => sourceNet(circ, net));
+  const aux = (circ: Circuit, net: string): string[] => {
+    const { id, in: inp } = circ.nets.get(net)!;
+
+    if (isPrimitiveModule(circ, id)) {
+      return [net];
+    }
+
+    if (inp.length === 0) {
+      return [net];
+    }
+
+    return aux(circ, inp[0]);
+  };
+
+  return nets.flatMap(net => aux(circ, net));
 };
 
 const targetPrimitiveModsAux = (circ: Circuit, net: string): ModuleId[] => {

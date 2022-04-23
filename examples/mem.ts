@@ -10,7 +10,7 @@ const top = createModule({
   inputs: { clk: 1 },
   outputs: { leds: N },
   connect(inp, out) {
-    const counter = regs.counterN(N);
+    const counter = regs.jkCounterN(N);
 
     counter.in.clk = inp.clk;
     counter.in.count_enable = 1;

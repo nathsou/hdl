@@ -1,5 +1,5 @@
 import Queue from 'mnemonist/queue';
-import { checkConnections, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
+import { checkConnections, MapStates, metadata, Module, ModuleId, Net, NodeStateConst, State } from "../core";
 import { targetPrimitiveMods, withoutCompoundModules } from './rewrite';
 import { Tuple, Iter, uniq } from "../utils";
 import { createState, SimulationData, simulationHandler, Simulator } from './sim';
@@ -65,7 +65,7 @@ export const createEventDrivenSimulator = <
     }
 
     for (const [net, newState] of inputNets) {
-      if (state.deref(net) !== newState || !state.raw[net].initialized) {
+      if (state.deref(net) !== newState || state.raw[net].changed) {
         eventQueue.enqueue({ net, newState });
       }
     }
@@ -77,7 +77,7 @@ export const createEventDrivenSimulator = <
     while (eventQueue.size > 0) {
       const event = eventQueue.dequeue()!;
       state.write(event.net, event.newState);
-      state.raw[event.net].initialized = true;
+      state.raw[event.net].changed = false;
 
       for (const modId of fanouts.get(event.net)!) {
         if (!Iter.some(gateQueue, id => id === modId)) {
@@ -116,16 +116,16 @@ export const createEventDrivenSimulator = <
       const modId = gateQueue.dequeue()!;
       const mod = primCircuit.modules.get(modId)!;
       const outNets = outputNets.get(modId)!;
-      const prevOutput = outNets.map(net => state.deref(net));
       simData.mod = mod;
 
       mod.simulate!(inputs, outputs, mod.state!);
 
       for (let i = 0; i < outNets.length; i++) {
         const net = outNets[i];
-        const newOutput = state.deref(net);
-        if (prevOutput[i] !== newOutput || !state.raw[net].initialized) {
-          eventQueue.enqueue({ net, newState: newOutput });
+        const sta = state.raw[net] as NodeStateConst;
+        if (sta.changed) {
+          eventQueue.enqueue({ net, newState: sta.value });
+          sta.changed = false;
         }
       }
     }

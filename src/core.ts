@@ -47,8 +47,8 @@ export const Connection = {
   },
   forward: <
     Pins extends keyof Mapping,
-    Mapping extends Record<Pins, Connection>,
-    Mods extends Module<Record<Pins, 1>, any>[]
+    Mapping extends Record<Pins, MultiIO<number, Connection>>,
+    Mods extends Module<Record<Pins, number>, any>[]
   >(
     mapping: Mapping,
     modules: Mods
@@ -105,8 +105,8 @@ export type ModuleNode = {
   state?: object,
 };
 
-export type NodeStateConst = { type: 'const', value: 0 | 1, initialized: boolean };
-export type NodeStateRef = { type: 'ref', ref: Net, initialized: boolean };
+export type NodeStateConst = { type: 'const', value: 0 | 1, changed: boolean };
+export type NodeStateRef = { type: 'ref', ref: Net, changed: boolean };
 export type NodeState = NodeStateConst | NodeStateRef;
 export type Net = string;
 export type CircuitState = Record<string, NodeState>;
@@ -184,6 +184,14 @@ export const createCircuit = () => {
     primitives: createBasicModules(circuit),
   };
 };
+
+// const createWire = <Name extends string, W extends Num>(
+//   name: Name,
+//   width: Num,
+//   circuit: Circuit
+// ): MultiIO<W, RawConnection> => {
+
+// };
 
 export const createPrimitiveModule = <
   In extends Record<string, Num>,
@@ -397,7 +405,7 @@ export const checkConnections = (topMod: Module<any, any>): void => {
 
         for (const pin of pins) {
           const connections = mod.pins[isInput ? 'in' : 'out'][pin];
-          if (!Array.isArray(connections) || connections.length !== 1) {
+          if (!Array.isArray(connections) || connections.length === 0) {
             throw new Error(`Unconnected ${isInput ? 'input' : 'output'} pin '${pin}' in module '${mod.name}'`);
           }
         }
