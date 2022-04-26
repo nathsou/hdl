@@ -47,6 +47,17 @@ export const Iter = {
       }
     }
   },
+  max: (as: Iterable<number>): number => {
+    let currentMax = -Infinity;
+
+    for (const a of as) {
+      if (a > currentMax) {
+        currentMax = a;
+      }
+    }
+
+    return currentMax;
+  },
 };
 
 export const joinWithEndingSep = (strs: string[], sep: string): string => {

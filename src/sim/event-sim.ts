@@ -1,7 +1,8 @@
+import CircularBuffer from 'mnemonist/circular-buffer';
 import Queue from 'mnemonist/queue';
 import { checkConnections, MapStates, metadata, Module, ModuleId, Net, NodeStateConst, State } from "../core";
+import { Iter, uniq } from "../utils";
 import { targetPrimitiveMods, withoutCompoundModules } from './rewrite';
-import { Tuple, Iter, uniq } from "../utils";
 import { createState, SimulationData, simulationHandler, Simulator } from './sim';
 
 type SimEvent = {
@@ -18,8 +19,13 @@ export const createEventDrivenSimulator = <
   const state = createState(circuit);
   const primCircuit = withoutCompoundModules(circuit);
   const eventQueue = new Queue<SimEvent>();
-  const gateQueue = new Queue<ModuleId>();
-  const fanouts = new Map<Net, any>(
+  const maxModId = circuit.modules.size - 1;
+  const moduleQueue = new CircularBuffer<ModuleId>(
+    maxModId < 256 ? Uint8Array : maxModId < 65536 ? Uint16Array : Uint32Array,
+    primCircuit.modules.size
+  );
+  const modulesInQueue = new Set<ModuleId>();
+  const fanouts = new Map<Net, ModuleId[]>(
     Iter.map(circuit.nets.entries(), ([net, { out }]) => [
       net,
       uniq(targetPrimitiveMods(circuit, out))
@@ -65,7 +71,8 @@ export const createEventDrivenSimulator = <
     }
 
     for (const [net, newState] of inputNets) {
-      if (state.deref(net) !== newState || state.raw[net].changed) {
+      const sta = state.raw[net] as NodeStateConst;
+      if (sta.value !== newState || !sta.initialized) {
         eventQueue.enqueue({ net, newState });
       }
     }
@@ -76,66 +83,49 @@ export const createEventDrivenSimulator = <
   const processEvents = () => {
     while (eventQueue.size > 0) {
       const event = eventQueue.dequeue()!;
-      state.write(event.net, event.newState);
-      state.raw[event.net].changed = false;
+      const sta = state.raw[event.net] as NodeStateConst;
+      sta.value = event.newState;
+      sta.initialized = true;
+      sta.changed = false;
 
-      for (const modId of fanouts.get(event.net)!) {
-        if (!Iter.some(gateQueue, id => id === modId)) {
-          gateQueue.enqueue(modId);
+      const fanout = fanouts.get(event.net)!;
+      for (let i = 0; i < fanout.length; i++) {
+        let modId = fanout[i];
+        if (!modulesInQueue.has(modId)) {
+          modulesInQueue.add(modId);
+          moduleQueue.unshift(modId);
         }
       }
     }
+
+    modulesInQueue.clear();
   };
 
   const simData: SimulationData = {
     mod: circuit.modules.get(topId)!,
   };
 
-  const inputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, true));
-  const outputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, false));
+  const onStateChange = (net: Net, newState: State): void => {
+    eventQueue.enqueue({ net, newState });
+  };
 
-  const outputNets = new Map(Iter.map(primCircuit.modules.values(), mod => {
-    const outputNets: string[] = [];
-    const sig = primCircuit.signatures.get(mod.name)!.outputs;
+  const inputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, true, onStateChange));
+  const outputs = new Proxy({}, simulationHandler(circuit, state.raw, simData, false, onStateChange));
 
-    for (const pin of Object.keys(mod.pins.out)) {
-      const width = sig[pin];
-
-      if (width === 1) {
-        outputNets.push(`${pin}:${mod.id}`);
-      } else {
-        outputNets.push(...Tuple.gen(width, n => `${pin}${n}:${mod.id}`));
-      }
-    }
-
-    return [mod.id, outputNets];
-  }));
-
-  const processGates = () => {
-    while (gateQueue.size > 0) {
-      const modId = gateQueue.dequeue()!;
+  const processModules = () => {
+    while (moduleQueue.size > 0) {
+      const modId = moduleQueue.pop()!;
       const mod = primCircuit.modules.get(modId)!;
-      const outNets = outputNets.get(modId)!;
       simData.mod = mod;
-
       mod.simulate!(inputs, outputs, mod.state!);
-
-      for (let i = 0; i < outNets.length; i++) {
-        const net = outNets[i];
-        const sta = state.raw[net] as NodeStateConst;
-        if (sta.changed) {
-          eventQueue.enqueue({ net, newState: sta.value });
-          sta.changed = false;
-        }
-      }
     }
   };
 
   const loop = () => {
     while (eventQueue.size > 0) {
       processEvents();
-      if (gateQueue.size > 0) {
-        processGates();
+      if (moduleQueue.size > 0) {
+        processModules();
       }
     }
   };

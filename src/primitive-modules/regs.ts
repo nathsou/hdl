@@ -75,11 +75,14 @@ export const createRegisters = (
     },
   }, circ);
 
-  const regN = <N extends Multi>(N: N) => createPrimitiveModule({
+  const regN = <N extends Multi>(
+    N: N,
+    initialData = Connection.gen<State, N>(N, () => 0)
+  ) => createPrimitiveModule({
     name: `reg${N}`,
     inputs: { d: N, load: 1, clk: 1 },
     outputs: { q: N },
-    state: { data: Connection.gen<State, N>(N, () => 0), last_clk: 0 },
+    state: { data: initialData, last_clk: 0 },
     simulate(inp, out, state) {
       const rising = inp.clk && !state.last_clk;
 

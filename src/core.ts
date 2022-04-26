@@ -105,8 +105,8 @@ export type ModuleNode = {
   state?: object,
 };
 
-export type NodeStateConst = { type: 'const', value: 0 | 1, changed: boolean };
-export type NodeStateRef = { type: 'ref', ref: Net, changed: boolean };
+export type NodeStateConst = { type: 'const', value: State, initialized: boolean, changed: boolean };
+export type NodeStateRef = { type: 'ref', ref: Net };
 export type NodeState = NodeStateConst | NodeStateRef;
 export type Net = string;
 export type CircuitState = Record<string, NodeState>;
