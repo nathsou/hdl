@@ -105,7 +105,7 @@ export type ModuleNode = {
   state?: object,
 };
 
-export type NodeStateConst = { type: 'const', value: State, initialized: boolean, changed: boolean };
+export type NodeStateConst = { type: 'const', value: State, initialized: boolean };
 export type NodeStateRef = { type: 'ref', ref: Net };
 export type NodeState = NodeStateConst | NodeStateRef;
 export type Net = string;
@@ -184,14 +184,6 @@ export const createCircuit = () => {
     primitives: createBasicModules(circuit),
   };
 };
-
-// const createWire = <Name extends string, W extends Num>(
-//   name: Name,
-//   width: Num,
-//   circuit: Circuit
-// ): MultiIO<W, RawConnection> => {
-
-// };
 
 export const createPrimitiveModule = <
   In extends Record<string, Num>,

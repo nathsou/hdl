@@ -33,10 +33,10 @@ export const initState = (circuit: Circuit): CircuitState => {
 
     for (const [pin, width] of Iter.join(Object.entries(sig.inputs), Object.entries(sig.outputs))) {
       if (width === 1) {
-        state[`${pin}:${id}`] = { type: 'const', value: 0, initialized: false, changed: false };
+        state[`${pin}:${id}`] = { type: 'const', value: 0, initialized: false };
       } else {
         for (let n = 0; n < width; n++) {
-          state[`${pin}${width - n - 1}:${id}`] = { type: 'const', value: 0, initialized: false, changed: false };
+          state[`${pin}${width - n - 1}:${id}`] = { type: 'const', value: 0, initialized: false };
         }
       }
     }
@@ -50,7 +50,6 @@ export const initState = (circuit: Circuit): CircuitState => {
             type: 'const',
             value: conn.pin === 'vcc' ? 1 : 0,
             initialized: false,
-            changed: false,
           };
         } else {
           state[`${pin}:${id}`] = {
@@ -114,21 +113,35 @@ export const createSimulator = <
   return simulatorMapping[approach](top);
 };
 
-const overwriteState = (
-  state: CircuitState,
-  net: Net,
-  newState: State,
-  onStateChange?: (net: Net, newState: State) => void
-) => {
-  const node = state[net] as NodeStateConst;
+type StateUpdater = (state: CircuitState, net: Net, newState: State) => void;
 
-  if (onStateChange != null && ((!node.changed && node.value !== newState) || !node.initialized)) {
-    node.changed = true;
-    node.value = newState;
-    onStateChange(net, newState);
-  } else {
-    node.value = newState;
+const createStateUpdater = (onStateChange?: (net: Net, newState: State) => void): StateUpdater => {
+  if (onStateChange != null) {
+    return (
+      state: CircuitState,
+      net: Net,
+      newState: State
+    ) => {
+      const node = state[net] as NodeStateConst;
+
+      if (!node.initialized) {
+        node.value = newState;
+        node.initialized = true;
+        onStateChange(net, newState);
+      } else if (node.value !== newState) {
+        onStateChange(net, newState);
+      }
+    };
   }
+
+  return (
+    state: CircuitState,
+    net: Net,
+    newState: State
+  ) => {
+    const node = state[net] as NodeStateConst;
+    node.value = newState;
+  };
 };
 
 export type SimulationData = { mod: ModuleNode };
@@ -140,6 +153,8 @@ export const simulationHandler = (
   isInput: boolean,
   onStateChange?: (net: Net, newState: State) => void
 ): ProxyHandler<any> => {
+  const updateState = createStateUpdater(onStateChange);
+
   return {
     get: (_, pin) => {
       if (typeof pin !== 'string') {
@@ -176,14 +191,14 @@ export const simulationHandler = (
       }
 
       if (value === 0 || value === 1) {
-        overwriteState(state, `${pin}:${data.mod.id}`, value, onStateChange);
+        updateState(state, `${pin}:${data.mod.id}`, value);
         return true;
       }
 
       if (Array.isArray(value)) {
         value.forEach((v, n) => {
           if (v === 0 || v === 1) {
-            overwriteState(state, `${pin}${expectedWidth - n - 1}:${data.mod.id}`, v, onStateChange);
+            updateState(state, `${pin}${expectedWidth - n - 1}:${data.mod.id}`, v);
           } else {
             throw new Error(`Invalid node state for ${data.mod.name}:${data.mod.id}.${prefix}.${pin}`);
           }

@@ -85,8 +85,6 @@ export const createEventDrivenSimulator = <
       const event = eventQueue.dequeue()!;
       const sta = state.raw[event.net] as NodeStateConst;
       sta.value = event.newState;
-      sta.initialized = true;
-      sta.changed = false;
 
       const fanout = fanouts.get(event.net)!;
       for (let i = 0; i < fanout.length; i++) {

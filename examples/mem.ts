@@ -24,7 +24,7 @@ const main = () => {
   const mod = top();
   const sim = createSimulator(mod);
 
-  for (let i = 0; i < 2 ** N - 1; i++) {
+  for (let i = 0; i < 2 ** N; i++) {
     sim.input({ clk: 0 });
     sim.input({ clk: 1 });
     console.log(sim.state.read(mod.out.leds).join(''));
