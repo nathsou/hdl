@@ -176,11 +176,16 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     }
 
     if (!isExhaustive) {
-      const isMatched = or(...isMatchedOrs);
-      const isNotMatched = not(isMatched);
       const defaultValue = (cases as { _: MultiIO<N> })['_'];
       const defaultValueArray = MultiIO.asArray(defaultValue);
-      ors.push(defaultValueArray.map(c => and(isNotMatched, c)) as Tuple<Connection, N>);
+
+      if (casesExceptDefault.length > 0) {
+        const isMatched = or(...isMatchedOrs);
+        const isNotMatched = not(isMatched);
+        ors.push(defaultValueArray.map(c => and(isNotMatched, c)) as Tuple<Connection, N>);
+      } else {
+        ors.push(defaultValueArray as Tuple<Connection, N>);
+      }
     }
 
     return Connection.gen<Connection, N>(ors[0].length as N, i => or(...ors.map(o => o[i])));
