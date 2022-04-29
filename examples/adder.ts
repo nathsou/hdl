@@ -12,7 +12,7 @@ const top = createModule({
   inputs: { a: N, b: N, subtract: 1 },
   outputs: { leds: N, overflow: 1 },
   connect(inp, out) {
-    const adder = arith.adderSubtractorN(N);
+    const adder = arith.adderSubtractor(N);
 
     adder.in.a = inp.a;
     adder.in.b = inp.b;

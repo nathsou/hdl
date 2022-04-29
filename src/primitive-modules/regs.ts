@@ -1,4 +1,4 @@
-import { Circuit, createModule, createPrimitiveModule, State, Multi, Connection } from "../core";
+import { Circuit, Connection, createModule, createPrimitiveModule, Multi, MultiIO, State } from "../core";
 import { Tuple } from "../utils";
 import { ArithmeticModules } from "./arith";
 import { GateModules } from "./gates";
@@ -7,9 +7,9 @@ import { MemoryModules } from "./mem";
 export const createRegisters = (
   circ: Circuit, { and }: GateModules,
   { leaderFollowerJKFlipFlop: jkFF }: MemoryModules,
-  { adderN }: ArithmeticModules
+  arith: ArithmeticModules
 ) => {
-  const jkCounterN = <N extends Multi>(N: N) => createModule({
+  const jkCounter = <N extends Multi>(N: N) => createModule({
     name: `jk_counter${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
@@ -36,30 +36,30 @@ export const createRegisters = (
     },
   }, circ);
 
-  const counterN = <N extends Multi>(N: N) => createModule({
+  const counter = <N extends Multi>(N: N) => createModule({
     name: `counter${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
     connect(inp, out) {
-      const adder = adderN(N);
-      const reg = regN(N)();
+      const adder = arith.adder(N);
+      const count = reg(N)();
 
-      reg.in.clk = inp.clk;
-      reg.in.load = inp.count_enable;
+      count.in.clk = inp.clk;
+      count.in.load = inp.count_enable;
       adder.in.carry_in = inp.count_enable;
-      adder.in.a = reg.out.q;
-      adder.in.b = Connection.gen(N, () => 0);
-      reg.in.d = adder.out.sum;
+      adder.in.a = count.out.q;
+      adder.in.b = Connection.gen(N, () => State.zero);
+      count.in.d = adder.out.sum;
 
-      out.q = reg.out.q;
+      out.q = count.out.q;
     },
   }, circ);
 
-  const counterSimN = <N extends Multi>(N: N) => createPrimitiveModule({
+  const counterSim = <N extends Multi>(N: N) => createPrimitiveModule({
     name: `counter_sim${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
-    state: { bits: Connection.gen<State, N>(N, () => 0), last_clk: 0 },
+    state: { bits: Connection.gen(N, () => State.zero), last_clk: 0 },
     simulate(inp, out, state) {
       const rising = state.last_clk === 0 && inp.clk;
       if (inp.count_enable && rising) {
@@ -75,10 +75,9 @@ export const createRegisters = (
     },
   }, circ);
 
-  const regN = <N extends Multi>(
-    N: N,
-    initialData = Connection.gen<State, N>(N, () => 0)
-  ) => createPrimitiveModule({
+  const reg = <N extends Multi>(
+    N: N
+  ) => (initialData = Connection.gen(N, () => State.zero)) => createPrimitiveModule({
     name: `reg${N}`,
     inputs: { d: N, load: 1, clk: 1 },
     outputs: { q: N },
@@ -88,21 +87,21 @@ export const createRegisters = (
 
       if (rising && inp.load) {
         state.data = inp.d;
-        out.q = state.data;
       }
 
       state.last_clk = inp.clk;
+      out.q = state.data;
     },
-  }, circ);
+  }, circ)();
 
   return {
-    counterN: <N extends Multi>(N: N) => counterN(N)(),
-    jkCounterN: <N extends Multi>(N: N) => jkCounterN(N)(),
-    counterSimN: <N extends Multi>(N: N) => counterSimN(N)(),
-    reg2: regN(2),
-    reg4: regN(4),
-    reg8: regN(8),
-    reg16: regN(16),
-    regN: <N extends Multi>(N: N) => regN(N)(),
+    counter: <N extends Multi>(N: N) => counter(N)(),
+    jkCounter: <N extends Multi>(N: N) => jkCounter(N)(),
+    counterSim: <N extends Multi>(N: N) => counterSim(N)(),
+    reg2: reg(2),
+    reg4: reg(4),
+    reg8: reg(8),
+    reg16: reg(16),
+    reg: <N extends Multi>(N: N, initialData?: MultiIO<N, State>) => reg(N)(initialData),
   };
 };

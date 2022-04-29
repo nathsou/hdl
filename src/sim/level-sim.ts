@@ -1,10 +1,10 @@
 import { checkConnections, Circuit, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
-import { withoutCompoundModules } from "./rewrite";
+import { keepPrimitiveModules } from "./rewrite";
 import { Iter, complementarySet } from "../utils";
 import { createState, SimulationData, simulationHandler, Simulator } from "./sim";
 
 export const levelize = (circuit: Circuit) => {
-  const { modules: gates } = withoutCompoundModules(circuit);
+  const { modules: gates } = keepPrimitiveModules(circuit);
 
   const remainingGates = new Set<ModuleId>();
   const readyGates = complementarySet(remainingGates);

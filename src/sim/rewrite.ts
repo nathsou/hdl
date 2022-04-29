@@ -44,11 +44,11 @@ export const connectionToNet = (c: RawConnection): Net => {
   return `${c.pin}:${c.modId}`;
 };
 
-export const withoutCompoundModules = (circ: Circuit): Circuit => {
+export const keepPrimitiveModules = (circ: Circuit): Circuit => {
   const newCirc: Circuit = {
     modules: new Map(),
     nets: new Map(),
-    signatures: circ.signatures,
+    signatures: new Map(),
   };
 
   // only keep primitive modules
@@ -72,6 +72,12 @@ export const withoutCompoundModules = (circ: Circuit): Circuit => {
       out: sourceNets(circ, io.out),
       id: io.id,
     });
+  }
+
+  const presentModuleNames = new Set(Iter.map(newCirc.modules.values(), m => m.name));
+
+  for (const moduleName of presentModuleNames) {
+    newCirc.signatures.set(moduleName, circ.signatures.get(moduleName)!);
   }
 
   return newCirc;

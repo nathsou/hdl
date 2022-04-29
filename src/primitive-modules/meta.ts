@@ -1,11 +1,11 @@
-import { Circuit, createModule, Module, Multi, Connection } from "../core";
+import { Circuit, Connection, createModule, Module, Num } from "../core";
 import { Tuple } from "../utils";
 
 export type MetaModules = ReturnType<typeof createMetaModules>;
 
 export const createMetaModules = (circuit: Circuit) => {
   const extendN = <
-    N extends Multi,
+    N extends Num,
     InputPin extends string,
     OutputPin extends string,
     Comp extends Module<Record<InputPin, 1>, Record<OutputPin, 1>>,
@@ -25,8 +25,8 @@ export const createMetaModules = (circuit: Circuit) => {
 
         for (const inputPin of inputPins) {
           for (let i = 0; i < N; i++) {
-            /// @ts-ignore - TypeScript issue?
-            comps[i].in[inputPin] = inp[inputPin][N - 1 - i];
+            /// @ts-ignore
+            comps[i].in[inputPin] = N === 1 ? inp[inputPin] : inp[inputPin][N - 1 - i];
           }
         }
 

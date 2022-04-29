@@ -2,7 +2,7 @@ import CircularBuffer from 'mnemonist/circular-buffer';
 import Queue from 'mnemonist/queue';
 import { checkConnections, MapStates, metadata, Module, ModuleId, Net, NodeStateConst, State } from "../core";
 import { Iter, uniq } from "../utils";
-import { targetPrimitiveMods, withoutCompoundModules } from './rewrite';
+import { targetPrimitiveMods, keepPrimitiveModules } from './rewrite';
 import { createState, SimulationData, simulationHandler, Simulator } from './sim';
 
 type SimEvent = {
@@ -17,7 +17,7 @@ export const createEventDrivenSimulator = <
   const { id: topId, circuit } = metadata(topModule);
   checkConnections(topModule);
   const state = createState(circuit);
-  const primCircuit = withoutCompoundModules(circuit);
+  const primCircuit = keepPrimitiveModules(circuit);
   const eventQueue = new Queue<SimEvent>();
   const maxModId = circuit.modules.size - 1;
   const moduleQueue = new CircularBuffer<ModuleId>(
@@ -122,9 +122,7 @@ export const createEventDrivenSimulator = <
   const loop = () => {
     while (eventQueue.size > 0) {
       processEvents();
-      if (moduleQueue.size > 0) {
-        processModules();
-      }
+      processModules();
     }
   };
 

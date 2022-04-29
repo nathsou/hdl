@@ -1,5 +1,5 @@
-import { Circuit, createModule, Multi, Connection } from "../core";
-import { Tuple, last } from "../utils";
+import { Circuit, Connection, createModule, Multi, MultiIO } from "../core";
+import { last, Tuple } from "../utils";
 import { GateModules } from "./gates";
 
 export type ArithmeticModules = ReturnType<typeof createArith>;
@@ -49,7 +49,7 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
     },
   }, circ);
 
-  const adderN = <N extends Multi>(N: N) => createModule({
+  const adder = <N extends Multi>(N: N) => createModule({
     name: `adder${N}`,
     inputs: { a: N, b: N, carry_in: 1 },
     outputs: { sum: N, carry_out: 1 },
@@ -67,34 +67,56 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
     },
   }, circ);
 
-  const adderSubtractorN = <N extends Multi>(N: N) => createModule({
+  const adderSubtractor = <N extends Multi>(N: N) => createModule({
     name: `adder_subtractor${N}`,
     inputs: { a: N, b: N, subtract: 1 },
     outputs: { sum: N, carry_out: 1 },
     connect(inp, out) {
-      const adder = adderN(N)();
+      const sum = adder(N)();
       const xors = gates.xorN(N);
 
       xors.in.a = Connection.gen(N, () => inp.subtract);
       xors.in.b = inp.b;
 
-      adder.in.carry_in = inp.subtract;
-      adder.in.a = inp.a;
-      adder.in.b = xors.out.q;
+      sum.in.carry_in = inp.subtract;
+      sum.in.a = inp.a;
+      sum.in.b = xors.out.q;
 
-      out.sum = adder.out.sum;
-      out.carry_out = adder.out.carry_out;
+      out.sum = sum.out.sum;
+      out.carry_out = sum.out.carry_out;
     },
   }, circ);
+
+  const add = <N extends Multi>(a: MultiIO<N, Connection>, b: MultiIO<N, Connection>): MultiIO<N, Connection> => {
+    const sum = adder(a.length as N)();
+
+    sum.in.a = a;
+    sum.in.b = b;
+    sum.in.carry_in = 0;
+
+    return sum.out.sum;
+  };
+
+  const subtract = <N extends Multi>(a: MultiIO<N, Connection>, b: MultiIO<N, Connection>): MultiIO<N, Connection> => {
+    const subtractor = adderSubtractor(a.length as N)();
+
+    subtractor.in.subtract = 1;
+    subtractor.in.a = a;
+    subtractor.in.b = b;
+
+    return subtractor.out.sum;
+  };
 
   return {
     halfAdder1: halfAdder,
     adder1: fullAdder,
-    adder2: adderN(2),
-    adder4: adderN(4),
-    adder8: adderN(8),
-    adder16: adderN(16),
-    adderN: <N extends Multi>(N: N) => adderN(N)(),
-    adderSubtractorN: <N extends Multi>(N: N) => adderSubtractorN(N)(),
+    adder2: adder(2),
+    adder4: adder(4),
+    adder8: adder(8),
+    adder16: adder(16),
+    adder: <N extends Multi>(N: N) => adder(N)(),
+    adderSubtractor: <N extends Multi>(N: N) => adderSubtractor(N)(),
+    add,
+    subtract,
   };
 };

@@ -11,9 +11,9 @@
   "scripts": {
     "test": "jest",
     "typeCheck": "tsc --noEmit",
-    "esbuild": "esbuild examples/mem.ts --bundle --outfile=dist/mem.js --platform=node",
+    "esbuild": "esbuild examples/mux.ts --bundle --outfile=dist/v.js --platform=node",
     "build": "tsc",
-    "watch": "esbuild examples/mem.ts --bundle --outfile=dist/mem.js --platform=node --watch"
+    "watch": "esbuild examples/mux.ts --bundle --outfile=dist/mux.js --platform=node --watch"
   },
   "keywords": [
     "hardware-description",

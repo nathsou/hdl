@@ -29,6 +29,9 @@ export type ModuleWithMetadata<In extends Record<string, number>, Out extends Re
 };
 
 export type State = 0 | 1;
+
+export const State = { zero: 0 as State, one: 1 as State } as const;
+
 export type Connection = RawConnection | State;
 
 export const Connection = {
@@ -62,17 +65,10 @@ export const Connection = {
       }
     }
   },
+  repeat: <N extends number>(count: N, c: Connection): MultiIO<N, Connection> => {
+    return Connection.gen(count, () => c);
+  },
 };
-
-export type Num =
-  | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
-  | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31
-  | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47
-  | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63
-  | 64 | 65 | 66 | 67 | 68 | 69 | 70 | 71 | 72 | 73 | 74 | 75 | 76 | 77 | 78 | 79
-  | 80 | 81 | 82 | 83 | 84 | 85 | 86 | 87 | 88 | 89 | 90 | 91 | 92 | 93 | 94 | 95
-  | 96 | 97 | 98 | 99 | 100 | 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 111
-  | 112 | 113 | 114 | 115 | 116 | 117 | 118 | 119 | 120 | 121 | 122 | 123 | 124 | 125 | 126 | 127 | 128;
 
 export type Multi = Exclude<Num, 0 | 1>;
 
@@ -441,3 +437,146 @@ export type ModuleDef<
   > =
   | PrimitiveModuleDef<In, Out, State>
   | CompoundModuleDef<In, Out>;
+
+
+export type Range<A extends Num, B extends Num> = A extends B ? never : A | Range<Successor<A>, B>;
+
+export type Num =
+  | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
+  | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31
+  | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47
+  | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63
+  | 64 | 65 | 66 | 67 | 68 | 69 | 70 | 71 | 72 | 73 | 74 | 75 | 76 | 77 | 78 | 79
+  | 80 | 81 | 82 | 83 | 84 | 85 | 86 | 87 | 88 | 89 | 90 | 91 | 92 | 93 | 94 | 95
+  | 96 | 97 | 98 | 99 | 100 | 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 111
+  | 112 | 113 | 114 | 115 | 116 | 117 | 118 | 119 | 120 | 121 | 122 | 123 | 124 | 125 | 126 | 127 | 128;
+
+export type Successor<N extends Num> =
+  N extends 0 ? 1 :
+  N extends 1 ? 2 :
+  N extends 2 ? 3 :
+  N extends 3 ? 4 :
+  N extends 4 ? 5 :
+  N extends 5 ? 6 :
+  N extends 6 ? 7 :
+  N extends 7 ? 8 :
+  N extends 8 ? 9 :
+  N extends 9 ? 10 :
+  N extends 10 ? 11 :
+  N extends 11 ? 12 :
+  N extends 12 ? 13 :
+  N extends 13 ? 14 :
+  N extends 14 ? 15 :
+  N extends 15 ? 16 :
+  N extends 16 ? 17 :
+  N extends 17 ? 18 :
+  N extends 18 ? 19 :
+  N extends 19 ? 20 :
+  N extends 20 ? 21 :
+  N extends 21 ? 22 :
+  N extends 22 ? 23 :
+  N extends 23 ? 24 :
+  N extends 24 ? 25 :
+  N extends 25 ? 26 :
+  N extends 26 ? 27 :
+  N extends 27 ? 28 :
+  N extends 28 ? 29 :
+  N extends 29 ? 30 :
+  N extends 30 ? 31 :
+  N extends 31 ? 32 :
+  N extends 32 ? 33 :
+  N extends 33 ? 34 :
+  N extends 34 ? 35 :
+  N extends 35 ? 36 :
+  N extends 36 ? 37 :
+  N extends 37 ? 38 :
+  N extends 38 ? 39 :
+  N extends 39 ? 40 :
+  N extends 40 ? 41 :
+  N extends 41 ? 42 :
+  N extends 42 ? 43 :
+  N extends 43 ? 44 :
+  N extends 44 ? 45 :
+  N extends 45 ? 46 :
+  N extends 46 ? 47 :
+  N extends 47 ? 48 :
+  N extends 48 ? 49 :
+  N extends 49 ? 50 :
+  N extends 50 ? 51 :
+  N extends 51 ? 52 :
+  N extends 52 ? 53 :
+  N extends 53 ? 54 :
+  N extends 54 ? 55 :
+  N extends 55 ? 56 :
+  N extends 56 ? 57 :
+  N extends 57 ? 58 :
+  N extends 58 ? 59 :
+  N extends 59 ? 60 :
+  N extends 60 ? 61 :
+  N extends 61 ? 62 :
+  N extends 62 ? 63 :
+  N extends 63 ? 64 :
+  N extends 64 ? 65 :
+  N extends 65 ? 66 :
+  N extends 66 ? 67 :
+  N extends 67 ? 68 :
+  N extends 68 ? 69 :
+  N extends 69 ? 70 :
+  N extends 70 ? 71 :
+  N extends 71 ? 72 :
+  N extends 72 ? 73 :
+  N extends 73 ? 74 :
+  N extends 74 ? 75 :
+  N extends 75 ? 76 :
+  N extends 76 ? 77 :
+  N extends 77 ? 78 :
+  N extends 78 ? 79 :
+  N extends 79 ? 80 :
+  N extends 80 ? 81 :
+  N extends 81 ? 82 :
+  N extends 82 ? 83 :
+  N extends 83 ? 84 :
+  N extends 84 ? 85 :
+  N extends 85 ? 86 :
+  N extends 86 ? 87 :
+  N extends 87 ? 88 :
+  N extends 88 ? 89 :
+  N extends 89 ? 90 :
+  N extends 90 ? 91 :
+  N extends 91 ? 92 :
+  N extends 92 ? 93 :
+  N extends 93 ? 94 :
+  N extends 94 ? 95 :
+  N extends 95 ? 96 :
+  N extends 96 ? 97 :
+  N extends 97 ? 98 :
+  N extends 98 ? 99 :
+  N extends 99 ? 100 :
+  N extends 100 ? 101 :
+  N extends 101 ? 102 :
+  N extends 102 ? 103 :
+  N extends 103 ? 104 :
+  N extends 104 ? 105 :
+  N extends 105 ? 106 :
+  N extends 106 ? 107 :
+  N extends 107 ? 108 :
+  N extends 108 ? 109 :
+  N extends 109 ? 110 :
+  N extends 110 ? 111 :
+  N extends 111 ? 112 :
+  N extends 112 ? 113 :
+  N extends 113 ? 114 :
+  N extends 114 ? 115 :
+  N extends 115 ? 116 :
+  N extends 116 ? 117 :
+  N extends 117 ? 118 :
+  N extends 118 ? 119 :
+  N extends 119 ? 120 :
+  N extends 120 ? 121 :
+  N extends 121 ? 122 :
+  N extends 122 ? 123 :
+  N extends 123 ? 124 :
+  N extends 124 ? 125 :
+  N extends 125 ? 126 :
+  N extends 126 ? 127 :
+  N extends 127 ? 128 : never;

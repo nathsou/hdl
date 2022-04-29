@@ -1,4 +1,4 @@
-import { State } from "./core";
+import { Num, Range, State } from "./core";
 
 export const Iter = {
   join: function* <T>(a: Iterable<T>, b: Iterable<T>): IterableIterator<T> {
@@ -111,7 +111,7 @@ export const shallowEqualObject = <V>(a: Record<string, V>, b: Record<string, V>
 };
 
 export const Tuple = {
-  map: <N extends number, T, U>(values: Tuple<T, N>, f: (v: T) => U): Tuple<U, N> => {
+  map: <N extends number, T, U>(values: Tuple<T, N>, f: (v: T, index: number) => U): Tuple<U, N> => {
     return values.map(f) as Tuple<U, N>;
   },
   gen: <N extends number, T>(count: N, factory: (n: number) => T): Tuple<T, N> => {
@@ -122,7 +122,7 @@ export const Tuple = {
 
     return result as Tuple<T, N>;
   },
-  rep: <T, N extends number>(count: N, c: T): Tuple<T, N> => {
+  repeat: <T, N extends number>(count: N, c: T): Tuple<T, N> => {
     return Tuple.gen(count, () => c);
   },
   low: <T, N extends number, Vs extends Tuple<T, N>>(count: N, values: Vs): Tuple<T, N> => {
@@ -138,6 +138,11 @@ export const Tuple = {
       .padStart(width, '0')
       .split('')
       .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
+  },
+  iterRange: <A extends Num, B extends Num, T>(from: A, to: B, f: (n: Range<A, B>) => T): void => {
+    for (let i = from; i < to; i++) {
+      f(i as Range<A, B>);
+    }
   },
 };
 
