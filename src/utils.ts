@@ -1,4 +1,4 @@
-import { Num, Range, State } from "./core";
+import { Num, State, Subtract, Successor } from "./core";
 
 export const Iter = {
   join: function* <T>(a: Iterable<T>, b: Iterable<T>): IterableIterator<T> {
@@ -139,10 +139,24 @@ export const Tuple = {
       .split('')
       .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
   },
-  iterRange: <A extends Num, B extends Num, T>(from: A, to: B, f: (n: Range<A, B>) => T): void => {
+};
+
+export type Range<A extends Num, B extends Num, Acc = never> = A extends B ? Acc : Range<Successor<A>, B, A | Acc>;
+
+export const Range = {
+  iter: <A extends Num, B extends Num, T>(from: A, to: B, f: (n: Range<A, B>) => void): void => {
     for (let i = from; i < to; i++) {
       f(i as Range<A, B>);
     }
+  },
+  map: <A extends Num, B extends Num, T>(from: A, to: B, f: (n: Range<A, B>) => T): Tuple<T, Subtract<B, A>> => {
+    const values: T[] = [];
+
+    Range.iter(from, to, i => {
+      values.push(f(i));
+    });
+
+    return values as any;
   },
 };
 

@@ -72,7 +72,16 @@ export const Connection = {
 
 export type Multi = Exclude<Num, 0 | 1>;
 
-export type MultiIO<N extends number, T> = N extends 1 ? T : Tuple<T, N>;
+export type MultiIO<N extends number, T = Connection> = N extends 1 ? T : Tuple<T, N>;
+
+export const MultiIO = {
+  asArray: <T>(io: MultiIO<any, T>): T[] => {
+    return Array.isArray(io) ? io : [io];
+  },
+  asTuple: <T, IO extends MultiIO<Num, T>>(io: IO): Tuple<T, IO extends any[] ? IO['length'] : 1> => {
+    return (Array.isArray(io) ? io : [io]) as any;
+  },
+};
 
 export type MapConnections<T extends Record<string, number>> = {
   [Pin in keyof T]: MultiIO<T[Pin], Connection>
@@ -438,8 +447,7 @@ export type ModuleDef<
   | PrimitiveModuleDef<In, Out, State>
   | CompoundModuleDef<In, Out>;
 
-
-export type Range<A extends Num, B extends Num> = A extends B ? never : A | Range<Successor<A>, B>;
+export type Subtract<B extends Num, A extends Num, Acc extends Num = 0> = A extends B ? Acc : Subtract<B, Successor<A>, Successor<Acc>>;
 
 export type Num =
   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
