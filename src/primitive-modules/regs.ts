@@ -1,4 +1,4 @@
-import { Circuit, Connection, createModule, createPrimitiveModule, Multi, MultiIO, State } from "../core";
+import { Circuit, createModule, createPrimitiveModule, Multi, IO, State } from "../core";
 import { Tuple } from "../utils";
 import { ArithmeticModules } from "./arith";
 import { GateModules } from "./gates";
@@ -16,7 +16,7 @@ export const createRegisters = (
     connect(inp, out) {
       const jks = Tuple.gen(N, jkFF);
 
-      Connection.forward({ clk: inp.clk }, jks);
+      IO.forward({ clk: inp.clk }, jks);
 
       jks[0].in.j = inp.count_enable;
       jks[0].in.k = inp.count_enable;
@@ -32,7 +32,7 @@ export const createRegisters = (
         }
       }
 
-      out.q = Connection.gen(N, i => jks[N - 1 - i].out.q);
+      out.q = IO.gen(N, i => jks[N - 1 - i].out.q);
     },
   }, circ);
 
@@ -48,7 +48,7 @@ export const createRegisters = (
       count.in.load = inp.count_enable;
       adder.in.carry_in = inp.count_enable;
       adder.in.a = count.out.q;
-      adder.in.b = Connection.gen(N, () => State.zero);
+      adder.in.b = IO.gen(N, () => State.zero);
       count.in.d = adder.out.sum;
 
       out.q = count.out.q;
@@ -59,7 +59,7 @@ export const createRegisters = (
     name: `counter_sim${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
-    state: { bits: Connection.gen(N, () => State.zero), last_clk: 0 },
+    state: { bits: State.gen(N, () => State.zero), last_clk: 0 },
     simulate(inp, out, state) {
       const rising = state.last_clk === 0 && inp.clk;
       if (inp.count_enable && rising) {
@@ -77,7 +77,7 @@ export const createRegisters = (
 
   const reg = <N extends Multi>(
     N: N
-  ) => (initialData = Connection.gen(N, () => State.zero)) => createPrimitiveModule({
+  ) => (initialData = State.gen(N, () => State.zero)) => createPrimitiveModule({
     name: `reg${N}`,
     inputs: { d: N, load: 1, clk: 1 },
     outputs: { q: N },
@@ -102,6 +102,6 @@ export const createRegisters = (
     reg4: reg(4),
     reg8: reg(8),
     reg16: reg(16),
-    reg: <N extends Multi>(N: N, initialData?: MultiIO<N, State>) => reg(N)(initialData),
+    reg: <N extends Multi>(N: N, initialData?: N extends 1 ? State : Tuple<State, N>) => reg(N)(initialData),
   };
 };

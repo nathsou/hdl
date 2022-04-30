@@ -1,8 +1,8 @@
-import { Connection, createCircuit } from "../src/core";
+import { IO, createCircuit } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { Tuple, Range } from "../src/utils";
 
-const { createModule, primitives: { gates, mux, regs } } = createCircuit();
+const { createModule, primitives: { mux, regs } } = createCircuit();
 
 const pow2 = {
   1: 2,
@@ -30,7 +30,7 @@ const top = createModule({
     const rs = Tuple.gen(pow2[muxSize], i => regs.reg8(Tuple.bin(i, 8)));
     const mux = multiplexers[muxSize](8);
 
-    Connection.forward({ clk }, rs);
+    IO.forward({ clk }, rs);
 
     Range.iter(0, pow2[muxSize], i => {
       mux.in[`d${i}`] = rs[i].out.q;

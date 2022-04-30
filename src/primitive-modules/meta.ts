@@ -1,4 +1,4 @@
-import { Circuit, Connection, createModule, Module, Num } from "../core";
+import { Circuit, IO, createModule, Module, Num } from "../core";
 import { Tuple } from "../utils";
 
 export type MetaModules = ReturnType<typeof createMetaModules>;
@@ -31,7 +31,7 @@ export const createMetaModules = (circuit: Circuit) => {
         }
 
         for (const outputPin of outputPins) {
-          out[outputPin] = Connection.gen(N, i => comps[N - 1 - i].out[outputPin]);
+          out[outputPin] = IO.gen(N, i => comps[N - 1 - i].out[outputPin]);
         }
       },
     }, circuit);

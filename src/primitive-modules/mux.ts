@@ -1,4 +1,4 @@
-import { Circuit, Connection, createModule, MultiIO, Num } from "../core";
+import { Circuit, Connection, createModule, IO, Num } from "../core";
 import { Range, Tuple } from "../utils";
 import { GateModules } from "./gates";
 
@@ -12,10 +12,10 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     connect({ sel, d0, d1 }, out) {
       const lhs = andN(N);
       lhs.in.a = d0;
-      lhs.in.b = Connection.repeat(N, not(sel));
+      lhs.in.b = IO.repeat(N, not(sel));
 
       const rhs = andN(N);
-      rhs.in.a = Connection.repeat(N, sel);
+      rhs.in.a = IO.repeat(N, sel);
       rhs.in.b = d1;
 
       const res = orN(N);
@@ -148,24 +148,24 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     }
   }, circuit);
 
-  type Pow2 = { 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128 };
+  type Pow2 = { 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128, 8: 256 };
 
-  type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, MultiIO<N>>;
-  type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: MultiIO<N> });
+  type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, IO<N>>;
+  type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: IO<N> });
 
-  const match = <N extends Num>(N: N) => <T extends MultiIO<keyof Pow2>>(
+  const match = <N extends Num>(N: N) => <T extends IO<keyof Pow2>>(
     value: T,
     cases: CasesWithDefault<T extends any[] ? T['length'] : 1, N>
-  ): MultiIO<N> => {
+  ): IO<N> => {
     const ors: Tuple<Connection, N>[] = [];
-    const valueTuple = MultiIO.asArray<Connection>(value);
+    const valueTuple = IO.asArray(value);
     const isExhaustive = !Object.keys(cases).some(key => key === '_');
     const isMatchedOrs: Connection[] = [];
 
     const casesExceptDefault = Object.entries(cases).filter(([key]) => key !== '_');
 
     for (const [n, c] of casesExceptDefault) {
-      const connectionTuple = MultiIO.asArray(c);
+      const connectionTuple = IO.asArray(c);
       const bits = Tuple.bin(Number(n), valueTuple.length);
       const selected = and(...bits.map((b, i) => b === 1 ? valueTuple[i] : not(valueTuple[i])));
       ors.push(connectionTuple.map(c => and(selected, c)) as Tuple<Connection, N>);
@@ -176,8 +176,8 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     }
 
     if (!isExhaustive) {
-      const defaultValue = (cases as { _: MultiIO<N> })['_'];
-      const defaultValueArray = MultiIO.asArray(defaultValue);
+      const defaultValue = (cases as { _: IO<N> })['_'];
+      const defaultValueArray = IO.asArray(defaultValue);
 
       if (casesExceptDefault.length > 0) {
         const isMatched = or(...isMatchedOrs);
@@ -188,7 +188,7 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
       }
     }
 
-    return Connection.gen<Connection, N>(ors[0].length as N, i => or(...ors.map(o => o[i])));
+    return IO.gen(N, i => or(...ors.map(o => o[i])));
   };
 
   return {

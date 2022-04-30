@@ -125,11 +125,14 @@ export const Tuple = {
   repeat: <T, N extends number>(count: N, c: T): Tuple<T, N> => {
     return Tuple.gen(count, () => c);
   },
-  low: <T, N extends number, Vs extends Tuple<T, N>>(count: N, values: Vs): Tuple<T, N> => {
+  low: <T, N extends number>(count: N, values: Tuple<T, Num>): Tuple<T, N> => {
     return Tuple.gen(count, i => values[values.length - count - i]);
   },
-  high: <T, N extends number, Vs extends Tuple<T, N>>(count: N, values: Vs): Tuple<T, N> => {
+  high: <T, N extends number>(count: N, values: Tuple<T, Num>): Tuple<T, N> => {
     return Tuple.gen(count, i => values[i]);
+  },
+  slice: <T, A extends number, B extends number>(start: A, end: B, tuple: Tuple<T, Num>): Tuple<T, Subtract<B, A>> => {
+    return tuple.slice(start, end) as any;
   },
   bin: <W extends number>(n: number | bigint, width: W): Tuple<State, W> => {
     return n
@@ -141,10 +144,10 @@ export const Tuple = {
   },
 };
 
-export type Range<A extends Num, B extends Num, Acc = never> = A extends B ? Acc : Range<Successor<A>, B, A | Acc>;
+export type Range<A extends number, B extends number, Acc = never> = A extends B ? Acc : Range<Successor<A>, B, A | Acc>;
 
 export const Range = {
-  iter: <A extends Num, B extends Num, T>(from: A, to: B, f: (n: Range<A, B>) => void): void => {
+  iter: <A extends Num, B extends Num>(from: A, to: B, f: (n: Range<A, B>) => void): void => {
     for (let i = from; i < to; i++) {
       f(i as Range<A, B>);
     }

@@ -1,6 +1,6 @@
-import { Tuple } from "../src/utils";
 import { createCircuit } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
+import { Tuple } from "../src/utils";
 
 const { createModule, primitives: { mux: { match3 } } } = createCircuit();
 const { bin } = Tuple;

@@ -30,27 +30,47 @@ export type ModuleWithMetadata<In extends Record<string, number>, Out extends Re
 
 export type State = 0 | 1;
 
-export const State = { zero: 0 as State, one: 1 as State } as const;
-
-export type Connection = RawConnection | State;
-
-export const Connection = {
-  gen: <T, N extends number>(count: N, factory: (n: number) => T): MultiIO<N, T> => {
+export const State = {
+  zero: 0 as State,
+  one: 1 as State,
+  gen: <N extends number>(count: N, factory: (n: number) => Connection): N extends 1 ? State : Tuple<State, N> => {
     if (count === 1) {
-      return factory(0) as MultiIO<N, T>;
+      return factory(0) as any;
     }
 
-    const result = Array<T>(count);
+    const result = Array<Connection>(count);
 
     for (let i = 0; i < count; i++) {
       result[i] = factory(i);
     }
 
-    return result as MultiIO<N, T>;
+    return result as any;
+  },
+};
+
+export type Connection = RawConnection | State;
+
+export type Multi = Exclude<Num, 0 | 1>;
+
+export type IO<N extends number> = N extends 1 ? Connection : Tuple<Connection, N>;
+
+export const IO = {
+  gen: <N extends number>(count: N, factory: (n: number) => Connection): IO<N> => {
+    if (count === 1) {
+      return factory(0) as IO<N>;
+    }
+
+    const result = Array<Connection>(count);
+
+    for (let i = 0; i < count; i++) {
+      result[i] = factory(i);
+    }
+
+    return result as IO<N>;
   },
   forward: <
     Pins extends keyof Mapping,
-    Mapping extends Record<Pins, MultiIO<number, Connection>>,
+    Mapping extends Record<Pins, IO<number>>,
     Mods extends Module<Record<Pins, number>, any>[]
   >(
     mapping: Mapping,
@@ -65,30 +85,23 @@ export const Connection = {
       }
     }
   },
-  repeat: <N extends number>(count: N, c: Connection): MultiIO<N, Connection> => {
-    return Connection.gen(count, () => c);
+  repeat: <N extends number>(count: N, c: Connection): IO<N> => {
+    return IO.gen(count, () => c);
   },
-};
-
-export type Multi = Exclude<Num, 0 | 1>;
-
-export type MultiIO<N extends number, T = Connection> = N extends 1 ? T : Tuple<T, N>;
-
-export const MultiIO = {
-  asArray: <T>(io: MultiIO<any, T>): T[] => {
+  asArray: (io: IO<Num>): Connection[] => {
     return Array.isArray(io) ? io : [io];
   },
-  asTuple: <T, IO extends MultiIO<Num, T>>(io: IO): Tuple<T, IO extends any[] ? IO['length'] : 1> => {
+  asTuple: <InpOut extends IO<Num>>(io: InpOut): Tuple<Connection, InpOut extends any[] ? InpOut['length'] : 1> => {
     return (Array.isArray(io) ? io : [io]) as any;
   },
 };
 
 export type MapConnections<T extends Record<string, number>> = {
-  [Pin in keyof T]: MultiIO<T[Pin], Connection>
+  [Pin in keyof T]: IO<T[Pin]>
 };
 
 export type MapStates<T extends Record<string, number>> = {
-  [Pin in keyof T]: MultiIO<T[Pin], State>
+  [Pin in keyof T]: T[Pin] extends 1 ? State : Tuple<State, T[Pin]>
 };
 
 export type ModuleId = number;
@@ -216,6 +229,65 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: C
       v === 1 ? { pin: 'vcc', modId: 0 } :
         v;
 
+  const assignmentHandler = (_: any, pin: string | symbol, value: any, index?: number) => {
+    if (typeof pin !== 'string') {
+      throw new Error(`Pin name must be a string`);
+    }
+
+    const outputWidth = Array.isArray(value) ? value.length : 1;
+    let expectedWidth = sig[pin];
+
+    if (index !== undefined) {
+      pin += `${expectedWidth - index - 1}`;
+      expectedWidth = 1;
+    }
+
+    if (outputWidth !== expectedWidth) {
+      throw new Error(`Incorrect pin width for ${mod.name}.${prefix}.${pin}, expected ${expectedWidth}, got ${outputWidth}`);
+    }
+
+    value = connectionOf(value);
+
+    const connect = (modId: ModuleId, dir: 'in' | 'out', pin: string, target: RawConnection) => {
+      const net = `${pin}:${modId}`;
+      const targetNet = `${target.pin}:${target.modId}`;
+
+      pushRecord(circuit.modules.get(modId)!.pins[dir], pin, target);
+
+      if (!circuit.nets.has(net)) {
+        circuit.nets.set(net, { in: [], out: [], id: modId });
+      }
+
+      if (!circuit.nets.has(targetNet)) {
+        circuit.nets.set(targetNet, { in: [], out: [], id: target.modId });
+      }
+
+      circuit.nets.get(net)!.in.push(targetNet);
+      circuit.nets.get(targetNet)!.out.push(net);
+    };
+
+    if (isRawConnection(value)) {
+      connect(id, isInput ? 'in' : 'out', pin, value);
+      return true;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((v, n) => {
+        v = connectionOf(v);
+        if (isRawConnection(v)) {
+          const key = `${pin as string}${expectedWidth - n - 1}`;
+          connect(id, isInput ? 'in' : 'out', key, v);
+        } else {
+          throw new Error(`Invalid connection for ${mod.name}.${prefix}.${pin as string}`);
+        }
+      });
+
+      return true;
+    }
+
+    throw new Error(`Invalid pin value for ${mod.name}.${prefix}.${pin}, got ${value}`);
+  };
+
   return {
     get: (_, pin) => {
       if (typeof pin !== 'string') {
@@ -232,62 +304,18 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: C
           out.push({ modId: id, pin: `${pin}${width - n - 1}` });
         }
 
-        return out;
-      }
-    },
-    set: (_, pin, value) => {
-      if (typeof pin !== 'string') {
-        throw new Error(`Pin name must be a string`);
-      }
+        return new Proxy(out, {
+          set: (_, index, value) => {
+            if (!(/[0-9]+/.test(String(index)))) {
+              throw new Error(`index must be a number, got ${String(index)}`);
+            }
 
-      const outputWidth = Array.isArray(value) ? value.length : 1;
-      const expectedWidth = sig[pin];
-
-      if (outputWidth !== expectedWidth) {
-        throw new Error(`Incorrect pin width for ${mod.name}.${prefix}.${pin}, expected ${expectedWidth}, got ${outputWidth}`);
-      }
-
-      value = connectionOf(value);
-
-      const connect = (modId: ModuleId, dir: 'in' | 'out', pin: string, target: RawConnection) => {
-        const net = `${pin}:${modId}`;
-        const targetNet = `${target.pin}:${target.modId}`;
-
-        pushRecord(circuit.modules.get(modId)!.pins[dir], pin, target);
-
-        if (!circuit.nets.has(net)) {
-          circuit.nets.set(net, { in: [], out: [], id: modId });
-        }
-
-        if (!circuit.nets.has(targetNet)) {
-          circuit.nets.set(targetNet, { in: [], out: [], id: target.modId });
-        }
-
-        circuit.nets.get(net)!.in.push(targetNet);
-        circuit.nets.get(targetNet)!.out.push(net);
-      };
-
-      if (isRawConnection(value)) {
-        connect(id, isInput ? 'in' : 'out', pin, value);
-        return true;
-      }
-
-      if (Array.isArray(value)) {
-        value.forEach((v, n) => {
-          v = connectionOf(v);
-          if (isRawConnection(v)) {
-            const key = `${pin}${expectedWidth - n - 1}`;
-            connect(id, isInput ? 'in' : 'out', key, v);
-          } else {
-            throw new Error(`Invalid connection for ${mod.name}.${prefix}.${pin}`);
+            return assignmentHandler(out, pin, value, Number(index));
           }
         });
-
-        return true;
       }
-
-      throw new Error(`Invalid pin value for ${mod.name}.${prefix}.${pin}, got ${value}`);
     },
+    set: (target, prop, value) => assignmentHandler(target, prop, value),
   };
 };
 
@@ -447,7 +475,7 @@ export type ModuleDef<
   | PrimitiveModuleDef<In, Out, State>
   | CompoundModuleDef<In, Out>;
 
-export type Subtract<B extends Num, A extends Num, Acc extends Num = 0> = A extends B ? Acc : Subtract<B, Successor<A>, Successor<Acc>>;
+export type Subtract<B extends number, A extends number, Acc extends number = 0> = A extends B ? Acc : Subtract<B, Successor<A>, Successor<Acc>>;
 
 export type Num =
   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
@@ -457,9 +485,17 @@ export type Num =
   | 64 | 65 | 66 | 67 | 68 | 69 | 70 | 71 | 72 | 73 | 74 | 75 | 76 | 77 | 78 | 79
   | 80 | 81 | 82 | 83 | 84 | 85 | 86 | 87 | 88 | 89 | 90 | 91 | 92 | 93 | 94 | 95
   | 96 | 97 | 98 | 99 | 100 | 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 111
-  | 112 | 113 | 114 | 115 | 116 | 117 | 118 | 119 | 120 | 121 | 122 | 123 | 124 | 125 | 126 | 127 | 128;
+  | 112 | 113 | 114 | 115 | 116 | 117 | 118 | 119 | 120 | 121 | 122 | 123 | 124 | 125 | 126 | 127 | 128
+  | 129 | 130 | 131 | 132 | 133 | 134 | 135 | 136 | 137 | 138 | 139 | 140 | 141 | 142 | 143 | 144 | 145
+  | 146 | 147 | 148 | 149 | 150 | 151 | 152 | 153 | 154 | 155 | 156 | 157 | 158 | 159 | 160 | 161
+  | 162 | 163 | 164 | 165 | 166 | 167 | 168 | 169 | 170 | 171 | 172 | 173 | 174 | 175 | 176 | 177
+  | 178 | 179 | 180 | 181 | 182 | 183 | 184 | 185 | 186 | 187 | 188 | 189 | 190 | 191 | 192 | 193
+  | 194 | 195 | 196 | 197 | 198 | 199 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209
+  | 210 | 211 | 212 | 213 | 214 | 215 | 216 | 217 | 218 | 219 | 220 | 221 | 222 | 223 | 224 | 225
+  | 226 | 227 | 228 | 229 | 230 | 231 | 232 | 233 | 234 | 235 | 236 | 237 | 238 | 239 | 240 | 241
+  | 242 | 243 | 244 | 245 | 246 | 247 | 248 | 249 | 250 | 251 | 252 | 253 | 254 | 255 | 256;
 
-export type Successor<N extends Num> =
+export type Successor<N extends number> =
   N extends 0 ? 1 :
   N extends 1 ? 2 :
   N extends 2 ? 3 :
@@ -587,4 +623,132 @@ export type Successor<N extends Num> =
   N extends 124 ? 125 :
   N extends 125 ? 126 :
   N extends 126 ? 127 :
-  N extends 127 ? 128 : never;
+  N extends 127 ? 128 :
+  N extends 128 ? 129 :
+  N extends 129 ? 130 :
+  N extends 130 ? 131 :
+  N extends 131 ? 132 :
+  N extends 132 ? 133 :
+  N extends 133 ? 134 :
+  N extends 134 ? 135 :
+  N extends 135 ? 136 :
+  N extends 136 ? 137 :
+  N extends 137 ? 138 :
+  N extends 138 ? 139 :
+  N extends 139 ? 140 :
+  N extends 140 ? 141 :
+  N extends 141 ? 142 :
+  N extends 142 ? 143 :
+  N extends 143 ? 144 :
+  N extends 144 ? 145 :
+  N extends 145 ? 146 :
+  N extends 146 ? 147 :
+  N extends 147 ? 148 :
+  N extends 148 ? 149 :
+  N extends 149 ? 150 :
+  N extends 150 ? 151 :
+  N extends 151 ? 152 :
+  N extends 152 ? 153 :
+  N extends 153 ? 154 :
+  N extends 154 ? 155 :
+  N extends 155 ? 156 :
+  N extends 156 ? 157 :
+  N extends 157 ? 158 :
+  N extends 158 ? 159 :
+  N extends 159 ? 160 :
+  N extends 160 ? 161 :
+  N extends 161 ? 162 :
+  N extends 162 ? 163 :
+  N extends 163 ? 164 :
+  N extends 164 ? 165 :
+  N extends 165 ? 166 :
+  N extends 166 ? 167 :
+  N extends 167 ? 168 :
+  N extends 168 ? 169 :
+  N extends 169 ? 170 :
+  N extends 170 ? 171 :
+  N extends 171 ? 172 :
+  N extends 172 ? 173 :
+  N extends 173 ? 174 :
+  N extends 174 ? 175 :
+  N extends 175 ? 176 :
+  N extends 176 ? 177 :
+  N extends 177 ? 178 :
+  N extends 178 ? 179 :
+  N extends 179 ? 180 :
+  N extends 180 ? 181 :
+  N extends 181 ? 182 :
+  N extends 182 ? 183 :
+  N extends 183 ? 184 :
+  N extends 184 ? 185 :
+  N extends 185 ? 186 :
+  N extends 186 ? 187 :
+  N extends 187 ? 188 :
+  N extends 188 ? 189 :
+  N extends 189 ? 190 :
+  N extends 190 ? 191 :
+  N extends 191 ? 192 :
+  N extends 192 ? 193 :
+  N extends 193 ? 194 :
+  N extends 194 ? 195 :
+  N extends 195 ? 196 :
+  N extends 196 ? 197 :
+  N extends 197 ? 198 :
+  N extends 198 ? 199 :
+  N extends 199 ? 200 :
+  N extends 200 ? 201 :
+  N extends 201 ? 202 :
+  N extends 202 ? 203 :
+  N extends 203 ? 204 :
+  N extends 204 ? 205 :
+  N extends 205 ? 206 :
+  N extends 206 ? 207 :
+  N extends 207 ? 208 :
+  N extends 208 ? 209 :
+  N extends 209 ? 210 :
+  N extends 210 ? 211 :
+  N extends 211 ? 212 :
+  N extends 212 ? 213 :
+  N extends 213 ? 214 :
+  N extends 214 ? 215 :
+  N extends 215 ? 216 :
+  N extends 216 ? 217 :
+  N extends 217 ? 218 :
+  N extends 218 ? 219 :
+  N extends 219 ? 220 :
+  N extends 220 ? 221 :
+  N extends 221 ? 222 :
+  N extends 222 ? 223 :
+  N extends 223 ? 224 :
+  N extends 224 ? 225 :
+  N extends 225 ? 226 :
+  N extends 226 ? 227 :
+  N extends 227 ? 228 :
+  N extends 228 ? 229 :
+  N extends 229 ? 230 :
+  N extends 230 ? 231 :
+  N extends 231 ? 232 :
+  N extends 232 ? 233 :
+  N extends 233 ? 234 :
+  N extends 234 ? 235 :
+  N extends 235 ? 236 :
+  N extends 236 ? 237 :
+  N extends 237 ? 238 :
+  N extends 238 ? 239 :
+  N extends 239 ? 240 :
+  N extends 240 ? 241 :
+  N extends 241 ? 242 :
+  N extends 242 ? 243 :
+  N extends 243 ? 244 :
+  N extends 244 ? 245 :
+  N extends 245 ? 246 :
+  N extends 246 ? 247 :
+  N extends 247 ? 248 :
+  N extends 248 ? 249 :
+  N extends 249 ? 250 :
+  N extends 250 ? 251 :
+  N extends 251 ? 252 :
+  N extends 252 ? 253 :
+  N extends 253 ? 254 :
+  N extends 254 ? 255 :
+  N extends 255 ? 256 : number;

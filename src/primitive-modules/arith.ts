@@ -1,4 +1,4 @@
-import { Circuit, Connection, createModule, Multi, MultiIO } from "../core";
+import { Circuit, createModule, Multi, IO } from "../core";
 import { last, Tuple } from "../utils";
 import { GateModules } from "./gates";
 
@@ -62,7 +62,7 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
         adders[i].in.b = inp.b[N - 1 - i];
       }
 
-      out.sum = Connection.gen(N, i => adders[N - 1 - i].out.sum);
+      out.sum = IO.gen(N, i => adders[N - 1 - i].out.sum);
       out.carry_out = last(adders).out.carry_out;
     },
   }, circ);
@@ -75,7 +75,7 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
       const sum = adder(N)();
       const xors = gates.xorN(N);
 
-      xors.in.a = Connection.gen(N, () => inp.subtract);
+      xors.in.a = IO.gen(N, () => inp.subtract);
       xors.in.b = inp.b;
 
       sum.in.carry_in = inp.subtract;
@@ -87,7 +87,7 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
     },
   }, circ);
 
-  const add = <N extends Multi>(a: MultiIO<N, Connection>, b: MultiIO<N, Connection>): MultiIO<N, Connection> => {
+  const add = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
     const sum = adder(a.length as N)();
 
     sum.in.a = a;
@@ -97,7 +97,7 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
     return sum.out.sum;
   };
 
-  const subtract = <N extends Multi>(a: MultiIO<N, Connection>, b: MultiIO<N, Connection>): MultiIO<N, Connection> => {
+  const subtract = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
     const subtractor = adderSubtractor(a.length as N)();
 
     subtractor.in.subtract = 1;
