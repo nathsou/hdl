@@ -94,6 +94,9 @@ export const IO = {
   asTuple: <InpOut extends IO<Num>>(io: InpOut): Tuple<Connection, InpOut extends any[] ? InpOut['length'] : 1> => {
     return (Array.isArray(io) ? io : [io]) as any;
   },
+  proxify: <N extends Num>(circuit: Circuit, connections: IO<N>): IO<N> => {
+    return (Array.isArray(connections) ? Tuple.proxify(circuit, connections as Tuple<Connection, N>) : connections) as IO<N>;
+  },
 };
 
 export type MapConnections<T extends Record<string, number>> = {
@@ -221,13 +224,54 @@ export const createModule = <In extends Record<string, Num>, Out extends Record<
   return _createModule({ ...def, type: 'compound' }, circuit);
 };
 
+export const CoreUtils = {
+  rawFrom: (v: Connection): RawConnection =>
+    v === 0 ? { pin: 'gnd', modId: 0 } :
+      v === 1 ? { pin: 'vcc', modId: 0 } :
+        v,
+  connect: (circuit: Circuit, modId: ModuleId, dir: 'in' | 'out', pin: string, target: Connection) => {
+    target = CoreUtils.rawFrom(target);
+
+    if (!isRawConnection(target)) {
+      const mod = circuit.modules.get(modId);
+      throw new Error(`Invalid connection for ${mod?.name}.${pin}`);
+    }
+
+    const net = `${pin}:${modId}`;
+    const targetNet = `${target.pin}:${target.modId}`;
+
+    pushRecord(circuit.modules.get(modId)!.pins[dir], pin, target);
+
+    if (!circuit.nets.has(net)) {
+      circuit.nets.set(net, { in: [], out: [], id: modId });
+    }
+
+    if (!circuit.nets.has(targetNet)) {
+      circuit.nets.set(targetNet, { in: [], out: [], id: target.modId });
+    }
+
+    circuit.nets.get(net)!.in.push(targetNet);
+    circuit.nets.get(targetNet)!.out.push(net);
+  },
+  pinDirection: (circuit: Circuit, modId: ModuleId, pin: string): 'in' | 'out' => {
+    const module = circuit.modules.get(modId)!;
+    const sig = circuit.signatures.get(module.name)!;
+
+    if (Object.keys(sig.inputs).includes(pin)) {
+      return 'in';
+    }
+
+    if (Object.keys(sig.outputs).includes(pin)) {
+      return 'out';
+    }
+
+    throw new Error(`Pin ${pin} is not defined in module ${module.name}`);
+  },
+};
+
 const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: Circuit, isInput: boolean): ProxyHandler<any> => {
   const sig = mod[isInput ? 'inputs' : 'outputs'];
   const prefix = isInput ? 'in' : 'out';
-  const connectionOf = (v: Connection) =>
-    v === 0 ? { pin: 'gnd', modId: 0 } :
-      v === 1 ? { pin: 'vcc', modId: 0 } :
-        v;
 
   const assignmentHandler = (_: any, pin: string | symbol, value: any, index?: number) => {
     if (typeof pin !== 'string') {
@@ -246,46 +290,18 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: C
       throw new Error(`Incorrect pin width for ${mod.name}.${prefix}.${pin}, expected ${expectedWidth}, got ${outputWidth}`);
     }
 
-    value = connectionOf(value);
-
-    const connect = (modId: ModuleId, dir: 'in' | 'out', pin: string, target: RawConnection) => {
-      const net = `${pin}:${modId}`;
-      const targetNet = `${target.pin}:${target.modId}`;
-
-      pushRecord(circuit.modules.get(modId)!.pins[dir], pin, target);
-
-      if (!circuit.nets.has(net)) {
-        circuit.nets.set(net, { in: [], out: [], id: modId });
-      }
-
-      if (!circuit.nets.has(targetNet)) {
-        circuit.nets.set(targetNet, { in: [], out: [], id: target.modId });
-      }
-
-      circuit.nets.get(net)!.in.push(targetNet);
-      circuit.nets.get(targetNet)!.out.push(net);
-    };
-
-    if (isRawConnection(value)) {
-      connect(id, isInput ? 'in' : 'out', pin, value);
-      return true;
-    }
-
     if (Array.isArray(value)) {
-      value.forEach((v, n) => {
-        v = connectionOf(v);
-        if (isRawConnection(v)) {
-          const key = `${pin as string}${expectedWidth - n - 1}`;
-          connect(id, isInput ? 'in' : 'out', key, v);
-        } else {
-          throw new Error(`Invalid connection for ${mod.name}.${prefix}.${pin as string}`);
-        }
+      value.forEach((value, n) => {
+        const net = `${pin as string}${expectedWidth - n - 1}`;
+        CoreUtils.connect(circuit, id, isInput ? 'in' : 'out', net, value);
       });
 
       return true;
     }
 
-    throw new Error(`Invalid pin value for ${mod.name}.${prefix}.${pin}, got ${value}`);
+    CoreUtils.connect(circuit, id, isInput ? 'in' : 'out', pin, value);
+
+    return true;
   };
 
   return {
@@ -485,15 +501,7 @@ export type Num =
   | 64 | 65 | 66 | 67 | 68 | 69 | 70 | 71 | 72 | 73 | 74 | 75 | 76 | 77 | 78 | 79
   | 80 | 81 | 82 | 83 | 84 | 85 | 86 | 87 | 88 | 89 | 90 | 91 | 92 | 93 | 94 | 95
   | 96 | 97 | 98 | 99 | 100 | 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 111
-  | 112 | 113 | 114 | 115 | 116 | 117 | 118 | 119 | 120 | 121 | 122 | 123 | 124 | 125 | 126 | 127 | 128
-  | 129 | 130 | 131 | 132 | 133 | 134 | 135 | 136 | 137 | 138 | 139 | 140 | 141 | 142 | 143 | 144 | 145
-  | 146 | 147 | 148 | 149 | 150 | 151 | 152 | 153 | 154 | 155 | 156 | 157 | 158 | 159 | 160 | 161
-  | 162 | 163 | 164 | 165 | 166 | 167 | 168 | 169 | 170 | 171 | 172 | 173 | 174 | 175 | 176 | 177
-  | 178 | 179 | 180 | 181 | 182 | 183 | 184 | 185 | 186 | 187 | 188 | 189 | 190 | 191 | 192 | 193
-  | 194 | 195 | 196 | 197 | 198 | 199 | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 209
-  | 210 | 211 | 212 | 213 | 214 | 215 | 216 | 217 | 218 | 219 | 220 | 221 | 222 | 223 | 224 | 225
-  | 226 | 227 | 228 | 229 | 230 | 231 | 232 | 233 | 234 | 235 | 236 | 237 | 238 | 239 | 240 | 241
-  | 242 | 243 | 244 | 245 | 246 | 247 | 248 | 249 | 250 | 251 | 252 | 253 | 254 | 255 | 256;
+  | 112 | 113 | 114 | 115 | 116 | 117 | 118 | 119 | 120 | 121 | 122 | 123 | 124 | 125 | 126 | 127 | 128;
 
 export type Successor<N extends number> =
   N extends 0 ? 1 :
@@ -623,132 +631,4 @@ export type Successor<N extends number> =
   N extends 124 ? 125 :
   N extends 125 ? 126 :
   N extends 126 ? 127 :
-  N extends 127 ? 128 :
-  N extends 128 ? 129 :
-  N extends 129 ? 130 :
-  N extends 130 ? 131 :
-  N extends 131 ? 132 :
-  N extends 132 ? 133 :
-  N extends 133 ? 134 :
-  N extends 134 ? 135 :
-  N extends 135 ? 136 :
-  N extends 136 ? 137 :
-  N extends 137 ? 138 :
-  N extends 138 ? 139 :
-  N extends 139 ? 140 :
-  N extends 140 ? 141 :
-  N extends 141 ? 142 :
-  N extends 142 ? 143 :
-  N extends 143 ? 144 :
-  N extends 144 ? 145 :
-  N extends 145 ? 146 :
-  N extends 146 ? 147 :
-  N extends 147 ? 148 :
-  N extends 148 ? 149 :
-  N extends 149 ? 150 :
-  N extends 150 ? 151 :
-  N extends 151 ? 152 :
-  N extends 152 ? 153 :
-  N extends 153 ? 154 :
-  N extends 154 ? 155 :
-  N extends 155 ? 156 :
-  N extends 156 ? 157 :
-  N extends 157 ? 158 :
-  N extends 158 ? 159 :
-  N extends 159 ? 160 :
-  N extends 160 ? 161 :
-  N extends 161 ? 162 :
-  N extends 162 ? 163 :
-  N extends 163 ? 164 :
-  N extends 164 ? 165 :
-  N extends 165 ? 166 :
-  N extends 166 ? 167 :
-  N extends 167 ? 168 :
-  N extends 168 ? 169 :
-  N extends 169 ? 170 :
-  N extends 170 ? 171 :
-  N extends 171 ? 172 :
-  N extends 172 ? 173 :
-  N extends 173 ? 174 :
-  N extends 174 ? 175 :
-  N extends 175 ? 176 :
-  N extends 176 ? 177 :
-  N extends 177 ? 178 :
-  N extends 178 ? 179 :
-  N extends 179 ? 180 :
-  N extends 180 ? 181 :
-  N extends 181 ? 182 :
-  N extends 182 ? 183 :
-  N extends 183 ? 184 :
-  N extends 184 ? 185 :
-  N extends 185 ? 186 :
-  N extends 186 ? 187 :
-  N extends 187 ? 188 :
-  N extends 188 ? 189 :
-  N extends 189 ? 190 :
-  N extends 190 ? 191 :
-  N extends 191 ? 192 :
-  N extends 192 ? 193 :
-  N extends 193 ? 194 :
-  N extends 194 ? 195 :
-  N extends 195 ? 196 :
-  N extends 196 ? 197 :
-  N extends 197 ? 198 :
-  N extends 198 ? 199 :
-  N extends 199 ? 200 :
-  N extends 200 ? 201 :
-  N extends 201 ? 202 :
-  N extends 202 ? 203 :
-  N extends 203 ? 204 :
-  N extends 204 ? 205 :
-  N extends 205 ? 206 :
-  N extends 206 ? 207 :
-  N extends 207 ? 208 :
-  N extends 208 ? 209 :
-  N extends 209 ? 210 :
-  N extends 210 ? 211 :
-  N extends 211 ? 212 :
-  N extends 212 ? 213 :
-  N extends 213 ? 214 :
-  N extends 214 ? 215 :
-  N extends 215 ? 216 :
-  N extends 216 ? 217 :
-  N extends 217 ? 218 :
-  N extends 218 ? 219 :
-  N extends 219 ? 220 :
-  N extends 220 ? 221 :
-  N extends 221 ? 222 :
-  N extends 222 ? 223 :
-  N extends 223 ? 224 :
-  N extends 224 ? 225 :
-  N extends 225 ? 226 :
-  N extends 226 ? 227 :
-  N extends 227 ? 228 :
-  N extends 228 ? 229 :
-  N extends 229 ? 230 :
-  N extends 230 ? 231 :
-  N extends 231 ? 232 :
-  N extends 232 ? 233 :
-  N extends 233 ? 234 :
-  N extends 234 ? 235 :
-  N extends 235 ? 236 :
-  N extends 236 ? 237 :
-  N extends 237 ? 238 :
-  N extends 238 ? 239 :
-  N extends 239 ? 240 :
-  N extends 240 ? 241 :
-  N extends 241 ? 242 :
-  N extends 242 ? 243 :
-  N extends 243 ? 244 :
-  N extends 244 ? 245 :
-  N extends 245 ? 246 :
-  N extends 246 ? 247 :
-  N extends 247 ? 248 :
-  N extends 248 ? 249 :
-  N extends 249 ? 250 :
-  N extends 250 ? 251 :
-  N extends 251 ? 252 :
-  N extends 252 ? 253 :
-  N extends 253 ? 254 :
-  N extends 254 ? 255 :
-  N extends 255 ? 256 : number;
+  N extends 127 ? 128 : number;

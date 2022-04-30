@@ -148,7 +148,7 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     }
   }, circuit);
 
-  type Pow2 = { 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128, 8: 256 };
+  type Pow2 = { 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128 } & Record<number, number>;
 
   type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, IO<N>>;
   type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: IO<N> });
@@ -188,7 +188,7 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
       }
     }
 
-    return IO.gen(N, i => or(...ors.map(o => o[i])));
+    return IO.proxify(circuit, IO.gen(N, i => or(...ors.map(o => o[i]))));
   };
 
   return {
@@ -206,5 +206,6 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     match6: match(6),
     match7: match(7),
     match8: match(8),
+    match9: match(9),
   };
 };

@@ -11,9 +11,9 @@
   "scripts": {
     "test": "jest",
     "typeCheck": "tsc --noEmit",
-    "esbuild": "esbuild examples/lab.ts --bundle --outfile=dist/lab.js --platform=node",
+    "esbuild": "esbuild examples/match.ts --bundle --outfile=dist/match.js --platform=node",
     "build": "tsc",
-    "watch": "esbuild examples/lab.ts --bundle --outfile=dist/lab.js --platform=node --watch"
+    "watch": "esbuild examples/match.ts --bundle --outfile=dist/match.js --platform=node --watch"
   },
   "keywords": [
     "hardware-description",
