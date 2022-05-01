@@ -115,6 +115,7 @@ const top = createModule({
     const isLoadInst = isEqualConst<4>(bin(Inst.LOAD, 4), opcode);
     const isBeqInst = isEqualConst<4>(bin(Inst.BEQ, 4), opcode);
     const isBneqInst = isEqualConst<4>(bin(Inst.BNEQ, 4), opcode);
+    const destOutEqualsConstant = isEqual<8>(destRegOut, constant);
 
     out.address = add<8>(arg1RegOut, [0, 0, 0, 0, ...arg2]);
     out.dout = destRegOut;
@@ -124,9 +125,10 @@ const top = createModule({
     const pcIncrementer = adder(8);
     pcIncrementer.in.carry_in = 0;
     pcIncrementer.in.a = programCounter;
+
     const branch = or(
-      and(argsComp.equ, isBeqInst),
-      and(not(argsComp.equ), isBneqInst)
+      and(destOutEqualsConstant, isBeqInst),
+      and(not(destOutEqualsConstant), isBneqInst)
     );
     pcIncrementer.in.b = match8(branch, {
       0: Tuple.bin(1, 8),
@@ -161,12 +163,10 @@ const main = () => {
   const sim = createSimulator(mod);
   const din = Tuple.repeat(8, State.zero);
 
-  for (let i = 0; i < 3100; i++) {
+  for (let i = 0; i < 3100 * 256; i++) {
     sim.input({ din, clk: 0 });
     if (sim.state.read(mod.out.write) === 1) {
       console.log({
-        write: sim.state.read(mod.out.write),
-        address: sim.state.read(mod.out.address).join(''),
         dout: sim.state.read(mod.out.dout).join(''),
       });
     }
