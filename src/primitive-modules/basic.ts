@@ -12,7 +12,7 @@ export const createBasicModules = (circ: Circuit) => {
   const transitors = createTransitors(circ);
   const gates = createGates(circ, meta);
   const mux = createMultiplexers(circ, gates);
-  const arith = createArith(circ, gates);
+  const arith = createArith(circ, gates, mux);
   const mem = createMemoryModules(circ, gates);
   const regs = createRegisters(circ, gates, mem, arith);
 

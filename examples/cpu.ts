@@ -5,9 +5,10 @@ import { Tuple, Range } from "../src/utils";
 const {
   createModule,
   primitives: {
+    gates: { and, not, or, xor },
     mux: { match1, match8, demux16, matchN },
     regs: { reg8 },
-    arith: { add, adder8, equalsConst, isEqual },
+    arith: { add, subtract, adder8, isEqual, isEqualConst, shiftLeft, shiftRight },
   }
 } = createCircuit();
 const { bin } = Tuple;
@@ -62,10 +63,10 @@ const createROM = createModule({
 
 const top = createModule({
   name: 'top',
-  inputs: { clk: 1 },
-  outputs: { write: 1, address: 8, dout: 8, leds: 4 },
+  inputs: { din: 8, clk: 1 },
+  outputs: { read: 1, write: 1, address: 8, dout: 8 },
   connect(inp, out) {
-    const regs = Tuple.gen(16, i => reg8(Tuple.bin(i, 8)));
+    const regs = Tuple.gen(16, i => reg8(bin(i, 8)));
     const rom = createROM();
 
     IO.forward({ clk: inp.clk }, regs);
@@ -88,45 +89,50 @@ const top = createModule({
     const arg1RegOut = match8(arg1, registersMapping);
     const arg2RegOut = match8(arg2, registersMapping);
 
-    const argsEqual = isEqual(8);
-    argsEqual.in.a = arg1RegOut;
-    argsEqual.in.b = arg2RegOut;
+    const argsEqual = isEqual<8>(arg1RegOut, arg1RegOut);
 
     const inputDemux = demux16(8);
     inputDemux.in.sel = dest;
     inputDemux.in.d = match8(opcode, {
+      [Inst.LOAD]: inp.din,
       [Inst.SET]: constant,
+      [Inst.EQ]: Tuple.repeat(8, argsEqual),
       [Inst.ADD]: add<8>(arg1RegOut, arg2RegOut),
-      [Inst.EQ]: Tuple.repeat(8, argsEqual.out.q),
+      [Inst.SUB]: subtract<8>(arg1RegOut, arg2RegOut),
+      [Inst.SHL]: shiftLeft<8>(arg1RegOut, Tuple.slice(0, 3, arg2RegOut)),
+      [Inst.SHR]: shiftRight<8>(arg1RegOut, Tuple.slice(0, 3, arg2RegOut)),
+      [Inst.AND]: and<8>(arg1RegOut, arg2RegOut),
+      [Inst.OR]: or<8>(arg1RegOut, arg2RegOut),
+      [Inst.INV]: not<8>(arg1RegOut),
+      [Inst.XOR]: xor<8>(arg1RegOut, arg2RegOut),
       _: Tuple.repeat(8, State.zero),
     });
 
-    const isDestZero = equalsConst<4>(Tuple.bin(0, 4))();
-    isDestZero.in.d = dest;
+    const isDestZero = isEqualConst<4>(bin(0, 4), dest);
+    const isStoreInst = isEqualConst<4>(bin(Inst.STORE, 4), opcode);
+    const isLoadInst = isEqualConst<4>(bin(Inst.LOAD, 4), opcode);
+    const isBeqInst = isEqualConst<4>(bin(Inst.BEQ, 4), opcode);
+    const isBneqInst = isEqualConst<4>(bin(Inst.BNEQ, 4), opcode);
 
-    const isStoreInst = equalsConst<4>(Tuple.bin(Inst.STORE, 4))();
-    isStoreInst.in.d = opcode;
-
-    const isBeqInst = equalsConst<4>(Tuple.bin(Inst.BEQ, 4))();
-    isBeqInst.in.d = opcode;
-
-    out.address = arg1RegOut;
+    out.address = add<8>(arg1RegOut, [0, 0, 0, 0, ...arg2]);
     out.dout = destRegOut;
-    out.write = isStoreInst.out.q;
+    out.read = isLoadInst;
+    out.write = isStoreInst;
 
     const pcIncrementer = adder8();
     pcIncrementer.in.carry_in = 0;
     pcIncrementer.in.a = programCounter;
-    pcIncrementer.in.b = match8(isBeqInst.out.q, {
+    const branch = or(
+      and(argsEqual, isBeqInst),
+      and(not(argsEqual), isBneqInst)
+    );
+    pcIncrementer.in.b = match8(branch, {
       0: Tuple.bin(1, 8),
-      1: match8(argsEqual.out.q, {
-        0: Tuple.bin(1, 8),
-        1: Tuple.bin(2, 8),
-      }),
+      1: Tuple.bin(2, 8),
     });
 
     regs[0].in.load = 1;
-    regs[0].in.d = match8(isDestZero.out.q, {
+    regs[0].in.d = match8(isDestZero, {
       0: pcIncrementer.out.sum,
       1: inputDemux.out.q0,
     });
@@ -134,6 +140,7 @@ const top = createModule({
     const loadDemux = demux16(1);
     loadDemux.in.sel = dest;
     loadDemux.in.d = match1(opcode, {
+      [Inst.NOOP]: 0,
       [Inst.STORE]: 0,
       [Inst.BEQ]: 0,
       [Inst.BNEQ]: 0,
@@ -144,26 +151,24 @@ const top = createModule({
       regs[n].in.load = loadDemux.out[`q${n}`];
       regs[n].in.d = inputDemux.out[`q${n}`];
     });
-
-    out.leds = opcode;
   },
 });
 
 const main = () => {
   const mod = top();
   const sim = createSimulator(mod);
+  const din = Tuple.repeat(8, State.zero);
 
-  for (let i = 0; i < 3500; i++) {
-    sim.input({ clk: 0 });
+  for (let i = 0; i < 3100; i++) {
+    sim.input({ din, clk: 0 });
     if (sim.state.read(mod.out.write) === 1) {
       console.log({
-        leds: sim.state.read(mod.out.leds).join(''),
         write: sim.state.read(mod.out.write),
         address: sim.state.read(mod.out.address).join(''),
         dout: sim.state.read(mod.out.dout).join(''),
       });
     }
-    sim.input({ clk: 1 });
+    sim.input({ din, clk: 1 });
   }
 };
 

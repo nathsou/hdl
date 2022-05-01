@@ -1,10 +1,10 @@
-import { Circuit, Connection, createModule, createPrimitiveModule, Module, Num } from "../core";
+import { Circuit, Connection, createPrimitiveModule, IO, Module, Num } from "../core";
 import { MetaModules } from "./meta";
 
 export type GateModules = ReturnType<typeof createGates>;
 
 export const createGates = (circuit: Circuit, meta: MetaModules) => {
-  const not1 = createPrimitiveModule({
+  const not = createPrimitiveModule({
     name: 'not',
     inputs: { d: 1 },
     outputs: { q: 1 },
@@ -13,10 +13,17 @@ export const createGates = (circuit: Circuit, meta: MetaModules) => {
     },
   }, circuit);
 
-  const not = (d: Connection): Connection => {
-    const gate = not1();
+  const logicalNot = (d: Connection): Connection => {
+    const gate = not();
     gate.in.d = d;
     return gate.out.q;
+  };
+
+  const bitwiseNot = <N extends Num>(d: IO<N>): IO<N> => {
+    const N = IO.width(d);
+    const extended = meta.extendN(N, not, ['d'], ['q'], `not${N}`)();
+    extended.in.d = d;
+    return extended.out.q;
   };
 
   const and = createPrimitiveModule({
@@ -90,43 +97,32 @@ export const createGates = (circuit: Circuit, meta: MetaModules) => {
     };
   };
 
-  type ExtendedGate<Name extends string> = {
-    [_ in Name]: (...inputs: Connection[]) => Connection
-  } & {
-      [N in (1 | 2 | 4 | 8 | 16) as `${Name}${N}`]: () => Module<{ a: N, b: N }, { q: N }>
-    } & {
-      [_ in `${Name}N`]: <N extends Num>(N: N) => Module<{ a: N, b: N }, { q: N }>
+  const bitwiseBinaryGateShorthand = (gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>, name: string) => {
+    return <N extends Num>(a: IO<N>, b: IO<N>): IO<N> => {
+      const N = IO.width(a);
+      const extended = meta.extendN(N, gate, ['a', 'b'], ['q'], `${name}${N}`)();
+      extended.in.a = a;
+      extended.in.b = b;
+
+      return extended.out.q;
     };
-
-  const extendBinary = <Name extends string>(
-    gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>,
-    name: Name
-  ): ExtendedGate<Name> => {
-
-    return {
-      [name]: logicalBinaryGateShorthand(gate),
-      [name + '1']: gate,
-      [name + '2']: meta.extendN(2, gate, ['a', 'b'], ['q'], `${name}2`),
-      [name + '4']: meta.extendN(4, gate, ['a', 'b'], ['q'], `${name}4`),
-      [name + '8']: meta.extendN(8, gate, ['a', 'b'], ['q'], `${name}8`),
-      [name + '16']: meta.extendN(16, gate, ['a', 'b'], ['q'], `${name}16`),
-      [name + 'N']: <N extends Num>(N: N) => meta.extendN(N, gate, ['a', 'b'], ['q'], `${name}${N}`)(),
-    } as ExtendedGate<Name>;
   };
 
   return {
-    not,
-    not1,
-    not2: meta.extendN(2, not1, ['d'], ['q'], 'not2'),
-    not4: meta.extendN(4, not1, ['d'], ['q'], 'not4'),
-    not8: meta.extendN(8, not1, ['d'], ['q'], 'not8'),
-    not16: meta.extendN(16, not1, ['d'], ['q'], 'not16'),
-    notN: <N extends Num>(N: N) => meta.extendN(N, not1, ['d'], ['q'], `not${N}`)(),
-    ...extendBinary(and, 'and'),
-    ...extendBinary(nand, 'nand'),
-    ...extendBinary(or, 'or'),
-    ...extendBinary(nor, 'nor'),
-    ...extendBinary(xor, 'xor'),
-    ...extendBinary(xnor, 'xnor'),
+    logicalNot,
+    logicalAnd: logicalBinaryGateShorthand(and),
+    logicalNand: logicalBinaryGateShorthand(nand),
+    logicalOr: logicalBinaryGateShorthand(or),
+    logicalNor: logicalBinaryGateShorthand(nor),
+    logicalXor: logicalBinaryGateShorthand(xor),
+    logicalXnor: logicalBinaryGateShorthand(xnor),
+    not: bitwiseNot,
+    and: bitwiseBinaryGateShorthand(and, 'and'),
+    nand: bitwiseBinaryGateShorthand(nand, 'nand'),
+    or: bitwiseBinaryGateShorthand(or, 'or'),
+    nor: bitwiseBinaryGateShorthand(nor, 'nor'),
+    xor: bitwiseBinaryGateShorthand(xor, 'xor'),
+    xnor: bitwiseBinaryGateShorthand(xnor, 'xnor'),
+    raw: { and, nand, not, or, nor, xor, xnor },
   };
 };

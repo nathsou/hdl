@@ -3,14 +3,14 @@ import { GateModules } from "./gates";
 
 export type MemoryModules = ReturnType<typeof createMemoryModules>;
 
-export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModules) => {
+export const createMemoryModules = (circ: Circuit, { and, not, raw }: GateModules) => {
   const srLatch = createModule({
     name: 'sr_latch',
     inputs: { s: 1, r: 1 },
     outputs: { q: 1, qbar: 1 },
     connect(inp, out) {
-      const top = nor1();
-      const bot = nor1();
+      const top = raw.nor();
+      const bot = raw.nor();
 
       top.in.a = inp.s;
       top.in.b = bot.out.q;
@@ -30,8 +30,8 @@ export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModul
     connect(inp, out) {
       const sr = srLatch();
 
-      sr.in.s = and(inp.s, inp.enable);
-      sr.in.r = and(inp.r, inp.enable);
+      sr.in.s = and<1>(inp.s, inp.enable);
+      sr.in.r = and<1>(inp.r, inp.enable);
 
       out.q = sr.out.q;
       out.qbar = sr.out.qbar;
@@ -46,7 +46,7 @@ export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModul
       const sr = srLatchWithEnable();
 
       sr.in.s = inp.d;
-      sr.in.r = not(inp.d);
+      sr.in.r = not<1>(inp.d);
       sr.in.enable = inp.enable;
 
       out.q = sr.out.q;
@@ -77,10 +77,10 @@ export const createMemoryModules = (circ: Circuit, { and, nor1, not }: GateModul
       const follower = srLatchWithEnable();
 
       leader.in.enable = inp.clk;
-      leader.in.s = and(inp.j, follower.out.qbar);
-      leader.in.r = and(inp.k, follower.out.q);
+      leader.in.s = and<1>(inp.j, follower.out.qbar);
+      leader.in.r = and<1>(inp.k, follower.out.q);
 
-      follower.in.enable = not(inp.clk);
+      follower.in.enable = not<1>(inp.clk);
       follower.in.s = leader.out.q;
       follower.in.r = leader.out.qbar;
 

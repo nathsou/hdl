@@ -28,7 +28,7 @@ export const createRegisters = (
         jks[i].in.k = andChain;
 
         if (i !== N - 1) {
-          andChain = and(andChain, jks[i].out.q);
+          andChain = and<1>(andChain, jks[i].out.q);
         }
       }
 

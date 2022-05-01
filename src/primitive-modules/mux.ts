@@ -4,37 +4,28 @@ import { GateModules } from "./gates";
 
 export type MultiplexerModules = ReturnType<typeof createMultiplexers>;
 
-export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }: GateModules) => {
-  const mux1 = <N extends Num>(N: N) => createModule({
-    name: `mux1_${N}`,
+export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd, logicalOr }: GateModules) => {
+  const mux2 = <N extends Num>(N: N) => createModule({
+    name: `mux2_${N}`,
     inputs: { d0: N, d1: N, sel: 1 },
     outputs: { q: N },
     connect({ sel, d0, d1 }, out) {
-      const lhs = andN(N);
-      lhs.in.a = d0;
-      lhs.in.b = IO.repeat(N, not(sel));
-
-      const rhs = andN(N);
-      rhs.in.a = IO.repeat(N, sel);
-      rhs.in.b = d1;
-
-      const res = orN(N);
-      res.in.a = lhs.out.q;
-      res.in.b = rhs.out.q;
-
-      out.q = res.out.q;
+      out.q = or(
+        and(d0, IO.repeat(N, not<1>(sel))),
+        and(IO.repeat(N, sel), d1)
+      );
     }
   }, circuit);
 
-  const mux2 = <N extends Num>(N: N) => createModule({
-    name: `mux2_${N}`,
+  const mux4 = <N extends Num>(N: N) => createModule({
+    name: `mux4_${N}`,
     inputs: { d0: N, d1: N, d2: N, d3: N, sel: 2 },
     outputs: { q: N },
     connect({ sel, d0, d1, d2, d3 }, out) {
-      const createMux1ToN = mux1(N);
-      const m1 = createMux1ToN();
-      const m2 = createMux1ToN();
-      const m3 = createMux1ToN();
+      const createMux2 = mux2(N);
+      const m1 = createMux2();
+      const m2 = createMux2();
+      const m3 = createMux2();
 
       m1.in.d0 = d0;
       m2.in.d0 = d1;
@@ -51,15 +42,15 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     }
   }, circuit);
 
-  const mux3 = <N extends Num>(N: N) => createModule({
-    name: `mux3_${N}`,
+  const mux8 = <N extends Num>(N: N) => createModule({
+    name: `mux8_${N}`,
     inputs: { d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N, sel: 3 },
     outputs: { q: N },
     connect({ sel, d0, d1, d2, d3, d4, d5, d6, d7 }, out) {
-      const createMux2ToN = mux2(N);
-      const m1 = createMux2ToN();
-      const m2 = createMux2ToN();
-      const m3 = mux1(N)();
+      const createMux4 = mux4(N);
+      const m1 = createMux4();
+      const m2 = createMux4();
+      const m3 = mux2(N)();
 
       m1.in.d0 = d0;
       m1.in.d1 = d1;
@@ -82,8 +73,8 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     }
   }, circuit);
 
-  const mux4 = <N extends Num>(N: N) => createModule({
-    name: `mux4_${N}`,
+  const mux16 = <N extends Num>(N: N) => createModule({
+    name: `mux16_${N}`,
     inputs: {
       d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N,
       d8: N, d9: N, d10: N, d11: N, d12: N, d13: N, d14: N, d15: N,
@@ -91,10 +82,10 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     },
     outputs: { q: N },
     connect(inp, out) {
-      const createMux3ToN = mux3(N);
-      const m1 = createMux3ToN();
-      const m2 = createMux3ToN();
-      const m3 = mux1(N)();
+      const createMux8 = mux8(N);
+      const m1 = createMux8();
+      const m2 = createMux8();
+      const m3 = mux2(N)();
 
       Range.iter(0, 8, i => {
         m1.in[`d${i}`] = inp[`d${i}`];
@@ -114,8 +105,8 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     }
   }, circuit);
 
-  const mux5 = <N extends Num>(N: N) => createModule({
-    name: `mux5_${N}`,
+  const mux32 = <N extends Num>(N: N) => createModule({
+    name: `mux32_${N}`,
     inputs: {
       d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N,
       d8: N, d9: N, d10: N, d11: N, d12: N, d13: N, d14: N, d15: N,
@@ -125,10 +116,10 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     },
     outputs: { q: N },
     connect(inp, out) {
-      const createMux4ToN = mux4(N);
-      const m1 = createMux4ToN();
-      const m2 = createMux4ToN();
-      const m3 = mux1(N)();
+      const createMux16 = mux16(N);
+      const m1 = createMux16();
+      const m2 = createMux16();
+      const m3 = mux2(N)();
 
       Range.iter(0, 16, i => {
         m1.in[`d${i}`] = inp[`d${i}`];
@@ -167,7 +158,7 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     for (const [n, c] of casesExceptDefault) {
       const connectionTuple = IO.asArray(c);
       const bits = Tuple.bin(Number(n), valueTuple.length);
-      const selected = and(...bits.map((b, i) => b === 1 ? valueTuple[i] : not(valueTuple[i])));
+      const selected = logicalAnd(...bits.map((b, i) => b === 1 ? valueTuple[i] : not<1>(valueTuple[i])));
       ors.push(connectionTuple.map(c => and(selected, c)) as Tuple<Connection, N>);
 
       if (!isExhaustive) {
@@ -180,7 +171,7 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
       const defaultValueArray = IO.asArray(defaultValue);
 
       if (casesExceptDefault.length > 0) {
-        const isMatched = or(...isMatchedOrs);
+        const isMatched = logicalOr(...isMatchedOrs);
         const isNotMatched = not(isMatched);
         ors.push(defaultValueArray.map(c => and(isNotMatched, c)) as Tuple<Connection, N>);
       } else {
@@ -188,7 +179,7 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
       }
     }
 
-    return IO.gen(N, i => or(...ors.map(o => o[i])));
+    return IO.gen(N, i => logicalOr(...ors.map(o => o[i])));
   };
 
   const binaryDecoder2 = createModule({
@@ -197,7 +188,7 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     outputs: { q: 2 },
     connect({ d }, out) {
       const [y3, y2, y1, _y0] = d;
-      out.q = [or(y3, y2), or(y3, y1)];
+      out.q = [or<1>(y3, y2), or<1>(y3, y1)];
     }
   }, circuit);
 
@@ -206,17 +197,8 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
     inputs: { d: N, sel: 1 },
     outputs: { q0: N, q1: N },
     connect(inp, out) {
-      const ands0 = andN(N);
-      const ands1 = andN(N);
-
-      ands0.in.a = inp.d;
-      ands0.in.b = IO.repeat(N, not(inp.sel));
-
-      ands1.in.a = inp.d;
-      ands1.in.b = IO.repeat(N, inp.sel);
-
-      out.q0 = ands0.out.q;
-      out.q1 = ands1.out.q;
+      out.q0 = and(inp.d, IO.repeat(N, not<1>(inp.sel)));
+      out.q1 = and(inp.d, IO.repeat(N, inp.sel));
     }
   }, circuit);
 
@@ -325,11 +307,11 @@ export const createMultiplexers = (circuit: Circuit, { and, andN, not, orN, or }
   }, circuit);
 
   return {
-    mux1: <N extends Num>(N: N) => mux1(N)(),
     mux2: <N extends Num>(N: N) => mux2(N)(),
-    mux3: <N extends Num>(N: N) => mux3(N)(),
     mux4: <N extends Num>(N: N) => mux4(N)(),
-    mux5: <N extends Num>(N: N) => mux5(N)(),
+    mux8: <N extends Num>(N: N) => mux8(N)(),
+    mux16: <N extends Num>(N: N) => mux16(N)(),
+    mux32: <N extends Num>(N: N) => mux32(N)(),
     demux2: <N extends Num>(N: N) => demux2(N)(),
     demux4: <N extends Num>(N: N) => demux4(N)(),
     demux8: <N extends Num>(N: N) => demux8(N)(),

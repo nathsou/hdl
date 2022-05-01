@@ -73,8 +73,8 @@ export const IO = {
 
     return (res.length === 1 ? res[0] : res) as IO<N>;
   },
-  width: <N extends number>(connections: IO<N>): number => {
-    return Array.isArray(connections) ? connections.length : 1;
+  width: <N extends number>(connections: IO<N>): N => {
+    return (Array.isArray(connections) ? connections.length : 1) as N;
   },
   at: <N extends number>(connections: IO<N>, index: number): Connection => {
     assert(index >= 0 && index < IO.width(connections), 'IO.at: index out of range');

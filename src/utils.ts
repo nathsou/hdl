@@ -145,7 +145,7 @@ export const Tuple = {
   bin: <W extends number>(n: number | bigint, width: W): Tuple<State, W> => {
     return n
       .toString(2)
-      .slice(0, width)
+      .slice(-width)
       .padStart(width, '0')
       .split('')
       .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
@@ -156,8 +156,6 @@ export const Tuple = {
         const connection = CoreUtils.rawFrom(value);
         const target = connections[Number(index)];
         const dir = CoreUtils.pinDirection(circuit, connection.modId, connection.pin);
-
-        console.log('set', { index, target, dir, connection });
 
         if (isRawConnection(target)) {
           CoreUtils.connect(circuit, target.modId, dir, target.pin, connection);
