@@ -33,6 +33,7 @@ export type State = 0 | 1;
 export const State = {
   zero: 0 as State,
   one: 1 as State,
+  from: (b: boolean): State => b ? 1 : 0,
   gen: <N extends number>(count: N, factory: (n: number) => Connection): N extends 1 ? State : Tuple<State, N> => {
     if (count === 1) {
       return factory(0) as any;

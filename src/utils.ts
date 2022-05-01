@@ -134,7 +134,7 @@ export const Tuple = {
     return Tuple.gen(count, () => c);
   },
   low: <T, N extends number>(count: N, values: Tuple<T, Num>): Tuple<T, N> => {
-    return Tuple.gen(count, i => values[values.length - count - i]);
+    return Tuple.gen(count, i => values[values.length - count + i]);
   },
   high: <T, N extends number>(count: N, values: Tuple<T, Num>): Tuple<T, N> => {
     return Tuple.gen(count, i => values[i]);

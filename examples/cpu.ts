@@ -8,7 +8,7 @@ const {
     gates: { and, not, or, xor },
     mux: { match1, match8, demux16, matchN },
     regs: { reg8 },
-    arith: { add, subtract, adder8, isEqual, isEqualConst, shiftLeft, shiftRight },
+    arith: { add, adder, subtract, isEqual, isEqualConst, shiftLeft, shiftRight, compare8 },
   }
 } = createCircuit();
 const { bin } = Tuple;
@@ -72,31 +72,33 @@ const top = createModule({
     IO.forward({ clk: inp.clk }, regs);
 
     const programCounter = regs[0].out.q;
-
     rom.in.address = programCounter;
 
     const inst = rom.out.inst;
-
     const opcode = Tuple.slice(0, 4, inst);
     const dest = Tuple.slice(4, 8, inst);
     const arg1 = Tuple.slice(8, 12, inst);
     const arg2 = Tuple.slice(12, 16, inst);
     const constant = Tuple.slice(8, 16, inst);
 
-    const registersMapping = Object.fromEntries(regs.map((r, i) => [i, r.out.q])) as Record<Range<0, 16>, Tuple<Connection, 8>>;
+    const registersMapping = Object.fromEntries(
+      regs.map((r, i) => [i, r.out.q])
+    ) as Record<Range<0, 16>, Tuple<Connection, 8>>;
 
     const destRegOut = match8(dest, registersMapping);
     const arg1RegOut = match8(arg1, registersMapping);
     const arg2RegOut = match8(arg2, registersMapping);
 
-    const argsEqual = isEqual<8>(arg1RegOut, arg1RegOut);
+    const argsComp = compare8(arg1RegOut, arg2RegOut);
 
     const inputDemux = demux16(8);
     inputDemux.in.sel = dest;
+
     inputDemux.in.d = match8(opcode, {
       [Inst.LOAD]: inp.din,
       [Inst.SET]: constant,
-      [Inst.EQ]: Tuple.repeat(8, argsEqual),
+      [Inst.LT]: Tuple.repeat(8, argsComp.lss),
+      [Inst.EQ]: Tuple.repeat(8, argsComp.equ),
       [Inst.ADD]: add<8>(arg1RegOut, arg2RegOut),
       [Inst.SUB]: subtract<8>(arg1RegOut, arg2RegOut),
       [Inst.SHL]: shiftLeft<8>(arg1RegOut, Tuple.slice(0, 3, arg2RegOut)),
@@ -119,12 +121,12 @@ const top = createModule({
     out.read = isLoadInst;
     out.write = isStoreInst;
 
-    const pcIncrementer = adder8();
+    const pcIncrementer = adder(8);
     pcIncrementer.in.carry_in = 0;
     pcIncrementer.in.a = programCounter;
     const branch = or(
-      and(argsEqual, isBeqInst),
-      and(not(argsEqual), isBneqInst)
+      and(argsComp.equ, isBeqInst),
+      and(not(argsComp.equ), isBneqInst)
     );
     pcIncrementer.in.b = match8(branch, {
       0: Tuple.bin(1, 8),

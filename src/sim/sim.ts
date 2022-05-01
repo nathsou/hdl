@@ -98,19 +98,16 @@ export type Simulator<In extends Record<string, number>> = {
 
 export type SimulationApproach = 'levelization' | 'event-driven';
 
-const simulatorMapping: Record<
-  SimulationApproach,
-  <In extends Record<string, number>, Out extends Record<string, number>>(top: Module<In, Out>) => Simulator<In>
-> = {
-  'levelization': createLevelizedSimulator,
-  'event-driven': createEventDrivenSimulator,
-};
-
 export const createSimulator = <
   In extends Record<string, number>,
   Out extends Record<string, number>
 >(top: Module<In, Out>, approach: SimulationApproach = 'event-driven') => {
-  return simulatorMapping[approach](top);
+  switch (approach) {
+    case 'levelization':
+      return createLevelizedSimulator(top);
+    case 'event-driven':
+      return createEventDrivenSimulator(top);
+  }
 };
 
 type StateUpdater = (state: CircuitState, net: Net, newState: State) => void;
