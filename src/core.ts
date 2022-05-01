@@ -1,5 +1,5 @@
 import { createBasicModules } from "./primitive-modules/basic";
-import { Iter, last, mapObject, pushRecord, shallowEqualObject, Tuple } from "./utils";
+import { assert, Iter, last, mapObject, pushRecord, shallowEqualObject, Tuple } from "./utils";
 
 export type Circuit = {
   modules: CircuitModules,
@@ -67,6 +67,18 @@ export const IO = {
     }
 
     return result as IO<N>;
+  },
+  map: <N extends number>(connections: IO<N>, f: (c: Connection, index: number) => Connection): IO<N> => {
+    const res = IO.asArray(connections).map(f);
+
+    return (res.length === 1 ? res[0] : res) as IO<N>;
+  },
+  width: <N extends number>(connections: IO<N>): number => {
+    return Array.isArray(connections) ? connections.length : 1;
+  },
+  at: <N extends number>(connections: IO<N>, index: number): Connection => {
+    assert(index >= 0 && index < IO.width(connections), 'IO.at: index out of range');
+    return Array.isArray(connections) ? connections[index] : connections;
   },
   forward: <
     Pins extends keyof Mapping,

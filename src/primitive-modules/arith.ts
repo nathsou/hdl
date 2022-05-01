@@ -1,4 +1,4 @@
-import { Circuit, createModule, Multi, IO } from "../core";
+import { Circuit, createModule, Multi, IO, Num, State } from "../core";
 import { last, Tuple } from "../utils";
 import { GateModules } from "./gates";
 
@@ -87,6 +87,28 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
     },
   }, circ);
 
+  const equalsConst = <N extends Num>(c: Tuple<State, N>) => createModule({
+    name: `equals_const_${c.join('')}`,
+    inputs: { d: c.length as N },
+    outputs: { q: 1 },
+    connect({ d }, out) {
+      out.q = gates.and(...c.map((state, i) => state === 1 ? IO.at(d, i) : gates.not(IO.at(d, i))));
+    },
+  }, circ);
+
+  const isEqual = <N extends Num>(N: N) => createModule({
+    name: `is_equal_${N}`,
+    inputs: { a: N, b: N },
+    outputs: { q: 1 },
+    connect({ a, b }, out) {
+      const eq = gates.xnorN(N);
+      eq.in.a = a;
+      eq.in.b = b;
+
+      out.q = gates.and(...IO.asArray(eq.out.q));
+    }
+  }, circ);
+
   const add = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
     const sum = adder(a.length as N)();
 
@@ -118,5 +140,7 @@ export const createArith = (circ: Circuit, gates: GateModules) => {
     adderSubtractor: <N extends Multi>(N: N) => adderSubtractor(N)(),
     add,
     subtract,
+    equalsConst,
+    isEqual: <N extends Multi>(N: N) => isEqual(N)(),
   };
 };

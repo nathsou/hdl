@@ -4,6 +4,5 @@
 /out
 /lib
 examples/lab.ts
-examples/cpu.ts
 examples/cpusim.ts
 examples/cpusim2.ts

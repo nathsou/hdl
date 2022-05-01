@@ -114,7 +114,7 @@ export const createGates = (circuit: Circuit, meta: MetaModules) => {
     } as ExtendedGate<Name>;
   };
 
-  const shorthands = {
+  return {
     not,
     not1,
     not2: meta.extendN(2, not1, ['d'], ['q'], 'not2'),
@@ -128,20 +128,5 @@ export const createGates = (circuit: Circuit, meta: MetaModules) => {
     ...extendBinary(nor, 'nor'),
     ...extendBinary(xor, 'xor'),
     ...extendBinary(xnor, 'xnor'),
-  };
-
-  const binaryEncoder2 = createModule({
-    name: 'binaryEncoder2',
-    inputs: { d: 4 },
-    outputs: { q: 2 },
-    connect({ d }, out) {
-      const [y3, y2, y1, _y0] = d;
-      out.q = [shorthands.or(y3, y2), shorthands.or(y3, y1)];
-    }
-  }, circuit);
-
-  return {
-    ...shorthands,
-    binaryEncoder1: binaryEncoder2,
   };
 };

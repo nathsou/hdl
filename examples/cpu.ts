@@ -1,0 +1,170 @@
+import { createCircuit, Connection, IO, State } from "../src/core";
+import { createSimulator } from '../src/sim/sim';
+import { Tuple, Range } from "../src/utils";
+
+const {
+  createModule,
+  primitives: {
+    mux: { match1, match8, demux16, matchN },
+    regs: { reg8 },
+    arith: { add, adder8, equalsConst, isEqual },
+  }
+} = createCircuit();
+const { bin } = Tuple;
+
+// Based on the basic CPU architecture from https://alchitry.com/basic-cpu-mojo
+const Inst = {
+  NOOP: 0x0,
+  LOAD: 0x1,
+  STORE: 0x2,
+  SET: 0x3,
+  LT: 0x4,
+  EQ: 0x5,
+  BEQ: 0x6,
+  BNEQ: 0x7,
+  ADD: 0x8,
+  SUB: 0x9,
+  SHL: 0xa,
+  SHR: 0xb,
+  AND: 0xc,
+  OR: 0xd,
+  INV: 0xe,
+  XOR: 0xf,
+} as const;
+
+const createROM = createModule({
+  name: 'instructions_rom',
+  inputs: { address: 8 },
+  outputs: { inst: 16 },
+  connect({ address }, out) {
+    out.inst = matchN(16)(address, {
+      0: [...bin(Inst.SET, 4), ...bin(2, 4), ...bin(0, 8)],
+      // loop
+      1: [...bin(Inst.SET, 4), ...bin(1, 4), ...bin(128, 8)],
+      2: [...bin(Inst.STORE, 4), ...bin(2, 4), ...bin(1, 4), ...bin(0, 4)],
+      3: [...bin(Inst.SET, 4), ...bin(1, 4), ...bin(1, 8)],
+      4: [...bin(Inst.ADD, 4), ...bin(2, 4), ...bin(2, 4), ...bin(1, 4)],
+      5: [...bin(Inst.SET, 4), ...bin(15, 4), ...bin(1, 8)],
+      6: [...bin(Inst.SET, 4), ...bin(0, 4), ...bin(7, 8)],
+      // delay
+      7: [...bin(Inst.SET, 4), ...bin(11, 4), ...bin(0, 8)],
+      8: [...bin(Inst.SET, 4), ...bin(1, 4), ...bin(1, 8)],
+      // delay_loop
+      9: [...bin(Inst.ADD, 4), ...bin(11, 4), ...bin(11, 4), ...bin(1, 4)],
+      10: [...bin(Inst.BEQ, 4), ...bin(11, 4), ...bin(0, 8)],
+      11: [...bin(Inst.SET, 4), ...bin(0, 4), ...bin(9, 8)],
+      12: [...bin(Inst.SET, 4), ...bin(1, 4), ...bin(0, 8)],
+      13: [...bin(Inst.ADD, 4), ...bin(0, 4), ...bin(15, 4), ...bin(1, 4)],
+      _: Tuple.repeat(16, 0),
+    });
+  }
+});
+
+const top = createModule({
+  name: 'top',
+  inputs: { clk: 1 },
+  outputs: { write: 1, address: 8, dout: 8, leds: 4 },
+  connect(inp, out) {
+    const regs = Tuple.gen(16, i => reg8(Tuple.bin(i, 8)));
+    const rom = createROM();
+
+    IO.forward({ clk: inp.clk }, regs);
+
+    const programCounter = regs[0].out.q;
+
+    rom.in.address = programCounter;
+
+    const inst = rom.out.inst;
+
+    const opcode = Tuple.slice(0, 4, inst);
+    const dest = Tuple.slice(4, 8, inst);
+    const arg1 = Tuple.slice(8, 12, inst);
+    const arg2 = Tuple.slice(12, 16, inst);
+    const constant = Tuple.slice(8, 16, inst);
+
+    const registersMapping = Object.fromEntries(regs.map((r, i) => [i, r.out.q])) as Record<Range<0, 16>, Tuple<Connection, 8>>;
+
+    const destRegOut = match8(dest, registersMapping);
+    const arg1RegOut = match8(arg1, registersMapping);
+    const arg2RegOut = match8(arg2, registersMapping);
+
+    const argsEqual = isEqual(8);
+    argsEqual.in.a = arg1RegOut;
+    argsEqual.in.b = arg2RegOut;
+
+    const inputDemux = demux16(8);
+    inputDemux.in.sel = dest;
+    inputDemux.in.d = match8(opcode, {
+      [Inst.SET]: constant,
+      [Inst.ADD]: add<8>(arg1RegOut, arg2RegOut),
+      [Inst.EQ]: Tuple.repeat(8, argsEqual.out.q),
+      _: Tuple.repeat(8, State.zero),
+    });
+
+    const isDestZero = equalsConst<4>(Tuple.bin(0, 4))();
+    isDestZero.in.d = dest;
+
+    const isStoreInst = equalsConst<4>(Tuple.bin(Inst.STORE, 4))();
+    isStoreInst.in.d = opcode;
+
+    const isBeqInst = equalsConst<4>(Tuple.bin(Inst.BEQ, 4))();
+    isBeqInst.in.d = opcode;
+
+    out.address = arg1RegOut;
+    out.dout = destRegOut;
+    out.write = isStoreInst.out.q;
+
+    const pcIncrementer = adder8();
+    pcIncrementer.in.carry_in = 0;
+    pcIncrementer.in.a = programCounter;
+    pcIncrementer.in.b = match8(isBeqInst.out.q, {
+      0: Tuple.bin(1, 8),
+      1: match8(argsEqual.out.q, {
+        0: Tuple.bin(1, 8),
+        1: Tuple.bin(2, 8),
+      }),
+    });
+
+    regs[0].in.load = 1;
+    regs[0].in.d = match8(isDestZero.out.q, {
+      0: pcIncrementer.out.sum,
+      1: inputDemux.out.q0,
+    });
+
+    const loadDemux = demux16(1);
+    loadDemux.in.sel = dest;
+    loadDemux.in.d = match1(opcode, {
+      [Inst.STORE]: 0,
+      [Inst.BEQ]: 0,
+      [Inst.BNEQ]: 0,
+      _: 1,
+    });
+
+    Range.iter(1, 16, n => {
+      regs[n].in.load = loadDemux.out[`q${n}`];
+      regs[n].in.d = inputDemux.out[`q${n}`];
+    });
+
+    out.leds = opcode;
+  },
+});
+
+const main = () => {
+  const mod = top();
+  const sim = createSimulator(mod);
+
+  for (let i = 0; i < 3500; i++) {
+    sim.input({ clk: 0 });
+    if (sim.state.read(mod.out.write) === 1) {
+      console.log({
+        leds: sim.state.read(mod.out.leds).join(''),
+        write: sim.state.read(mod.out.write),
+        address: sim.state.read(mod.out.address).join(''),
+        dout: sim.state.read(mod.out.dout).join(''),
+      });
+    }
+    sim.input({ clk: 1 });
+  }
+};
+
+main();

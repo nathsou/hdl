@@ -110,6 +110,14 @@ export const shallowEqualObject = <V>(a: Record<string, V>, b: Record<string, V>
   return keysa.length === keysb.length && keysa.every(k => a[k] === b[k]);
 };
 
+type Assert = (condition: unknown, message?: string) => asserts condition;
+
+export const assert: Assert = (condition, msg) => {
+  if (!condition) {
+    throw new Error(`Assertion error: ${msg}`);
+  }
+};
+
 export const Tuple = {
   map: <N extends number, T, U>(values: Tuple<T, N>, f: (v: T, index: number) => U): Tuple<U, N> => {
     return values.map(f) as Tuple<U, N>;
