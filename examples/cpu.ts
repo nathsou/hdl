@@ -101,8 +101,8 @@ const top = createModule({
       [Inst.EQ]: Tuple.repeat(8, argsComp.equ),
       [Inst.ADD]: add<8>(arg1RegOut, arg2RegOut),
       [Inst.SUB]: subtract<8>(arg1RegOut, arg2RegOut),
-      [Inst.SHL]: shiftLeft<8>(arg1RegOut, Tuple.slice(0, 3, arg2RegOut)),
-      [Inst.SHR]: shiftRight<8>(arg1RegOut, Tuple.slice(0, 3, arg2RegOut)),
+      [Inst.SHL]: shiftLeft<8>(arg1RegOut, Tuple.low(3, arg2RegOut)),
+      [Inst.SHR]: shiftRight<8>(arg1RegOut, Tuple.low(3, arg2RegOut)),
       [Inst.AND]: and<8>(arg1RegOut, arg2RegOut),
       [Inst.OR]: or<8>(arg1RegOut, arg2RegOut),
       [Inst.INV]: not<8>(arg1RegOut),
@@ -163,7 +163,7 @@ const main = () => {
   const sim = createSimulator(mod);
   const din = Tuple.repeat(8, State.zero);
 
-  for (let i = 0; i < 3100 * 256; i++) {
+  for (let i = 0; i < 198914; i++) {
     sim.input({ din, clk: 0 });
     if (sim.state.read(mod.out.write) === 1) {
       console.log({
