@@ -13,11 +13,11 @@ const pow2 = {
 } as const;
 
 const multiplexers = {
-  1: mux.mux1,
-  2: mux.mux2,
-  3: mux.mux3,
-  4: mux.mux4,
-  5: mux.mux5,
+  1: mux.mux2,
+  2: mux.mux4,
+  3: mux.mux8,
+  4: mux.mux16,
+  5: mux.mux32,
 };
 
 const muxSize = 5;

@@ -1,4 +1,4 @@
-import { Circuit, Connection, createModule, IO, Num } from "../core";
+import { Circuit, Connection, createModule, createModuleGroup, IO, Num } from "../core";
 import { Range, Tuple } from "../utils";
 import { GateModules } from "./gates";
 
@@ -143,11 +143,10 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
 
   type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, IO<N>>;
   type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: IO<N> });
-
   const match = <N extends Num>(N: N) => <T extends IO<Num>>(
     value: T,
     cases: CasesWithDefault<T extends any[] ? T['length'] : 1, N>
-  ): IO<N> => {
+  ): IO<N> => createModuleGroup(`match${N}${IO.width(value)}`, () => {
     const ors: Tuple<Connection, N>[] = [];
     const valueTuple = IO.asArray(value);
     const isExhaustive = !Object.keys(cases).some(key => key === '_');
@@ -180,7 +179,7 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
     }
 
     return IO.gen(N, i => logicalOr(...ors.map(o => o[i])));
-  };
+  });
 
   const binaryDecoder2 = createModule({
     name: 'binary_decoder_2',

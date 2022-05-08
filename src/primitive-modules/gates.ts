@@ -1,4 +1,5 @@
-import { Circuit, Connection, createPrimitiveModule, IO, Module, Num } from "../core";
+import { Circuit, Connection, createModuleGroup, createPrimitiveModule, IO, Module, Num } from "../core";
+import { assert } from "../utils";
 import { MetaModules } from "./meta";
 
 export type GateModules = ReturnType<typeof createGates>;
@@ -13,18 +14,18 @@ export const createGates = (circuit: Circuit, meta: MetaModules) => {
     },
   }, circuit);
 
-  const logicalNot = (d: Connection): Connection => {
+  const logicalNot = (d: Connection): Connection => createModuleGroup('logical_not', () => {
     const gate = not();
     gate.in.d = d;
     return gate.out.q;
-  };
+  });
 
-  const bitwiseNot = <N extends Num>(d: IO<N>): IO<N> => {
+  const bitwiseNot = <N extends Num>(d: IO<N>): IO<N> => createModuleGroup('bitwise_not', () => {
     const N = IO.width(d);
     const extended = meta.extendN(N, not, ['d'], ['q'], `not${N}`)();
     extended.in.d = d;
     return extended.out.q;
-  };
+  });
 
   const and = createPrimitiveModule({
     name: 'and',
@@ -82,8 +83,8 @@ export const createGates = (circuit: Circuit, meta: MetaModules) => {
     },
   }, circuit);
 
-  const logicalBinaryGateShorthand = (gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>) => {
-    return (...inputs: Connection[]): Connection => {
+  const logicalBinaryGateShorthand = (name: string, gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>) => {
+    return (...inputs: Connection[]): Connection => createModuleGroup(`logical_${name}${inputs.length}`, () => {
       let chain = inputs[0];
 
       for (let i = 1; i < inputs.length; i++) {
@@ -94,35 +95,36 @@ export const createGates = (circuit: Circuit, meta: MetaModules) => {
       }
 
       return chain;
-    };
+    });
   };
 
-  const bitwiseBinaryGateShorthand = (gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>, name: string) => {
-    return <N extends Num>(a: IO<N>, b: IO<N>): IO<N> => {
+  const bitwiseBinaryGateShorthand = (name: string, gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>) => {
+    return <N extends Num>(a: IO<N>, b: IO<N>): IO<N> => createModuleGroup(`bitwise_${name}${IO.width(a)}`, () => {
+      assert(IO.width(a) === IO.width(b));
       const N = IO.width(a);
       const extended = meta.extendN(N, gate, ['a', 'b'], ['q'], `${name}${N}`)();
       extended.in.a = a;
       extended.in.b = b;
 
       return extended.out.q;
-    };
+    });
   };
 
   return {
     logicalNot,
-    logicalAnd: logicalBinaryGateShorthand(and),
-    logicalNand: logicalBinaryGateShorthand(nand),
-    logicalOr: logicalBinaryGateShorthand(or),
-    logicalNor: logicalBinaryGateShorthand(nor),
-    logicalXor: logicalBinaryGateShorthand(xor),
-    logicalXnor: logicalBinaryGateShorthand(xnor),
+    logicalAnd: logicalBinaryGateShorthand('and', and),
+    logicalNand: logicalBinaryGateShorthand('nand', nand),
+    logicalOr: logicalBinaryGateShorthand('or', or),
+    logicalNor: logicalBinaryGateShorthand('nor', nor),
+    logicalXor: logicalBinaryGateShorthand('xor', xor),
+    logicalXnor: logicalBinaryGateShorthand('xnor', xnor),
     not: bitwiseNot,
-    and: bitwiseBinaryGateShorthand(and, 'and'),
-    nand: bitwiseBinaryGateShorthand(nand, 'nand'),
-    or: bitwiseBinaryGateShorthand(or, 'or'),
-    nor: bitwiseBinaryGateShorthand(nor, 'nor'),
-    xor: bitwiseBinaryGateShorthand(xor, 'xor'),
-    xnor: bitwiseBinaryGateShorthand(xnor, 'xnor'),
+    and: bitwiseBinaryGateShorthand('and', and),
+    nand: bitwiseBinaryGateShorthand('nand', nand),
+    or: bitwiseBinaryGateShorthand('or', or),
+    nor: bitwiseBinaryGateShorthand('nor', nor),
+    xor: bitwiseBinaryGateShorthand('xor', xor),
+    xnor: bitwiseBinaryGateShorthand('xnor', xnor),
     raw: { and, nand, not, or, nor, xor, xnor },
   };
 };

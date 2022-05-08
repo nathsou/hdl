@@ -74,7 +74,7 @@ export const IO = {
 
     return (res.length === 1 ? res[0] : res) as IO<N>;
   },
-  width: <N extends number>(connections: IO<N>): N => {
+  width: <N extends Num>(connections: IO<N>): N => {
     return (Array.isArray(connections) ? connections.length : 1) as N;
   },
   at: <N extends number>(connections: IO<N>, index: number): Connection => {
@@ -127,9 +127,24 @@ export type RawConnection = {
   pin: string,
 };
 
+export type SubModules = ModuleNode[] | ModuleGroup;
+export type ModuleGroup = { name: string, subModules: SubModules };
+
+const SubModules = {
+  push: (self: SubModules, node: ModuleNode): void => {
+    if (Array.isArray(self)) {
+      self.push(node);
+    } else if (self?.subModules) {
+      SubModules.push(self.subModules, node);
+    } else {
+      throw new Error(`${self}`);
+    }
+  },
+};
+
 export type ModuleNode = {
   id: ModuleId,
-  subModules: ModuleNode[],
+  subModules: SubModules,
   name: string,
   pins: {
     in: Record<string, RawConnection[]>,
@@ -147,12 +162,12 @@ export type CircuitState = Record<string, NodeState>;
 
 type GlobalState = {
   nextId: number,
-  subModulesStack: ModuleNode[][],
+  subModulesStack: SubModules[],
 };
 
 const globalState: GlobalState = {
   nextId: 0,
-  subModulesStack: [],
+  subModulesStack: [[]],
 };
 
 const nextId = () => globalState.nextId++;
@@ -282,6 +297,14 @@ export const CoreUtils = {
   },
 };
 
+export const createModuleGroup = <T>(name: string, f: () => T): T => {
+  const group: ModuleGroup = { name, subModules: [] };
+  globalState.subModulesStack.push(group);
+  const ret = f();
+  globalState.subModulesStack.pop();
+  return ret;
+};
+
 const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: Circuit, isInput: boolean): ProxyHandler<any> => {
   const sig = mod[isInput ? 'inputs' : 'outputs'];
   const prefix = isInput ? 'in' : 'out';
@@ -399,14 +422,12 @@ const _createModule = <
 
     const inputs = new Proxy({}, connectionHandler(id, mod, circuit, true));
     const outputs = new Proxy({}, connectionHandler(id, mod, circuit, false));
-    last(globalState.subModulesStack)?.push(node);
+    SubModules.push(last(globalState.subModulesStack), node);
 
     // register connections
     if (mod.type === 'compound') {
-      const subModules: ModuleNode[] = [];
-      globalState.subModulesStack.push(subModules);
+      globalState.subModulesStack.push(node.subModules);
       mod.connect(inputs, outputs);
-      node.subModules = subModules;
       globalState.subModulesStack.pop();
 
       for (const [pin, width] of Object.entries(mod.outputs)) {

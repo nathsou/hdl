@@ -6,3 +6,4 @@
 examples/lab.ts
 examples/cpusim.ts
 examples/cpusim2.ts
+examples/regs.ts
