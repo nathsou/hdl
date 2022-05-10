@@ -1,8 +1,8 @@
-import { createCircuit } from "../src/core";
+import { createModule } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
+import { match3 } from '../src/modules/mux';
 import { Tuple } from "../src/utils";
 
-const { createModule, primitives: { mux: { match3 } } } = createCircuit();
 const { bin } = Tuple;
 
 const top = createModule({

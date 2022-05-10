@@ -1,7 +1,6 @@
-import { createCircuit } from "../src/core";
+import { createModule } from "../src/core";
+import * as regs from "../src/modules/regs";
 import { createSimulator } from '../src/sim/sim';
-
-const { createModule, primitives: { regs } } = createCircuit();
 
 const N = 16;
 

@@ -1,8 +1,8 @@
-import { createCircuit } from "../src/core";
+import { adderSubtractor } from "../src/modules/arith";
+import { createModule } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { Tuple } from "../src/utils";
 
-const { createModule, primitives: { arith } } = createCircuit();
 const { bin } = Tuple;
 
 const N = 32;
@@ -12,7 +12,7 @@ const top = createModule({
   inputs: { a: N, b: N, subtract: 1 },
   outputs: { leds: N, overflow: 1 },
   connect(inp, out) {
-    const adder = arith.adderSubtractor(N);
+    const adder = adderSubtractor(N);
 
     adder.in.a = inp.a;
     adder.in.b = inp.b;

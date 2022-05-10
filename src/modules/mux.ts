@@ -1,11 +1,9 @@
-import { Circuit, Connection, createModule, createModuleGroup, IO, Num } from "../core";
+import { Connection, createModule, createModuleGroup, IO, Num } from "../core";
 import { Range, Tuple } from "../utils";
-import { GateModules } from "./gates";
+import { and, logicalAnd, logicalOr, not, or } from "./gates";
 
-export type MultiplexerModules = ReturnType<typeof createMultiplexers>;
-
-export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd, logicalOr }: GateModules) => {
-  const mux2 = <N extends Num>(N: N) => createModule({
+export const raw = {
+  mux2: <N extends Num>(N: N) => createModule({
     name: `mux2_${N}`,
     inputs: { d0: N, d1: N, sel: 1 },
     outputs: { q: N },
@@ -15,14 +13,13 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
         and(IO.repeat(N, sel), d1)
       );
     }
-  }, circuit);
-
-  const mux4 = <N extends Num>(N: N) => createModule({
+  }),
+  mux4: <N extends Num>(N: N) => createModule({
     name: `mux4_${N}`,
     inputs: { d0: N, d1: N, d2: N, d3: N, sel: 2 },
     outputs: { q: N },
     connect({ sel, d0, d1, d2, d3 }, out) {
-      const createMux2 = mux2(N);
+      const createMux2 = raw.mux2(N);
       const m1 = createMux2();
       const m2 = createMux2();
       const m3 = createMux2();
@@ -40,17 +37,16 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
 
       out.q = m3.out.q;
     }
-  }, circuit);
-
-  const mux8 = <N extends Num>(N: N) => createModule({
+  }),
+  mux8: <N extends Num>(N: N) => createModule({
     name: `mux8_${N}`,
     inputs: { d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N, sel: 3 },
     outputs: { q: N },
     connect({ sel, d0, d1, d2, d3, d4, d5, d6, d7 }, out) {
-      const createMux4 = mux4(N);
+      const createMux4 = raw.mux4(N);
       const m1 = createMux4();
       const m2 = createMux4();
-      const m3 = mux2(N)();
+      const m3 = raw.mux2(N)();
 
       m1.in.d0 = d0;
       m1.in.d1 = d1;
@@ -71,9 +67,8 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
 
       out.q = m3.out.q;
     }
-  }, circuit);
-
-  const mux16 = <N extends Num>(N: N) => createModule({
+  }),
+  mux16: <N extends Num>(N: N) => createModule({
     name: `mux16_${N}`,
     inputs: {
       d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N,
@@ -82,10 +77,10 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
     },
     outputs: { q: N },
     connect(inp, out) {
-      const createMux8 = mux8(N);
+      const createMux8 = raw.mux8(N);
       const m1 = createMux8();
       const m2 = createMux8();
-      const m3 = mux2(N)();
+      const m3 = raw.mux2(N)();
 
       Range.iter(0, 8, i => {
         m1.in[`d${i}`] = inp[`d${i}`];
@@ -103,9 +98,8 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
 
       out.q = m3.out.q;
     }
-  }, circuit);
-
-  const mux32 = <N extends Num>(N: N) => createModule({
+  }),
+  mux32: <N extends Num>(N: N) => createModule({
     name: `mux32_${N}`,
     inputs: {
       d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N,
@@ -116,10 +110,10 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
     },
     outputs: { q: N },
     connect(inp, out) {
-      const createMux16 = mux16(N);
+      const createMux16 = raw.mux16(N);
       const m1 = createMux16();
       const m2 = createMux16();
-      const m3 = mux2(N)();
+      const m3 = raw.mux2(N)();
 
       Range.iter(0, 16, i => {
         m1.in[`d${i}`] = inp[`d${i}`];
@@ -137,61 +131,8 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
 
       out.q = m3.out.q;
     }
-  }, circuit);
-
-  type Pow2 = { 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128 } & Record<number, number>;
-
-  type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, IO<N>>;
-  type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: IO<N> });
-  const match = <N extends Num>(N: N) => <T extends IO<Num>>(
-    value: T,
-    cases: CasesWithDefault<T extends any[] ? T['length'] : 1, N>
-  ): IO<N> => createModuleGroup(`match${N}${IO.width(value)}`, () => {
-    const ors: Tuple<Connection, N>[] = [];
-    const valueTuple = IO.asArray(value);
-    const isExhaustive = !Object.keys(cases).some(key => key === '_');
-    const isMatchedOrs: Connection[] = [];
-
-    const casesExceptDefault = Object.entries(cases).filter(([key]) => key !== '_');
-
-    for (const [n, c] of casesExceptDefault) {
-      const connectionTuple = IO.asArray(c);
-      const bits = Tuple.bin(Number(n), valueTuple.length);
-      const selected = logicalAnd(...bits.map((b, i) => b === 1 ? valueTuple[i] : not<1>(valueTuple[i])));
-      ors.push(connectionTuple.map(c => and(selected, c)) as Tuple<Connection, N>);
-
-      if (!isExhaustive) {
-        isMatchedOrs.push(selected);
-      }
-    }
-
-    if (!isExhaustive) {
-      const defaultValue = (cases as { _: IO<N> })['_'];
-      const defaultValueArray = IO.asArray(defaultValue);
-
-      if (casesExceptDefault.length > 0) {
-        const isMatched = logicalOr(...isMatchedOrs);
-        const isNotMatched = not(isMatched);
-        ors.push(defaultValueArray.map(c => and(isNotMatched, c)) as Tuple<Connection, N>);
-      } else {
-        ors.push(defaultValueArray as Tuple<Connection, N>);
-      }
-    }
-
-    return IO.gen(N, i => logicalOr(...ors.map(o => o[i])));
-  });
-
-  const binaryDecoder2 = createModule({
-    name: 'binary_decoder_2',
-    inputs: { d: 4 },
-    outputs: { q: 2 },
-    connect({ d }, out) {
-      const [y3, y2, y1, _y0] = d;
-      out.q = [or<1>(y3, y2), or<1>(y3, y1)];
-    }
-  }, circuit);
-
-  const demux2 = <N extends Num>(N: N) => createModule({
+  }),
+  demux2: <N extends Num>(N: N) => createModule({
     name: `demux2_${N}`,
     inputs: { d: N, sel: 1 },
     outputs: { q0: N, q1: N },
@@ -199,14 +140,13 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
       out.q0 = and(inp.d, IO.repeat(N, not<1>(inp.sel)));
       out.q1 = and(inp.d, IO.repeat(N, inp.sel));
     }
-  }, circuit);
-
-  const demux4 = <N extends Num>(N: N) => createModule({
+  }),
+  demux4: <N extends Num>(N: N) => createModule({
     name: `demux4_${N}`,
     inputs: { d: N, sel: 2 },
     outputs: { q0: N, q1: N, q2: N, q3: N },
     connect(inp, out) {
-      const createDemux2 = demux2(N);
+      const createDemux2 = raw.demux2(N);
       const m1 = createDemux2();
       const m2 = createDemux2();
       const m3 = createDemux2();
@@ -225,17 +165,16 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
       out.q2 = m2.out.q0;
       out.q3 = m2.out.q1;
     }
-  }, circuit);
-
-  const demux8 = <N extends Num>(N: N) => createModule({
+  }),
+  demux8: <N extends Num>(N: N) => createModule({
     name: `demux8_${N}`,
     inputs: { d: N, sel: 3 },
     outputs: Object.fromEntries(Range.map(0, 8, i => [`q${i}`, N])) as Record<`q${Range<0, 8>}`, N>,
     connect(inp, out) {
-      const createDemux4 = demux4(N);
+      const createDemux4 = raw.demux4(N);
       const m1 = createDemux4();
       const m2 = createDemux4();
-      const m3 = demux2(N)();
+      const m3 = raw.demux2(N)();
 
       m3.in.d = inp.d;
       m3.in.sel = inp.sel[0];
@@ -251,17 +190,16 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
         out[`q${(n + 4) as Range<4, 8>}`] = m2.out[`q${n}`];
       });
     }
-  }, circuit);
-
-  const demux16 = <N extends Num>(N: N) => createModule({
+  }),
+  demux16: <N extends Num>(N: N) => createModule({
     name: `demux16_${N}`,
     inputs: { d: N, sel: 4 },
     outputs: Object.fromEntries(Range.map(0, 16, i => [`q${i}`, N])) as Record<`q${Range<0, 16>}`, N>,
     connect(inp, out) {
-      const createDemux8 = demux8(N);
+      const createDemux8 = raw.demux8(N);
       const m1 = createDemux8();
       const m2 = createDemux8();
-      const m3 = demux2(N)();
+      const m3 = raw.demux2(N)();
 
       m3.in.d = inp.d;
       m3.in.sel = inp.sel[0];
@@ -277,17 +215,16 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
         out[`q${(n + 8) as Range<8, 16>}`] = m2.out[`q${n}`];
       });
     }
-  }, circuit);
-
-  const demux32 = <N extends Num>(N: N) => createModule({
+  }),
+  demux32: <N extends Num>(N: N) => createModule({
     name: `demux32_${N}`,
     inputs: { d: N, sel: 5 },
     outputs: Object.fromEntries(Range.map(0, 32, i => [`q${i}`, N])) as Record<`q${Range<0, 32>}`, N>,
     connect(inp, out) {
-      const createDemux16 = demux16(N);
+      const createDemux16 = raw.demux16(N);
       const m1 = createDemux16();
       const m2 = createDemux16();
-      const m3 = demux2(N)();
+      const m3 = raw.demux2(N)();
 
       m3.in.d = inp.d;
       m3.in.sel = inp.sel[0];
@@ -303,28 +240,77 @@ export const createMultiplexers = (circuit: Circuit, { and, not, or, logicalAnd,
         out[`q${(n + 16) as Range<16, 32>}`] = m2.out[`q${n}`];
       });
     }
-  }, circuit);
-
-  return {
-    mux2: <N extends Num>(N: N) => mux2(N)(),
-    mux4: <N extends Num>(N: N) => mux4(N)(),
-    mux8: <N extends Num>(N: N) => mux8(N)(),
-    mux16: <N extends Num>(N: N) => mux16(N)(),
-    mux32: <N extends Num>(N: N) => mux32(N)(),
-    demux2: <N extends Num>(N: N) => demux2(N)(),
-    demux4: <N extends Num>(N: N) => demux4(N)(),
-    demux8: <N extends Num>(N: N) => demux8(N)(),
-    demux16: <N extends Num>(N: N) => demux16(N)(),
-    demux32: <N extends Num>(N: N) => demux32(N)(),
-    matchN: match,
-    match1: match(1),
-    match2: match(2),
-    match3: match(3),
-    match4: match(4),
-    match5: match(5),
-    match6: match(6),
-    match7: match(7),
-    match8: match(8),
-    binaryDecoder2,
-  };
+  }),
 };
+
+type Pow2 = { 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128 } & Record<number, number>;
+
+type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, IO<N>>;
+type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: IO<N> });
+const match = <N extends Num>(N: N) => <T extends IO<Num>>(
+  value: T,
+  cases: CasesWithDefault<T extends any[] ? T['length'] : 1, N>
+): IO<N> => createModuleGroup(`match${N}${IO.width(value)}`, () => {
+  const ors: Tuple<Connection, N>[] = [];
+  const valueTuple = IO.asArray(value);
+  const isExhaustive = !Object.keys(cases).some(key => key === '_');
+  const isMatchedOrs: Connection[] = [];
+
+  const casesExceptDefault = Object.entries(cases).filter(([key]) => key !== '_');
+
+  for (const [n, c] of casesExceptDefault) {
+    const connectionTuple = IO.asArray(c);
+    const bits = Tuple.bin(Number(n), valueTuple.length);
+    const selected = logicalAnd(...bits.map((b, i) => b === 1 ? valueTuple[i] : not<1>(valueTuple[i])));
+    ors.push(connectionTuple.map(c => and(selected, c)) as Tuple<Connection, N>);
+
+    if (!isExhaustive) {
+      isMatchedOrs.push(selected);
+    }
+  }
+
+  if (!isExhaustive) {
+    const defaultValue = (cases as { _: IO<N> })['_'];
+    const defaultValueArray = IO.asArray(defaultValue);
+
+    if (casesExceptDefault.length > 0) {
+      const isMatched = logicalOr(...isMatchedOrs);
+      const isNotMatched = not(isMatched);
+      ors.push(defaultValueArray.map(c => and(isNotMatched, c)) as Tuple<Connection, N>);
+    } else {
+      ors.push(defaultValueArray as Tuple<Connection, N>);
+    }
+  }
+
+  return IO.gen(N, i => logicalOr(...ors.map(o => o[i])));
+});
+
+export const binaryDecoder2 = createModule({
+  name: 'binary_decoder_2',
+  inputs: { d: 4 },
+  outputs: { q: 2 },
+  connect({ d }, out) {
+    const [y3, y2, y1, _y0] = d;
+    out.q = [or<1>(y3, y2), or<1>(y3, y1)];
+  }
+});
+
+export const mux2 = <N extends Num>(N: N) => raw.mux2(N)();
+export const mux4 = <N extends Num>(N: N) => raw.mux4(N)();
+export const mux8 = <N extends Num>(N: N) => raw.mux8(N)();
+export const mux16 = <N extends Num>(N: N) => raw.mux16(N)();
+export const mux32 = <N extends Num>(N: N) => raw.mux32(N)();
+export const demux2 = <N extends Num>(N: N) => raw.demux2(N)();
+export const demux4 = <N extends Num>(N: N) => raw.demux4(N)();
+export const demux8 = <N extends Num>(N: N) => raw.demux8(N)();
+export const demux16 = <N extends Num>(N: N) => raw.demux16(N)();
+export const demux32 = <N extends Num>(N: N) => raw.demux32(N)();
+export const matchN = match;
+export const match1 = match(1);
+export const match2 = match(2);
+export const match3 = match(3);
+export const match4 = match(4);
+export const match5 = match(5);
+export const match6 = match(6);
+export const match7 = match(7);
+export const match8 = match(8);

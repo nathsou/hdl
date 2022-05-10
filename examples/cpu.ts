@@ -1,16 +1,12 @@
-import { createCircuit, Connection, IO, State } from "../src/core";
+import { compare8 } from "../src";
+import { Connection, IO, State, createModule } from "../src/core";
+import { demux16, match8, matchN, match1 } from "../src/modules/mux";
+import { adder, add, subtract, shiftLeft, shiftRight, isEqual, isEqualConst } from "../src/modules/arith";
+import { reg8 } from "../src/modules/regs";
+import { and, or, not, xor } from "../src/modules/gates";
 import { createSimulator } from '../src/sim/sim';
 import { Tuple, Range } from "../src/utils";
 
-const {
-  createModule,
-  primitives: {
-    gates: { and, not, or, xor },
-    mux: { match1, match8, demux16, matchN },
-    regs: { reg8 },
-    arith: { add, adder, subtract, isEqual, isEqualConst, shiftLeft, shiftRight, compare8 },
-  }
-} = createCircuit();
 const { bin } = Tuple;
 
 // Based on the basic CPU architecture from https://alchitry.com/basic-cpu-mojo

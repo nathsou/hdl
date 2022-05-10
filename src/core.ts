@@ -1,4 +1,3 @@
-import { createBasicModules } from "./primitive-modules/basic";
 import { assert, Iter, last, mapObject, pushRecord, shallowEqualObject, Tuple } from "./utils";
 
 export type Circuit = {
@@ -136,8 +135,6 @@ const SubModules = {
       self.push(node);
     } else if (self?.subModules) {
       SubModules.push(self.subModules, node);
-    } else {
-      throw new Error(`${self}`);
     }
   },
 };
@@ -161,13 +158,32 @@ export type Net = string;
 export type CircuitState = Record<string, NodeState>;
 
 type GlobalState = {
+  circuit: Circuit,
   nextId: number,
   subModulesStack: SubModules[],
 };
 
 const globalState: GlobalState = {
+  circuit: {
+    modules: new Map(),
+    nets: new Map(),
+    signatures: new Map(),
+  },
   nextId: 0,
   subModulesStack: [[]],
+};
+
+const GlobalState = {
+  state: globalState,
+  reset: () => {
+    globalState.nextId = 0;
+    globalState.subModulesStack = [[]];
+    globalState.circuit = {
+      modules: new Map(),
+      nets: new Map(),
+      signatures: new Map(),
+    };
+  },
 };
 
 const nextId = () => globalState.nextId++;
@@ -189,67 +205,6 @@ export const isNodeState = (x: any): x is NodeState => {
   }
 
   return typeof x.ref === 'string';
-};
-
-const constantsModule = (circuit: Circuit) => createPrimitiveModule({
-  name: '<consts>',
-  inputs: {},
-  outputs: { vcc: 1, gnd: 1 },
-  simulate(_, out) {
-    out.vcc = 1;
-    out.gnd = 0;
-  }
-}, circuit);
-
-export const createCircuit = () => {
-  const circuit: Circuit = {
-    modules: new Map(),
-    signatures: new Map(),
-    nets: new Map(),
-  };
-
-  constantsModule(circuit)();
-
-  const _createPrimitiveModule = <
-    In extends Record<string, Num>,
-    Out extends Record<string, Num>,
-    State extends {}
-  >(
-    def: Omit<PrimitiveModuleDef<In, Out, State>, 'type'>
-  ): (() => Module<In, Out>) => {
-    return createPrimitiveModule(def, circuit);
-  };
-
-  const _createCompoundModule = <In extends Record<string, Num>, Out extends Record<string, Num>>(
-    def: Omit<CompoundModuleDef<In, Out>, 'type'>
-  ): (() => Module<In, Out>) => {
-    return createModule(def, circuit);
-  };
-
-  return {
-    circuit,
-    createPrimitiveModule: _createPrimitiveModule,
-    createModule: _createCompoundModule,
-    primitives: createBasicModules(circuit),
-  };
-};
-
-export const createPrimitiveModule = <
-  In extends Record<string, Num>,
-  Out extends Record<string, Num>,
-  State extends {}
->(
-  def: Omit<PrimitiveModuleDef<In, Out, State>, 'type'>,
-  circuit: Circuit,
-): (() => Module<In, Out>) => {
-  return _createModule({ ...def, type: 'primitive' }, circuit);
-};
-
-export const createModule = <In extends Record<string, Num>, Out extends Record<string, Num>>(
-  def: Omit<CompoundModuleDef<In, Out>, 'type'>,
-  circuit: Circuit,
-): (() => Module<In, Out>) => {
-  return _createModule({ ...def, type: 'compound' }, circuit);
 };
 
 export const CoreUtils = {
@@ -376,9 +331,9 @@ const _createModule = <
   Out extends Record<string, Num>,
   State extends {}
 >(
-  mod: ModuleDef<In, Out, State>,
-  circuit: Circuit,
+  mod: ModuleDef<In, Out, State>
 ): (() => Module<In, Out>) => {
+  const { circuit } = globalState;
   const duplicatePin = Object.keys(mod.inputs).find(pin => mod.outputs[pin] !== undefined);
 
   if (duplicatePin != undefined) {
@@ -446,7 +401,7 @@ const _createModule = <
       }
     }
 
-    if (mod.type === 'primitive') {
+    if (mod.type === 'simulated') {
       /// @ts-ignore
       node.simulate = mod.simulate;
       node.state = mod.state;
@@ -459,6 +414,35 @@ const _createModule = <
     };
   };
 };
+
+export const createSimulatedModule = <
+  In extends Record<string, Num>,
+  Out extends Record<string, Num>,
+  State extends {}
+>(
+  def: Omit<SimulatedModuleDef<In, Out, State>, 'type'>
+): (() => Module<In, Out>) => {
+  return _createModule({ ...def, type: 'simulated' });
+};
+
+export const createModule = <In extends Record<string, Num>, Out extends Record<string, Num>>(
+  def: Omit<CompoundModuleDef<In, Out>, 'type'>
+): (() => Module<In, Out>) => {
+  return _createModule({ ...def, type: 'compound' });
+};
+
+const createConstants = createSimulatedModule({
+  name: '<consts>',
+  inputs: {},
+  outputs: { vcc: 1, gnd: 1 },
+  simulate(_, out) {
+    out.vcc = 1;
+    out.gnd = 0;
+  }
+});
+
+// initialize gnd and vcc
+createConstants();
 
 // ensure that all pins (exepted the primary inputs/outputs) are connected
 export const checkConnections = (topMod: Module<any, any>): void => {
@@ -502,12 +486,12 @@ type BaseModuleDef<In extends Record<string, Num>, Out extends Record<string, Nu
   outputs: Out,
 };
 
-export type PrimitiveModuleDef<
+export type SimulatedModuleDef<
   In extends Record<string, Num>,
   Out extends Record<string, Num>,
   State extends {}
   > = BaseModuleDef<In, Out> & {
-    type: 'primitive',
+    type: 'simulated',
     state?: State,
     simulate: (inputs: MapStates<In>, outputs: MapStates<Out>, state: State) => void,
   };
@@ -522,7 +506,7 @@ export type ModuleDef<
   Out extends Record<string, Num>,
   State extends {}
   > =
-  | PrimitiveModuleDef<In, Out, State>
+  | SimulatedModuleDef<In, Out, State>
   | CompoundModuleDef<In, Out>;
 
 export type Subtract<B extends number, A extends number, Acc extends number = 0> = A extends B ? Acc : Subtract<B, Successor<A>, Successor<Acc>>;

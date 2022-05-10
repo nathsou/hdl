@@ -1,8 +1,8 @@
-import { IO, createCircuit } from "../src/core";
+import { IO, createModule } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { Tuple, Range } from "../src/utils";
-
-const { createModule, primitives: { mux, regs } } = createCircuit();
+import * as mux from "../src/modules/mux";
+import { reg8 } from "../src/modules/regs";
 
 const pow2 = {
   1: 2,
@@ -27,7 +27,7 @@ const top = createModule({
   inputs: { clk: 1, sel: muxSize },
   outputs: { leds: 8 },
   connect({ clk, sel }, out) {
-    const rs = Tuple.gen(pow2[muxSize], i => regs.reg8(Tuple.bin(i, 8)));
+    const rs = Tuple.gen(pow2[muxSize], i => reg8(Tuple.bin(i, 8)));
     const mux = multiplexers[muxSize](8);
 
     IO.forward({ clk }, rs);
