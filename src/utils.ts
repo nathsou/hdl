@@ -188,6 +188,20 @@ export const Range = {
   },
 };
 
+export const occurences = <T>(values: T[]): Map<T, number> => {
+  const counts = new Map<T, number>();
+
+  values.forEach(v => {
+    if (!counts.has(v)) {
+      counts.set(v, 0);
+    }
+
+    counts.set(v, counts.get(v)! + 1);
+  });
+
+  return counts;
+};
+
 export type Tuple<T, Len extends number> =
   Len extends 0 ? [] :
   Len extends 1 ? [T] :

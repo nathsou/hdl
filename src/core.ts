@@ -11,6 +11,7 @@ export type CircuitNets = Map<string, { in: string[], out: string[], id: ModuleI
 export type CircuitSignatures = Map<string, {
   inputs: Record<string, number>,
   outputs: Record<string, number>,
+  kicad?: KiCadConfig<any, any>,
 }>;
 
 export type CircuitModules = Map<ModuleId, ModuleNode>;
@@ -126,22 +127,9 @@ export type RawConnection = {
   pin: string,
 };
 
-export type SubModules = ModuleNode[] | ModuleGroup;
-export type ModuleGroup = { name: string, subModules: SubModules };
-
-const SubModules = {
-  push: (self: SubModules, node: ModuleNode): void => {
-    if (Array.isArray(self)) {
-      self.push(node);
-    } else if (self?.subModules) {
-      SubModules.push(self.subModules, node);
-    }
-  },
-};
-
 export type ModuleNode = {
   id: ModuleId,
-  subModules: SubModules,
+  subModules: ModuleNode[],
   name: string,
   pins: {
     in: Record<string, RawConnection[]>,
@@ -160,24 +148,26 @@ export type CircuitState = Record<string, NodeState>;
 type GlobalState = {
   circuit: Circuit,
   nextId: number,
-  subModulesStack: SubModules[],
+  subModulesStack: ModuleNode[][],
+};
+
+const circuit: Circuit = {
+  modules: new Map(),
+  nets: new Map(),
+  signatures: new Map(),
 };
 
 const globalState: GlobalState = {
-  circuit: {
-    modules: new Map(),
-    nets: new Map(),
-    signatures: new Map(),
-  },
+  circuit,
   nextId: 0,
-  subModulesStack: [[]],
+  subModulesStack: [],
 };
 
 const GlobalState = {
   state: globalState,
   reset: () => {
     globalState.nextId = 0;
-    globalState.subModulesStack = [[]];
+    globalState.subModulesStack = [];
     globalState.circuit = {
       modules: new Map(),
       nets: new Map(),
@@ -252,12 +242,9 @@ export const CoreUtils = {
   },
 };
 
+// TODO:
 export const createModuleGroup = <T>(name: string, f: () => T): T => {
-  const group: ModuleGroup = { name, subModules: [] };
-  globalState.subModulesStack.push(group);
-  const ret = f();
-  globalState.subModulesStack.pop();
-  return ret;
+  return f();
 };
 
 const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: Circuit, isInput: boolean): ProxyHandler<any> => {
@@ -344,6 +331,7 @@ const _createModule = <
     circuit.signatures.set(mod.name, {
       inputs: mod.inputs,
       outputs: mod.outputs,
+      kicad: mod.kicad,
     });
   } else {
     const prevSig = circuit.signatures.get(mod.name)!;
@@ -377,7 +365,8 @@ const _createModule = <
 
     const inputs = new Proxy({}, connectionHandler(id, mod, circuit, true));
     const outputs = new Proxy({}, connectionHandler(id, mod, circuit, false));
-    SubModules.push(last(globalState.subModulesStack), node);
+
+    last(globalState.subModulesStack)?.push(node);
 
     // register connections
     if (mod.type === 'compound') {
@@ -432,7 +421,7 @@ export const createModule = <In extends Record<string, Num>, Out extends Record<
 };
 
 const createConstants = createSimulatedModule({
-  name: '<consts>',
+  name: '<power>',
   inputs: {},
   outputs: { vcc: 1, gnd: 1 },
   simulate(_, out) {
@@ -480,10 +469,17 @@ export const metadata = <
   return (mod as ModuleWithMetadata<In, Out>).meta;
 };
 
+export type KiCadConfig<In extends Record<string, Num>, Out extends Record<string, Num>> = {
+  symbol: string,
+  footprint: string,
+  pins: Record<number, keyof In | keyof Out>,
+};
+
 type BaseModuleDef<In extends Record<string, Num>, Out extends Record<string, Num>> = {
   name: string,
   inputs: In,
   outputs: Out,
+  kicad?: KiCadConfig<In, Out>,
 };
 
 export type SimulatedModuleDef<
