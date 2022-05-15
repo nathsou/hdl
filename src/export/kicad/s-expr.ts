@@ -156,18 +156,24 @@ export const SExpr = {
 
     return parseSExpr();
   },
-  show(expr: SExpr, identation = 0): string {
-    switch (expr.type) {
-      case 'symbol':
-        return expr.value;
-      case 'string':
-        return `"${expr.value}"`;
-      case 'number':
-        return `${expr.value}`;
-      case 'list':
-        const ident = '  '.repeat(identation);
-        return `\n${ident}(${expr.elems.map(elem => SExpr.show(elem, identation + 1)).join(' ')})`;
-    }
+  show(expr: SExpr, format = true): string {
+    const newline = format ? '\n' : '';
+
+    const aux = (expr: SExpr, identation = 0): string => {
+      switch (expr.type) {
+        case 'symbol':
+          return expr.value;
+        case 'string':
+          return `"${expr.value}"`;
+        case 'number':
+          return `${expr.value}`;
+        case 'list':
+          const ident = format ? '  '.repeat(identation) : '';
+          return `${newline}${ident}(${expr.elems.map(elem => aux(elem, identation + 1)).join(' ')})`;
+      }
+    };
+
+    return aux(expr);
   },
   index(expr: SExpr) {
     const index: IndexedSExpr = {

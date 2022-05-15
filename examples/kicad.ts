@@ -1,47 +1,48 @@
-import { createModule, IO, metadata } from '../src';
+import { createModule, IO } from '../src';
 import { KiCad } from '../src/export/kicad/kicad';
 import { SExpr } from '../src/export/kicad/s-expr';
-import { SN74LS00 } from '../src/modules/74xx/7400';
+import { quad2InputNandGates7400 } from '../src/modules/74xx';
+import { resistor } from '../src/modules/passive';
 
-const KICAD_DIR = '/mnt/c/Program Files/KiCad/6.0/share/kicad';
+const KICAD_LIBS_DIR = '/mnt/c/Program Files/KiCad/6.0/share/kicad';
 
 const top = createModule({
   name: 'lab',
   inputs: {},
   outputs: {},
   connect() {
-    const u1 = SN74LS00();
-    const u2 = SN74LS00();
+    const u1 = quad2InputNandGates7400();
+    const u2 = quad2InputNandGates7400();
 
     IO.forward({ gnd: 0, vcc: 1 }, [u1, u2]);
 
-    u1.in['1A'] = 0;
-    u1.in['1B'] = 0;
-    u1.in['2A'] = 0;
-    u1.in['2B'] = 1;
-    u1.in['3A'] = 1;
-    u1.in['3B'] = 0;
-    u1.in['4A'] = 1;
-    u1.in['4B'] = 1;
+    const r1 = resistor({ value: '1k' });
+    const r2 = resistor({ value: '1k' });
+    const r3 = resistor({ value: '1k' });
+    const r4 = resistor({ value: '1k' });
+
+    r1.in.lhs = u1.out.y[0];
+    r2.in.lhs = u1.out.y[1];
+    r3.in.lhs = u1.out.y[2];
+    r4.in.lhs = u1.out.y[3];
+
+    u1.in.a = [0, 0, 1, 1];
+    u1.in.b = [0, 1, 0, 1];
+
+    const y: IO<4> = [r1.out.rhs, r2.out.rhs, r3.out.rhs, r4.out.rhs];
 
     // invert
-    u2.in['1A'] = u2.out['1Y'];
-    u2.in['1B'] = u2.out['1Y'];
-    u2.in['2A'] = u2.out['2Y'];
-    u2.in['2B'] = u2.out['2Y'];
-    u2.in['3A'] = u2.out['3Y'];
-    u2.in['3B'] = u2.out['3Y'];
-    u2.in['4A'] = u2.out['4Y'];
-    u2.in['4B'] = u2.out['4Y'];
+    u2.in.a = y;
+    u2.in.b = y;
   }
 })();
 
 const main = async () => {
-  const { circuit } = metadata(top);
-  const libs = await KiCad.scanLibraries(KICAD_DIR);
+  const libs = await KiCad.scanLibraries(KICAD_LIBS_DIR);
   const symbols = await KiCad.collectUsedSymbols(top, libs);
-  const netlist = KiCad.generateNetlist(symbols, circuit);
-  console.log(SExpr.show(netlist));
+  const netlist = KiCad.generateNetlist(symbols, top);
+
+  console.log(SExpr.show(netlist, false));
 };
 
 main();

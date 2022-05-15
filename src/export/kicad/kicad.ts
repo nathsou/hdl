@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
-import { Circuit, KiCadConfig, metadata, Module, ModuleNode } from "../../core";
+import { IO, KiCadConfig, metadata, Module, ModuleNode } from "../../core";
 import { Iter, occurences } from "../../utils";
 import { parseSymbolLibrary, SymbolDef } from './parse';
 import { SExpr } from './s-expr';
@@ -109,12 +109,9 @@ const collectUsedSymbols = async (top: Module<any, any>, libs: KiCadLibraries): 
         throw new Error(`Extraneous pin(s): ${differences.join(', ')} for symbol '${symbolLib}:${symbolPart}'`);
       }
 
-      const pinNameOccurences = new Map(
-        Iter.map(
-          Iter.join(Object.keys(sig.inputs), Object.keys(sig.outputs)),
-          name => [name, 0]
-        )
-      );
+      const linearizedPins = IO.linearizePinout({ ...sig.inputs, ...sig.outputs });
+
+      const pinNameOccurences = new Map(linearizedPins.map(pin => [pin, 0]));
 
       for (const pinName of Object.values(sig.kicad.pins)) {
         pinNameOccurences.set(pinName as string, pinNameOccurences.get(pinName as string)! + 1);
@@ -146,12 +143,12 @@ const collectUsedSymbols = async (top: Module<any, any>, libs: KiCadLibraries): 
   return kicadSymbols;
 };
 
-const generateNetlist = (symbols: SymbolOccurence[], circuit: Circuit) => {
+const generateNetlist = (symbols: SymbolOccurence[], top: Module<any, any>) => {
   const { num, str, sym, list } = SExpr;
+  const { circuit } = metadata(top);
 
   // 0 is the power module
   const moduleIds = new Set([0, ...symbols.map(s => s.node.id)]);
-
   const symbolsNets = Iter.filter(circuit.nets, ([_, net]) => moduleIds.has(net.id));
 
   return list(
@@ -180,7 +177,7 @@ const generateNetlist = (symbols: SymbolOccurence[], circuit: Circuit) => {
     list(
       sym('nets'),
       ...Iter.map(symbolsNets, ([netName, net], index) => {
-        const connectedNodes = [netName, ...net.out]
+        const connectedNodes = [netName, ...net.in, ...net.out]
           .map(net => [net, circuit.modules.get(Number(net.split(':')[1]))!] as const)
           .filter(([_, mod]) => mod.id !== 0 && moduleIds.has(mod.id));
 
@@ -194,6 +191,7 @@ const generateNetlist = (symbols: SymbolOccurence[], circuit: Circuit) => {
             const p = Object.entries(sig.kicad!.pins).find(([_id, name]) => name === pinName);
 
             if (!Array.isArray(p)) {
+              console.log(net, sig.kicad!.pins, circuit.nets);
               throw new Error(`Pin '${pinName}' not found in the signature of module '${mod.name}'`);
             }
 

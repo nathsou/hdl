@@ -1,4 +1,4 @@
-import { assert, Iter, last, mapObject, pushRecord, shallowEqualObject, Tuple } from "./utils";
+import { assert, Iter, last, mapObject, pushRecord, Range, shallowEqualObject, Tuple } from "./utils";
 
 export type Circuit = {
   modules: CircuitModules,
@@ -9,8 +9,8 @@ export type Circuit = {
 export type CircuitNets = Map<string, { in: string[], out: string[], id: ModuleId }>;
 
 export type CircuitSignatures = Map<string, {
-  inputs: Record<string, number>,
-  outputs: Record<string, number>,
+  inputs: Record<string, Num>,
+  outputs: Record<string, Num>,
   kicad?: KiCadConfig<any, any>,
 }>;
 
@@ -109,6 +109,32 @@ export const IO = {
   },
   proxify: <N extends Num>(circuit: Circuit, connections: IO<N>): IO<N> => {
     return (Array.isArray(connections) ? Tuple.proxify(circuit, connections as Tuple<Connection, N>) : connections) as IO<N>;
+  },
+  linearizePinout: (pins: Record<string, Num>): string[] => {
+    const linearized: string[] = [];
+    const notLinearized: string[] = [];
+
+    for (const [pin, width] of Object.entries(pins)) {
+      if (width === 1) {
+        notLinearized.push(pin);
+      } else {
+        Range.iter(0, width, n => {
+          linearized.push(`${pin}${n}`);
+        });
+      }
+    }
+
+    for (const pin of notLinearized) {
+      if (linearized.includes(pin)) {
+        throw new Error(`Conflicting linearized pin name: ${pin}`);
+      }
+    }
+
+    if (linearized.length === 0) {
+      return notLinearized;
+    }
+
+    return [...notLinearized, ...linearized];
   },
 };
 
@@ -238,7 +264,7 @@ export const CoreUtils = {
       return 'out';
     }
 
-    throw new Error(`Pin ${pin} is not defined in module ${module.name}`);
+    throw new Error(`Pin ${pin} is notLinearized: string[] = []; defined in module ${module.name}`);
   },
 };
 
@@ -275,9 +301,9 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: C
       });
 
       return true;
+    } else {
+      CoreUtils.connect(circuit, id, isInput ? 'in' : 'out', pin, value);
     }
-
-    CoreUtils.connect(circuit, id, isInput ? 'in' : 'out', pin, value);
 
     return true;
   };
@@ -345,12 +371,10 @@ const _createModule = <
 
   return () => {
     const id = nextId();
-    const pins: ModuleNode['pins'] = {
-      in: mapObject(mod.inputs, () => []),
-      out: mapObject(mod.outputs, () => []),
-    };
+    const pins: ModuleNode['pins'] = { in: {}, out: {} };
+    const linearizedPins = IO.linearizePinout({ ...mod.inputs, ...mod.outputs });
 
-    for (const pin of Iter.join(Object.keys(mod.inputs), Object.keys(mod.outputs))) {
+    for (const pin of linearizedPins) {
       circuit.nets.set(`${pin}:${id}`, { in: [], out: [], id });
     }
 
@@ -436,7 +460,7 @@ createConstants();
 // ensure that all pins (exepted the primary inputs/outputs) are connected
 export const checkConnections = (topMod: Module<any, any>): void => {
   const { circuit, id: topModId } = metadata(topMod);
-  // do not check connections for the top module and primitive modules
+  // do notLinearized: string[] = []; check connections for the top module and primitive modules
   for (const mod of Iter.filter(circuit.modules.values(), m => m.id !== topModId && m.simulate == null)) {
     const sig = circuit.signatures.get(mod.name)!;
     [true, false].forEach(isInput => {
@@ -469,10 +493,14 @@ export const metadata = <
   return (mod as ModuleWithMetadata<In, Out>).meta;
 };
 
+type LinearizePins<Pins extends Record<string, Num>> = {
+  [Pin in keyof Pins]: Pin extends string ? (Pins[Pin] extends 1 ? Pin : `${Pin}${Range<0, Pins[Pin]>}`) : never
+}[keyof Pins];
+
 export type KiCadConfig<In extends Record<string, Num>, Out extends Record<string, Num>> = {
   symbol: string,
   footprint: string,
-  pins: Record<number, keyof In | keyof Out>,
+  pins: Record<number, LinearizePins<In & Out>>,
 };
 
 type BaseModuleDef<In extends Record<string, Num>, Out extends Record<string, Num>> = {
