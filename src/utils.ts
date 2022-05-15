@@ -35,12 +35,21 @@ export const Iter = {
       }
     }
   },
-  map: function* map<T, U>(as: Iterable<T>, f: (x: T) => U): IterableIterator<U> {
+  map: function* <T, U>(as: Iterable<T>, f: (x: T, index: number) => U): IterableIterator<U> {
+    let i = 0;
     for (const a of as) {
-      yield f(a);
+      yield f(a, i);
+      i += 1;
     }
   },
-  filter: function* filter<T>(as: Iterable<T>, pred: (x: T) => boolean): IterableIterator<T> {
+  flatMap: function* map<T, U>(as: Iterable<T>, f: (x: T, index: number) => Iterable<U>): IterableIterator<U> {
+    let i = 0;
+    for (const a of as) {
+      yield* f(a, i);
+      i += 1;
+    }
+  },
+  filter: function* <T>(as: Iterable<T>, pred: (x: T) => boolean): IterableIterator<T> {
     for (const a of as) {
       if (pred(a)) {
         yield a;
