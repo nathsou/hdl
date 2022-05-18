@@ -119,7 +119,7 @@ const top = createModule({
     out.write = isStoreInst;
 
     const pcIncrementer = adder(8);
-    pcIncrementer.in.carry_in = 0;
+    pcIncrementer.in.carryIn = 0;
     pcIncrementer.in.a = programCounter;
 
     const branch = or(

@@ -1,8 +1,8 @@
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
-import { IO, KiCadConfig, metadata, Module, ModuleNode } from "../../core";
-import { Iter, occurences } from "../../utils";
-import { parseSymbolLibrary, SymbolDef } from './parse';
+import { IO, KiCadConfig, metadata, Module, ModuleNode, Num } from "../../core";
+import { Iter, occurences, createCache } from "../../utils";
+import { parseSymbolLibrary, SymbolDef, SymbolPin } from './parse';
 import { SExpr } from './s-expr';
 
 export type SymbolOccurence = KiCadConfig<any, any> & {
@@ -72,6 +72,49 @@ const scanLibraries = async (libsDir: string): Promise<KiCadLibraries> => {
   };
 };
 
+const renameSymbolPins = (pins: SymbolPin[]): Record<number, string> => {
+  const pinsObj: Record<number, string> = {};
+
+  for (const { name, number } of pins) {
+    pinsObj[number] = name === '~' ? `${number}` : name.toLowerCase();
+  }
+
+  return pinsObj;
+};
+
+const pinReverseMapping = (
+  moduleName: string,
+  pinWidths: Record<string, Num>,
+  pinMapping: Record<number, string>
+): Record<string, number> => {
+  const reversePinMapping: Record<string, number> = {};
+  const pinMappingEntries = Object.entries(pinMapping);
+
+  const findPinNumber = (name: string) => {
+    const pin = pinMappingEntries.find(([_, pin]) => pin.toLowerCase() === name);
+    if (pin === undefined) {
+      throw new Error(`Unmapped pin number for '${name}' in module '${moduleName}'`);
+    }
+
+    return Number(pin[0]);
+  };
+
+  for (const [name, width] of Object.entries(pinWidths)) {
+    const lowerName = name.toLowerCase();
+    if (width === 1) {
+      reversePinMapping[lowerName] = findPinNumber(lowerName);
+    } else {
+      for (let i = 0; i < width; i++) {
+        // add 1 in the rhs since pin numbers usually start at 1 in datasheets,
+        // but not internally
+        reversePinMapping[`${lowerName}${i}`] = findPinNumber(`${lowerName}${i + 1}`);
+      }
+    }
+  }
+
+  return reversePinMapping;
+};
+
 const collectUsedSymbols = async (top: Module<any, any>, libs: KiCadLibraries): Promise<SymbolOccurence[]> => {
   const { circuit, id } = metadata(top);
   const mod = circuit.modules.get(id)!;
@@ -96,7 +139,10 @@ const collectUsedSymbols = async (top: Module<any, any>, libs: KiCadLibraries): 
         throw new Error(`Symbol '${symbolLib}:${symbolPart}' has no pins`);
       }
 
-      const expectedPins = new Set(Object.keys(sig.kicad.pins).map(Number));
+      const pins = sig.kicad.pins ? sig.kicad.pins : renameSymbolPins(symb.pins);
+      sig.kicad.pins = pins;
+
+      const expectedPins = new Set(Object.keys(pins).map(Number));
       const actualPins = new Set(symb.pins.map(p => p.number));
 
       if (expectedPins.size !== actualPins.size) {
@@ -109,11 +155,10 @@ const collectUsedSymbols = async (top: Module<any, any>, libs: KiCadLibraries): 
         throw new Error(`Extraneous pin(s): ${differences.join(', ')} for symbol '${symbolLib}:${symbolPart}'`);
       }
 
-      const linearizedPins = IO.linearizePinout({ ...sig.inputs, ...sig.outputs });
-
+      const linearizedPins = IO.linearizePinout({ ...sig.inputs, ...sig.outputs }, true);
       const pinNameOccurences = new Map(linearizedPins.map(pin => [pin, 0]));
 
-      for (const pinName of Object.values(sig.kicad.pins)) {
+      for (const pinName of Object.values(pins)) {
         pinNameOccurences.set(pinName as string, pinNameOccurences.get(pinName as string)! + 1);
       }
 
@@ -123,7 +168,7 @@ const collectUsedSymbols = async (top: Module<any, any>, libs: KiCadLibraries): 
         throw new Error(`Unmapped pin(s) for symbol '${symbolLib}:${symbolPart}': ${unmappedPinNames.join(', ')}`);
       }
 
-      const pinNamesOccs = occurences(Object.values(sig.kicad.pins));
+      const pinNamesOccs = occurences(Object.values(pins));
       const duplicatePinNames = [...pinNamesOccs.entries()].filter(([_, count]) => count > 1);
 
       if (duplicatePinNames.length > 0) {
@@ -150,6 +195,7 @@ const generateNetlist = (symbols: SymbolOccurence[], top: Module<any, any>) => {
   // 0 is the power module
   const moduleIds = new Set([0, ...symbols.map(s => s.node.id)]);
   const symbolsNets = Iter.filter(circuit.nets, ([_, net]) => moduleIds.has(net.id));
+  const reverseMappings = createCache<string, Record<string, number>>();
 
   return list(
     sym('export'),
@@ -188,17 +234,20 @@ const generateNetlist = (symbols: SymbolOccurence[], top: Module<any, any>) => {
           ...connectedNodes.map(([net, mod]) => {
             const sig = circuit.signatures.get(mod.name)!;
             const pinName = net.split(':')[0];
-            const p = Object.entries(sig.kicad!.pins).find(([_id, name]) => name === pinName);
+            const reverseMapping = reverseMappings.key(mod.name, () => {
+              return pinReverseMapping(
+                mod.name,
+                { ...sig.inputs, ...sig.outputs },
+                sig.kicad!.pins!,
+              );
+            });
 
-            if (!Array.isArray(p)) {
-              console.log(net, sig.kicad!.pins, circuit.nets);
-              throw new Error(`Pin '${pinName}' not found in the signature of module '${mod.name}'`);
-            }
+            const pinNum = reverseMapping[pinName];
 
             return list(
               sym('node'),
               list(sym('ref'), str(`${mod.name}_${mod.id}`)),
-              list(sym('pin'), num(Number(p[0]))),
+              list(sym('pin'), num(pinNum)),
               list(sym('pinfunction'), str(pinName)),
             );
           }),

@@ -179,6 +179,7 @@ export const Tuple = {
 };
 
 export type Range<A extends number, B extends number, Acc = never> = A extends B ? Acc : Range<Successor<A>, B, A | Acc>;
+export type RangeInclusive<A extends number, B extends number, Acc = never> = A extends B ? B | Acc : RangeInclusive<Successor<A>, B, A | Acc>;
 
 export const Range = {
   iter: <A extends Num, B extends Num>(from: A, to: B, f: (n: Range<A, B>) => void): void => {
@@ -278,3 +279,20 @@ export type Tuple<T, Len extends number> =
   Len extends 63 ? [...Tuple<T, 62>, T] :
   Len extends 64 ? [...Tuple<T, 63>, T] :
   T[];
+
+export const createCache = <K, V>() => {
+  const cache = new Map<K, V>();
+
+  return {
+    raw: cache,
+    key(key: K, generate: () => V): V {
+      if (cache.has(key)) {
+        return cache.get(key)!;
+      } else {
+        const value = generate();
+        cache.set(key, value);
+        return value;
+      }
+    }
+  };
+};

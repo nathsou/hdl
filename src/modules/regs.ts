@@ -41,7 +41,7 @@ export const raw = {
 
       count.in.clk = inp.clk;
       count.in.load = inp.count_enable;
-      adder.in.carry_in = inp.count_enable;
+      adder.in.carryIn = inp.count_enable;
       adder.in.a = count.out.q;
       adder.in.b = IO.gen(N, () => State.zero);
       count.in.d = adder.out.sum;

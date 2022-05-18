@@ -35,19 +35,19 @@ export const arith = {
   }),
   adder: <N extends Multi>(N: N) => createModule({
     name: `adder${N}`,
-    inputs: { a: N, b: N, carry_in: 1 },
-    outputs: { sum: N, carry_out: 1 },
+    inputs: { a: N, b: N, carryIn: 1 },
+    outputs: { sum: N, carryOut: 1 },
     connect(inp, out) {
       const adders = Tuple.gen(N, arith.fullAdder1);
 
       for (let i = 0; i < N; i++) {
-        adders[i].in.carry_in = i === 0 ? inp.carry_in : adders[i - 1].out.carry_out;
+        adders[i].in.carry_in = i === 0 ? inp.carryIn : adders[i - 1].out.carry_out;
         adders[i].in.a = inp.a[N - 1 - i];
         adders[i].in.b = inp.b[N - 1 - i];
       }
 
       out.sum = IO.gen(N, i => adders[N - 1 - i].out.sum);
-      out.carry_out = last(adders).out.carry_out;
+      out.carryOut = last(adders).out.carry_out;
     },
   }),
   adderSubtractor: <N extends Multi>(N: N) => createModule({
@@ -56,12 +56,12 @@ export const arith = {
     outputs: { sum: N, carry_out: 1 },
     connect(inp, out) {
       const sum = arith.adder(N)();
-      sum.in.carry_in = inp.subtract;
+      sum.in.carryIn = inp.subtract;
       sum.in.a = inp.a;
       sum.in.b = xor(IO.repeat(N, inp.subtract), inp.b);
 
       out.sum = sum.out.sum;
-      out.carry_out = sum.out.carry_out;
+      out.carry_out = sum.out.carryOut;
     },
   }),
   rightShifter: <N extends keyof Log2>(N: N) => createModule({
@@ -122,7 +122,7 @@ export const add = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
 
   sum.in.a = a;
   sum.in.b = b;
-  sum.in.carry_in = 0;
+  sum.in.carryIn = 0;
 
   return sum.out.sum;
 };

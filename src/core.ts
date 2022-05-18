@@ -1,4 +1,4 @@
-import { assert, Iter, last, mapObject, pushRecord, Range, shallowEqualObject, Tuple } from "./utils";
+import { assert, Iter, last, pushRecord, Range, RangeInclusive, shallowEqualObject, Tuple } from "./utils";
 
 export type Circuit = {
   modules: CircuitModules,
@@ -110,16 +110,18 @@ export const IO = {
   proxify: <N extends Num>(circuit: Circuit, connections: IO<N>): IO<N> => {
     return (Array.isArray(connections) ? Tuple.proxify(circuit, connections as Tuple<Connection, N>) : connections) as IO<N>;
   },
-  linearizePinout: (pins: Record<string, Num>): string[] => {
+  linearizePinout: (pins: Record<string, Num>, startIndexAtOne = false): string[] => {
     const linearized: string[] = [];
     const notLinearized: string[] = [];
 
     for (const [pin, width] of Object.entries(pins)) {
       if (width === 1) {
-        notLinearized.push(pin);
+        notLinearized.push(pin.toLowerCase());
       } else {
-        Range.iter(0, width, n => {
-          linearized.push(`${pin}${n}`);
+        const start = startIndexAtOne ? 1 : 0;
+        const end = startIndexAtOne ? (width + 1) as Num : width;
+        Range.iter(start, end, n => {
+          linearized.push(`${pin.toLowerCase()}${n}`);
         });
       }
     }
@@ -494,13 +496,13 @@ export const metadata = <
 };
 
 type LinearizePins<Pins extends Record<string, Num>> = {
-  [Pin in keyof Pins]: Pin extends string ? (Pins[Pin] extends 1 ? Pin : `${Pin}${Range<0, Pins[Pin]>}`) : never
+  [Pin in keyof Pins]: Pin extends string ? (Pins[Pin] extends 1 ? Pin : `${Pin}${RangeInclusive<1, Pins[Pin]>}`) : never
 }[keyof Pins];
 
 export type KiCadConfig<In extends Record<string, Num>, Out extends Record<string, Num>> = {
   symbol: string,
   footprint: string,
-  pins: Record<number, LinearizePins<In & Out>>,
+  pins?: Record<number, LinearizePins<In & Out>>,
 };
 
 type BaseModuleDef<In extends Record<string, Num>, Out extends Record<string, Num>> = {
