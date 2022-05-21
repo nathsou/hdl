@@ -1,11 +1,11 @@
-import { createModule } from "../src/core";
+import { defineModule } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { match3 } from '../src/modules/mux';
 import { Tuple } from "../src/utils";
 
 const { bin } = Tuple;
 
-const top = createModule({
+const top = defineModule({
   name: 'top',
   inputs: {},
   outputs: { leds: 3 },

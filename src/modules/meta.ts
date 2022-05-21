@@ -1,4 +1,4 @@
-import { createModule, IO, Module, Num } from "../core";
+import { defineModule, IO, Module, Num } from "../core";
 import { Tuple } from "../utils";
 
 export const extendN = <
@@ -7,7 +7,7 @@ export const extendN = <
   OutputPin extends string,
   Comp extends Module<Record<InputPin, 1>, Record<OutputPin, 1>>,
   >(N: N, baseComp: () => Comp, inputPins: InputPin[], outputPins: OutputPin[], name: string) => {
-  return createModule({
+  return defineModule({
     name,
     inputs: inputPins.reduce((acc, pin) => {
       acc[pin] = N;

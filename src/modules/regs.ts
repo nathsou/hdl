@@ -1,11 +1,11 @@
-import { createModule, createSimulatedModule, IO, Multi, State } from "../core";
+import { defineModule, defineSimulatedModule, IO, Multi, State } from "../core";
 import { Tuple } from "../utils";
 import { and } from "./gates";
 import * as arith from "./arith";
 import { leaderFollowerJKFlipFlop } from "./mem";
 
 export const raw = {
-  jkCounter: <N extends Multi>(N: N) => createModule({
+  jkCounter: <N extends Multi>(N: N) => defineModule({
     name: `jk_counter${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
@@ -31,7 +31,7 @@ export const raw = {
       out.q = IO.gen(N, i => jks[N - 1 - i].out.q);
     },
   }),
-  counter: <N extends Multi>(N: N) => createModule({
+  counter: <N extends Multi>(N: N) => defineModule({
     name: `counter${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
@@ -49,7 +49,7 @@ export const raw = {
       out.q = count.out.q;
     },
   }),
-  counterSim: <N extends Multi>(N: N) => createSimulatedModule({
+  counterSim: <N extends Multi>(N: N) => defineSimulatedModule({
     name: `counter_sim${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
@@ -70,7 +70,7 @@ export const raw = {
   }),
   reg: <N extends Multi>(
     N: N
-  ) => (initialData = State.gen(N, () => State.zero)) => createSimulatedModule({
+  ) => (initialData = State.gen(N, () => State.zero)) => defineSimulatedModule({
     name: `reg${N}`,
     inputs: { d: N, load: 1, clk: 1 },
     outputs: { q: N },

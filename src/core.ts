@@ -430,7 +430,7 @@ const _createModule = <
   };
 };
 
-export const createSimulatedModule = <
+export const defineSimulatedModule = <
   In extends Record<string, Num>,
   Out extends Record<string, Num>,
   State extends {}
@@ -440,13 +440,13 @@ export const createSimulatedModule = <
   return _createModule({ ...def, type: 'simulated' });
 };
 
-export const createModule = <In extends Record<string, Num>, Out extends Record<string, Num>>(
+export const defineModule = <In extends Record<string, Num>, Out extends Record<string, Num>>(
   def: Omit<CompoundModuleDef<In, Out>, 'type'>
 ): (() => Module<In, Out>) => {
   return _createModule({ ...def, type: 'compound' });
 };
 
-const createConstants = createSimulatedModule({
+const createConstants = defineSimulatedModule({
   name: '<power>',
   inputs: {},
   outputs: { vcc: 1, gnd: 1 },
@@ -460,7 +460,7 @@ const createConstants = createSimulatedModule({
 createConstants();
 
 // ensure that all pins (exepted the primary inputs/outputs) are connected
-export const checkConnections = (topMod: Module<any, any>): void => {
+export const checkConnections = (topMod: Module<{}, {}>): void => {
   const { circuit, id: topModId } = metadata(topMod);
   // do notLinearized: string[] = []; check connections for the top module and primitive modules
   for (const mod of Iter.filter(circuit.modules.values(), m => m.id !== topModId && m.simulate == null)) {

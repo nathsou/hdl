@@ -1,8 +1,8 @@
-import { Circuit, CircuitState, Connection, MapStates, Module, ModuleNode, Net, NodeStateConst, State } from "../core";
-import { Iter, Tuple } from "../utils";
+import { checkConnections, Circuit, CircuitState, Connection, MapStates, Module, ModuleNode, Net, NodeStateConst, State } from "../core";
+import { deepEqualObject, Iter, Tuple } from "../utils";
 import { createEventDrivenSimulator } from "./event-sim";
 import { createLevelizedSimulator } from "./level-sim";
-import { connectionToNet } from "./rewrite";
+import { connectionToNet } from "./rewire";
 
 const deref = (state: CircuitState, net: Net): State => {
   const s = state[net];
@@ -93,21 +93,59 @@ export type Simulator<In extends Record<string, number>> = {
   state: {
     raw: CircuitState,
     read: <C extends Connection[] | Connection>(connection: C) => StateReaderRet<C>,
-  },
+  }
 };
 
 export type SimulationApproach = 'levelization' | 'event-driven';
 
+export type SimulationSettings = {
+  approach: SimulationApproach,
+  checkConnections: boolean,
+};
+
+const defaultSimulationSettings: SimulationSettings = {
+  approach: 'event-driven',
+  checkConnections: true,
+};
+
 export const createSimulator = <
   In extends Record<string, number>,
   Out extends Record<string, number>
->(top: Module<In, Out>, approach: SimulationApproach = 'event-driven') => {
-  switch (approach) {
-    case 'levelization':
-      return createLevelizedSimulator(top);
-    case 'event-driven':
-      return createEventDrivenSimulator(top);
+>(top: Module<In, Out>, settings = defaultSimulationSettings) => {
+  if (settings.checkConnections) {
+    checkConnections(top);
   }
+
+  const sim = (() => {
+    switch (settings.approach) {
+      case 'levelization':
+        return createLevelizedSimulator(top);
+      case 'event-driven':
+        return createEventDrivenSimulator(top);
+    }
+  })();
+
+  type InputVector<M extends Module<Record<string, number>, any>> =
+  MapStates<M extends Module<infer In, any> ? In : never>;
+
+  type OutputVector<M extends Module<any, Record<string, number>>> =
+    MapStates<M extends Module<any, infer Out> ? Out : never>;
+
+  return {
+    ...sim,
+    expect(input: InputVector<typeof top>, expectedOutput: OutputVector<typeof top>) {
+      sim.input(input);
+
+      const actualOutput: Record<string, State | State[]> = {};
+      for (const k of Object.keys(expectedOutput)) {
+        actualOutput[k] = sim.state.read(top.out[k]); 
+      }
+    
+      if (!deepEqualObject(actualOutput, expectedOutput)) {
+        throw new Error(`Invalid state for ${JSON.stringify(input)}, expected ${JSON.stringify(expectedOutput)}, got ${JSON.stringify(actualOutput)}`);
+      }
+    },
+  };
 };
 
 type StateUpdater = (state: CircuitState, net: Net, newState: State) => void;

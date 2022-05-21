@@ -1,7 +1,7 @@
-import { Circuit, ModuleNode, RawConnection } from "./core";
-import { Tuple, Iter, joinWithEndingSep } from "./utils";
+import { Circuit, ModuleNode, RawConnection } from "../../core";
+import { Tuple, Iter, joinWithEndingSep } from "../../utils";
 
-export const createGraphDotFile = (circuit: Circuit) => {
+const generateDotFile = (circuit: Circuit): string => {
   const label = (c: RawConnection) => `"${c.pin}:${c.modId}"`;
   const edges = new Set<string>();
 
@@ -51,4 +51,8 @@ export const createGraphDotFile = (circuit: Circuit) => {
     joinWithEndingSep(subgraphs.map(s => '  ' + s), '\n') +
     joinWithEndingSep([...edges].map(edge => '  ' + edge), ';\n') +
     '}\n';
+};
+
+export const GraphViz = {
+  generateDotFile,
 };

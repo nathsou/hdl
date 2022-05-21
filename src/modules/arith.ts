@@ -1,4 +1,4 @@
-import { Connection, createModule, IO, Multi, Num, State } from "../core";
+import { Connection, defineModule, IO, Multi, Num, State } from "../core";
 import { last, Range, Tuple } from "../utils";
 import { and, logicalAnd, logicalNot, logicalOr, nor, not, or, xnor, xor } from "./gates";
 import * as mux from './mux';
@@ -7,7 +7,7 @@ const log2 = { 2: 4, 4: 2, 8: 3, 16: 4, 32: 5 } as const;
 type Log2 = typeof log2;
 
 export const arith = {
-  halfAdder1: createModule({
+  halfAdder1: defineModule({
     name: 'half_adder1',
     inputs: { a: 1, b: 1 },
     outputs: { sum: 1, carry: 1 },
@@ -16,7 +16,7 @@ export const arith = {
       out.carry = and<1>(inp.a, inp.b);
     },
   }),
-  fullAdder1: createModule({
+  fullAdder1: defineModule({
     name: 'full_adder1',
     inputs: { a: 1, b: 1, carry_in: 1 },
     outputs: { sum: 1, carry_out: 1 },
@@ -33,7 +33,7 @@ export const arith = {
       );
     },
   }),
-  adder: <N extends Multi>(N: N) => createModule({
+  adder: <N extends Multi>(N: N) => defineModule({
     name: `adder${N}`,
     inputs: { a: N, b: N, carryIn: 1 },
     outputs: { sum: N, carryOut: 1 },
@@ -50,7 +50,7 @@ export const arith = {
       out.carryOut = last(adders).out.carry_out;
     },
   }),
-  adderSubtractor: <N extends Multi>(N: N) => createModule({
+  adderSubtractor: <N extends Multi>(N: N) => defineModule({
     name: `adder_subtractor${N}`,
     inputs: { a: N, b: N, subtract: 1 },
     outputs: { sum: N, carry_out: 1 },
@@ -64,7 +64,7 @@ export const arith = {
       out.carry_out = sum.out.carryOut;
     },
   }),
-  rightShifter: <N extends keyof Log2>(N: N) => createModule({
+  rightShifter: <N extends keyof Log2>(N: N) => defineModule({
     name: `right_shifter${N}`,
     inputs: { d: N, amount: log2[N] },
     outputs: { q: N },
@@ -83,7 +83,7 @@ export const arith = {
       out.q = IO.gen(N, n => muxes[n].out.q);
     }
   }),
-  leftShifer: <N extends keyof Log2>(N: N) => createModule({
+  leftShifer: <N extends keyof Log2>(N: N) => defineModule({
     name: `left_shifter${N}`,
     inputs: { d: N, amount: log2[N] },
     outputs: { q: N },
@@ -155,7 +155,7 @@ export const shiftRight = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>):
   return shifter.out.q;
 };
 
-export const comparator1 = createModule({
+export const comparator1 = defineModule({
   name: 'comparator1',
   inputs: { a: 1, b: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
@@ -167,7 +167,7 @@ export const comparator1 = createModule({
 });
 
 // amplitude comparator with cascade
-export const comparator4 = createModule({
+export const comparator4 = defineModule({
   name: 'comparator4',
   inputs: { a: 4, b: 4, cascaded_lss: 1, cascaded_equ: 1, cascaded_gtr: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
@@ -193,7 +193,7 @@ export const comparator4 = createModule({
   }
 });
 
-export const comparator8 = createModule({
+export const comparator8 = defineModule({
   name: 'comparator8',
   inputs: { a: 8, b: 8, cascaded_lss: 1, cascaded_equ: 1, cascaded_gtr: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
@@ -219,7 +219,7 @@ export const comparator8 = createModule({
   }
 });
 
-export const comparator16 = createModule({
+export const comparator16 = defineModule({
   name: 'comparator16',
   inputs: { a: 16, b: 16, cascaded_lss: 1, cascaded_equ: 1, cascaded_gtr: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
@@ -245,7 +245,7 @@ export const comparator16 = createModule({
   }
 });
 
-export const comparator32 = createModule({
+export const comparator32 = defineModule({
   name: 'comparator32',
   inputs: { a: 32, b: 32, cascaded_lss: 1, cascaded_equ: 1, cascaded_gtr: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },

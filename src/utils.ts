@@ -119,6 +119,25 @@ export const shallowEqualObject = <V>(a: Record<string, V>, b: Record<string, V>
   return keysa.length === keysb.length && keysa.every(k => a[k] === b[k]);
 };
 
+export const deepEqualObject = <V>(a: Record<string, V>, b: Record<string, V>): boolean => {
+  const aux = (x: any, y: any): boolean => {
+    if (typeof x !== typeof y) {
+      return false;
+    }
+
+   if (typeof x === 'object') {
+    const keysx = Object.keys(x);
+    const keysy = Object.keys(y);
+  
+    return keysx.length === keysy.length && keysx.every(k => y.hasOwnProperty(k) && aux(x[k], y[k])); 
+   } else {
+     return x === y;
+   }
+  };
+
+  return aux(a, b);
+};
+
 type Assert = (condition: unknown, message?: string) => asserts condition;
 
 export const assert: Assert = (condition, msg) => {
@@ -293,6 +312,15 @@ export const createCache = <K, V>() => {
         cache.set(key, value);
         return value;
       }
-    }
+    },
+    async keyAsync(key: K, generate: () => Promise<V>): Promise<V> {
+      if (cache.has(key)) {
+        return cache.get(key)!;
+      } else {
+        const value = await generate();
+        cache.set(key, value);
+        return value;
+      }
+    },
   };
 };

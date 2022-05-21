@@ -1,8 +1,6 @@
 import { IndexedSExpr, SExpr } from "./s-expr";
 
-
 type Assert = (condition: unknown, message?: string) => asserts condition;
-
 const assert: Assert = (condition, msg) => {
   if (!condition) {
     throw new Error(`Assertion error: ${msg}`);

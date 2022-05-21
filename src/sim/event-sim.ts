@@ -1,8 +1,8 @@
 import CircularBuffer from 'mnemonist/circular-buffer';
 import Queue from 'mnemonist/queue';
-import { checkConnections, MapStates, metadata, Module, ModuleId, Net, NodeStateConst, State } from "../core";
+import { MapStates, metadata, Module, ModuleId, Net, NodeStateConst, State } from "../core";
 import { Iter, uniq } from "../utils";
-import { targetPrimitiveMods, keepPrimitiveModules } from './rewrite';
+import { Rewire } from './rewire';
 import { createState, SimulationData, simulationHandler, Simulator } from './sim';
 
 type SimEvent = {
@@ -15,9 +15,8 @@ export const createEventDrivenSimulator = <
   Out extends Record<string, number>
 >(topModule: Module<In, Out>): Simulator<In> => {
   const { id: topId, circuit } = metadata(topModule);
-  checkConnections(topModule);
   const state = createState(circuit);
-  const primCircuit = keepPrimitiveModules(circuit);
+  const primCircuit = Rewire.keepPrimitiveModules(circuit);
   const eventQueue = new Queue<SimEvent>();
   const maxModId = circuit.modules.size - 1;
   const moduleQueue = new CircularBuffer<ModuleId>(
@@ -28,7 +27,7 @@ export const createEventDrivenSimulator = <
   const fanouts = new Map<Net, ModuleId[]>(
     Iter.map(circuit.nets.entries(), ([net, { out }]) => [
       net,
-      uniq(targetPrimitiveMods(circuit, out))
+      uniq(Rewire.filterOutputs(circuit, out, node => node.simulate != null))
     ])
   );
 
@@ -47,7 +46,7 @@ export const createEventDrivenSimulator = <
 
     for (const net of nets) {
       const out = circuit.nets.get(net)!.out;
-      fanouts.set(net, uniq(targetPrimitiveMods(circuit, out)));
+      fanouts.set(net, uniq(Rewire.filterOutputs(circuit, out, node => node.simulate != null)));
     }
   }
 

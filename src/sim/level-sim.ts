@@ -1,10 +1,10 @@
-import { checkConnections, Circuit, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
-import { keepPrimitiveModules } from "./rewrite";
-import { Iter, complementarySet } from "../utils";
+import { Circuit, MapStates, metadata, Module, ModuleId, Net, State } from "../core";
+import { complementarySet, Iter } from "../utils";
+import { Rewire } from "./rewire";
 import { createState, SimulationData, simulationHandler, Simulator } from "./sim";
 
 export const levelize = (circuit: Circuit) => {
-  const { modules: gates } = keepPrimitiveModules(circuit);
+  const { modules: gates } = Rewire.keepPrimitiveModules(circuit);
 
   const remainingGates = new Set<ModuleId>();
   const readyGates = complementarySet(remainingGates);
@@ -54,7 +54,6 @@ export const createLevelizedSimulator = <
   Out extends Record<string, number>
 >(top: Module<In, Out>): Simulator<In> => {
   const { id: topId, circuit } = metadata(top);
-  checkConnections(top);
   const state = createState(circuit);
   const executionOrder = levelize(circuit);
 

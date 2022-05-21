@@ -1,11 +1,11 @@
-import { createSimulatedModule } from "../core";
+import { defineSimulatedModule } from "../core";
 
 type ResistorOptions = {
   value: number | `${number}k`, // ohms
   footprint?: string,
 };
 
-export const resistor = (options: ResistorOptions) => createSimulatedModule({
+export const resistor = (options: ResistorOptions) => defineSimulatedModule({
   name: `R${options.value}`,
   inputs: { lhs: 1 },
   outputs: { rhs: 1 },

@@ -1,5 +1,5 @@
 import { compare8 } from "../src";
-import { Connection, IO, State, createModule } from "../src/core";
+import { Connection, IO, State, defineModule } from "../src/core";
 import { demux16, match8, matchN, match1 } from "../src/modules/mux";
 import { adder, add, subtract, shiftLeft, shiftRight, isEqual, isEqualConst } from "../src/modules/arith";
 import { reg8 } from "../src/modules/regs";
@@ -29,7 +29,7 @@ const Inst = {
   XOR: 0xf,
 } as const;
 
-const createROM = createModule({
+const createROM = defineModule({
   name: 'instructions_rom',
   inputs: { address: 8 },
   outputs: { inst: 16 },
@@ -57,7 +57,7 @@ const createROM = createModule({
   }
 });
 
-const top = createModule({
+const top = defineModule({
   name: 'top',
   inputs: { din: 8, clk: 1 },
   outputs: { read: 1, write: 1, address: 8, dout: 8 },

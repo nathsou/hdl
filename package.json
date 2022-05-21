@@ -11,9 +11,9 @@
   "scripts": {
     "test": "jest",
     "typeCheck": "tsc --noEmit",
-    "esbuild": "esbuild examples/kicad.ts --bundle --outfile=dist/kicad.js --platform=node",
+    "esbuild": "esbuild examples/kicad.ts --sourcemap --bundle --outfile=dist/kicad.js --platform=node",
     "build": "tsc",
-    "watch": "esbuild examples/kicad.ts --bundle --outfile=dist/kicad.js --platform=node --watch"
+    "watch": "esbuild examples/kicad.ts --sourcemap --bundle --outfile=dist/kicad.js --platform=node --watch"
   },
   "keywords": [
     "hardware-description",

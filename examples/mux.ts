@@ -1,4 +1,4 @@
-import { IO, createModule } from "../src/core";
+import { IO, defineModule } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { Tuple, Range } from "../src/utils";
 import * as mux from "../src/modules/mux";
@@ -22,7 +22,7 @@ const multiplexers = {
 
 const muxSize = 5;
 
-const top = createModule({
+const top = defineModule({
   name: 'top',
   inputs: { clk: 1, sel: muxSize },
   outputs: { leds: 8 },

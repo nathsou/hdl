@@ -1,7 +1,7 @@
-import { createModule } from "../core";
+import { defineModule } from "../core";
 import { and, not, gates } from "./gates";
 
-export const srLatch = createModule({
+export const srLatch = defineModule({
   name: 'sr_latch',
   inputs: { s: 1, r: 1 },
   outputs: { q: 1, qbar: 1 },
@@ -20,7 +20,7 @@ export const srLatch = createModule({
   },
 });
 
-export const srLatchWithEnable = createModule({
+export const srLatchWithEnable = defineModule({
   name: 'sr_latch_with_enable',
   inputs: { s: 1, r: 1, enable: 1 },
   outputs: { q: 1, qbar: 1 },
@@ -35,7 +35,7 @@ export const srLatchWithEnable = createModule({
   },
 });
 
-export const dLatch = createModule({
+export const dLatch = defineModule({
   name: 'd_latch',
   inputs: { d: 1, enable: 1 },
   outputs: { q: 1, qbar: 1 },
@@ -51,7 +51,7 @@ export const dLatch = createModule({
   },
 });
 
-export const dFlipFlop = createModule({
+export const dFlipFlop = defineModule({
   name: 'd_flip_flop',
   inputs: { d: 1, clk: 1 },
   outputs: { q: 1, qbar: 1 },
@@ -65,7 +65,7 @@ export const dFlipFlop = createModule({
 });
 
 // also known as master-slave JK flip-flop
-export const leaderFollowerJKFlipFlop = createModule({
+export const leaderFollowerJKFlipFlop = defineModule({
   name: 'leader_follower_jk_flip_flop',
   inputs: { j: 1, k: 1, clk: 1 },
   outputs: { q: 1, qbar: 1 },

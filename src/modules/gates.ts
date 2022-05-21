@@ -1,9 +1,9 @@
-import { Connection, createModuleGroup, createSimulatedModule, IO, Module, Num } from "../core";
+import { Connection, createModuleGroup, defineSimulatedModule, IO, Module, Num } from "../core";
 import { assert } from "../utils";
 import { extendN } from "./meta";
 
 export const gates = {
-  not: createSimulatedModule({
+  not: defineSimulatedModule({
     name: 'not',
     inputs: { d: 1 },
     outputs: { q: 1 },
@@ -11,7 +11,7 @@ export const gates = {
       out.q = inp.d === 0 ? 1 : 0;
     },
   }),
-  and: createSimulatedModule({
+  and: defineSimulatedModule({
     name: 'and',
     inputs: { a: 1, b: 1 },
     outputs: { q: 1 },
@@ -19,7 +19,7 @@ export const gates = {
       out.q = (inp.a && inp.b) ? 1 : 0;
     },
   }),
-  nand: createSimulatedModule({
+  nand: defineSimulatedModule({
     name: 'nand',
     inputs: { a: 1, b: 1 },
     outputs: { q: 1 },
@@ -27,7 +27,7 @@ export const gates = {
       out.q = (inp.a && inp.b) ? 0 : 1;
     },
   }),
-  or: createSimulatedModule({
+  or: defineSimulatedModule({
     name: 'or',
     inputs: { a: 1, b: 1 },
     outputs: { q: 1 },
@@ -35,7 +35,7 @@ export const gates = {
       out.q = (inp.a || inp.b) ? 1 : 0;
     },
   }),
-  nor: createSimulatedModule({
+  nor: defineSimulatedModule({
     name: 'nor',
     inputs: { a: 1, b: 1 },
     outputs: { q: 1 },
@@ -43,7 +43,7 @@ export const gates = {
       out.q = (inp.a || inp.b) ? 0 : 1;
     },
   }),
-  xor: createSimulatedModule({
+  xor: defineSimulatedModule({
     name: 'xor',
     inputs: { a: 1, b: 1 },
     outputs: { q: 1 },
@@ -51,7 +51,7 @@ export const gates = {
       out.q = (inp.a || inp.b) && !(inp.a && inp.b) ? 1 : 0;
     },
   }),
-  xnor: createSimulatedModule({
+  xnor: defineSimulatedModule({
     name: 'xnor',
     inputs: { a: 1, b: 1 },
     outputs: { q: 1 },

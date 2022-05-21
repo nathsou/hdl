@@ -1,9 +1,12 @@
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import { IO, KiCadConfig, metadata, Module, ModuleNode, Num } from "../../core";
+import { Rewire } from '../../sim/rewire';
 import { Iter, occurences, createCache } from "../../utils";
+import { GraphViz } from '../graphviz/graphviz';
 import { parseSymbolLibrary, SymbolDef, SymbolPin } from './parse';
 import { SExpr } from './s-expr';
+import { writeFile } from 'fs/promises';
 
 export type SymbolOccurence = KiCadConfig<any, any> & {
   node: ModuleNode,
@@ -26,8 +29,8 @@ const scanLibraries = async (libsDir: string): Promise<KiCadLibraries> => {
   const footprintsDir = join(libsDir, 'footprints');
   const symbolLibs = new Set(findByExt(await readdir(symbolsDir), '.kicad_sym'));
   const footprintLibs = new Set(findByExt(await readdir(footprintsDir), '.pretty'));
-  const symbolsCache = new Map<string, Map<string, SymbolDef>>();
-  const footprintsCache = new Map<string, Set<string>>();
+  const symbolsCache = createCache<string, Map<string, SymbolDef>>();
+  const footprintsCache = createCache<string, Set<string>>();
 
   return {
     symbols: symbolLibs,
@@ -37,14 +40,11 @@ const scanLibraries = async (libsDir: string): Promise<KiCadLibraries> => {
         throw new Error(`Symbol library '${lib}.kicad_sym' not found`);
       }
 
-      if (!symbolsCache.has(lib)) {
+      const libParts = await symbolsCache.keyAsync(lib, async () => {
         const libFile = join(symbolsDir, `${lib}.kicad_sym`);
         const contents = (await readFile(libFile)).toString();
-        const libParts = parseSymbolLibrary(contents);
-        symbolsCache.set(lib, libParts);
-      }
-
-      const libParts = symbolsCache.get(lib)!;
+        return parseSymbolLibrary(contents);
+      });
 
       if (libParts.has(part)) {
         return libParts.get(part)!;
@@ -57,13 +57,10 @@ const scanLibraries = async (libsDir: string): Promise<KiCadLibraries> => {
         throw new Error(`Footprint library '${lib}.pretty' not found`);
       }
 
-      if (!footprintsCache.has(lib)) {
+      const parts = await footprintsCache.keyAsync(lib, async () => {
         const libDir = join(footprintsDir, `${lib}.pretty`);
-        const parts = new Set(findByExt(await readdir(libDir), '.kicad_mod'));
-        footprintsCache.set(lib, parts);
-      }
-
-      const parts = footprintsCache.get(lib)!;
+        return new Set(findByExt(await readdir(libDir), '.kicad_mod'));
+      });
 
       if (!parts.has(part)) {
         throw new Error(`Footprint '${part}' not found in footprint library '${lib}', available footprints:\n${[...parts].join(', ')}`);
@@ -115,15 +112,21 @@ const pinReverseMapping = (
   return reversePinMapping;
 };
 
-const collectUsedSymbols = async (top: Module<any, any>, libs: KiCadLibraries): Promise<SymbolOccurence[]> => {
+const collectUsedSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): Promise<SymbolOccurence[]> => {
   const { circuit, id } = metadata(top);
   const mod = circuit.modules.get(id)!;
+  const topSig = circuit.signatures.get(mod.name)!;
+  
+  if (Object.keys(topSig.inputs).length + Object.keys(topSig.outputs).length > 0) {
+    throw new Error(`Top module must define empty inputs and outputs when targetting KiCad`);
+  }
+
   const kicadSymbols: SymbolOccurence[] = [];
 
   const aux = async (node: ModuleNode) => {
     const sig = circuit.signatures.get(node.name)!;
     if (node.simulate !== undefined && sig.kicad === undefined) {
-      throw new Error(`Unspecified kicad mapping for module '${node.name}'`);
+      throw new Error(`Unspecified KiCad mapping for module '${node.name}'`);
     }
 
     if (sig.kicad !== undefined) {
@@ -188,14 +191,18 @@ const collectUsedSymbols = async (top: Module<any, any>, libs: KiCadLibraries): 
   return kicadSymbols;
 };
 
-const generateNetlist = (symbols: SymbolOccurence[], top: Module<any, any>) => {
+const generateNetlist = async (top: Module<{}, {}>, libsDir: string): Promise<SExpr> => {
+  const libs = await scanLibraries(libsDir);
+  const symbols = await collectUsedSymbols(top, libs);
   const { num, str, sym, list } = SExpr;
-  const { circuit } = metadata(top);
-
+  
   // 0 is the power module
-  const moduleIds = new Set([0, ...symbols.map(s => s.node.id)]);
-  const symbolsNets = Iter.filter(circuit.nets, ([_, net]) => moduleIds.has(net.id));
+  const kicadModuleIds = new Set([0, ...symbols.map(s => s.node.id)]);
+  const circuit = Rewire.keepModules(metadata(top).circuit, node => kicadModuleIds.has(node.id));
   const reverseMappings = createCache<string, Record<string, number>>();
+
+  const gv = GraphViz.generateDotFile(circuit);
+  await writeFile('./out/lab.gv', gv);
 
   return list(
     sym('export'),
@@ -222,11 +229,11 @@ const generateNetlist = (symbols: SymbolOccurence[], top: Module<any, any>) => {
     ),
     list(
       sym('nets'),
-      ...Iter.map(symbolsNets, ([netName, net], index) => {
+      ...Iter.map(circuit.nets, ([netName, net], index) => {
         const connectedNodes = [netName, ...net.in, ...net.out]
-          .map(net => [net, circuit.modules.get(Number(net.split(':')[1]))!] as const)
-          .filter(([_, mod]) => mod.id !== 0 && moduleIds.has(mod.id));
-
+          .filter(net => (id => id !== 0 && kicadModuleIds.has(id))(Number(net.split(':')[1])))
+          .map(net => [net, circuit.modules.get(Number(net.split(':')[1]))!] as const);
+          
         return list(
           sym('net'),
           list(sym('code'), num(index)),
@@ -258,7 +265,5 @@ const generateNetlist = (symbols: SymbolOccurence[], top: Module<any, any>) => {
 };
 
 export const KiCad = {
-  scanLibraries,
-  collectUsedSymbols,
   generateNetlist,
 };

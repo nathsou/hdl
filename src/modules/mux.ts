@@ -1,9 +1,9 @@
-import { Connection, createModule, createModuleGroup, IO, Num } from "../core";
+import { Connection, defineModule, createModuleGroup, IO, Num } from "../core";
 import { Range, Tuple } from "../utils";
 import { and, logicalAnd, logicalOr, not, or } from "./gates";
 
 export const raw = {
-  mux2: <N extends Num>(N: N) => createModule({
+  mux2: <N extends Num>(N: N) => defineModule({
     name: `mux2_${N}`,
     inputs: { d0: N, d1: N, sel: 1 },
     outputs: { q: N },
@@ -14,7 +14,7 @@ export const raw = {
       );
     }
   }),
-  mux4: <N extends Num>(N: N) => createModule({
+  mux4: <N extends Num>(N: N) => defineModule({
     name: `mux4_${N}`,
     inputs: { d0: N, d1: N, d2: N, d3: N, sel: 2 },
     outputs: { q: N },
@@ -38,7 +38,7 @@ export const raw = {
       out.q = m3.out.q;
     }
   }),
-  mux8: <N extends Num>(N: N) => createModule({
+  mux8: <N extends Num>(N: N) => defineModule({
     name: `mux8_${N}`,
     inputs: { d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N, sel: 3 },
     outputs: { q: N },
@@ -68,7 +68,7 @@ export const raw = {
       out.q = m3.out.q;
     }
   }),
-  mux16: <N extends Num>(N: N) => createModule({
+  mux16: <N extends Num>(N: N) => defineModule({
     name: `mux16_${N}`,
     inputs: {
       d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N,
@@ -99,7 +99,7 @@ export const raw = {
       out.q = m3.out.q;
     }
   }),
-  mux32: <N extends Num>(N: N) => createModule({
+  mux32: <N extends Num>(N: N) => defineModule({
     name: `mux32_${N}`,
     inputs: {
       d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N,
@@ -132,7 +132,7 @@ export const raw = {
       out.q = m3.out.q;
     }
   }),
-  demux2: <N extends Num>(N: N) => createModule({
+  demux2: <N extends Num>(N: N) => defineModule({
     name: `demux2_${N}`,
     inputs: { d: N, sel: 1 },
     outputs: { q0: N, q1: N },
@@ -141,7 +141,7 @@ export const raw = {
       out.q1 = and(inp.d, IO.repeat(N, inp.sel));
     }
   }),
-  demux4: <N extends Num>(N: N) => createModule({
+  demux4: <N extends Num>(N: N) => defineModule({
     name: `demux4_${N}`,
     inputs: { d: N, sel: 2 },
     outputs: { q0: N, q1: N, q2: N, q3: N },
@@ -166,7 +166,7 @@ export const raw = {
       out.q3 = m2.out.q1;
     }
   }),
-  demux8: <N extends Num>(N: N) => createModule({
+  demux8: <N extends Num>(N: N) => defineModule({
     name: `demux8_${N}`,
     inputs: { d: N, sel: 3 },
     outputs: Object.fromEntries(Range.map(0, 8, i => [`q${i}`, N])) as Record<`q${Range<0, 8>}`, N>,
@@ -191,7 +191,7 @@ export const raw = {
       });
     }
   }),
-  demux16: <N extends Num>(N: N) => createModule({
+  demux16: <N extends Num>(N: N) => defineModule({
     name: `demux16_${N}`,
     inputs: { d: N, sel: 4 },
     outputs: Object.fromEntries(Range.map(0, 16, i => [`q${i}`, N])) as Record<`q${Range<0, 16>}`, N>,
@@ -216,7 +216,7 @@ export const raw = {
       });
     }
   }),
-  demux32: <N extends Num>(N: N) => createModule({
+  demux32: <N extends Num>(N: N) => defineModule({
     name: `demux32_${N}`,
     inputs: { d: N, sel: 5 },
     outputs: Object.fromEntries(Range.map(0, 32, i => [`q${i}`, N])) as Record<`q${Range<0, 32>}`, N>,
@@ -285,7 +285,7 @@ const match = <N extends Num>(N: N) => <T extends IO<Num>>(
   return IO.gen(N, i => logicalOr(...ors.map(o => o[i])));
 });
 
-export const binaryDecoder2 = createModule({
+export const binaryDecoder2 = defineModule({
   name: 'binary_decoder_2',
   inputs: { d: 4 },
   outputs: { q: 2 },

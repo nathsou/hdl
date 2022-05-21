@@ -1,6 +1,6 @@
-import { createSimulatedModule } from "../core";
+import { defineSimulatedModule } from "../core";
 
-export const npn = createSimulatedModule({
+export const npn = defineSimulatedModule({
   name: 'npn',
   inputs: { base: 1, collector: 1 },
   outputs: { emitter: 1 },
