@@ -1,12 +1,10 @@
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
-import { IO, KiCadConfig, metadata, Module, ModuleNode, Num } from "../../core";
+import { Circuit, IO, KiCadConfig, metadata, Module, ModuleNode, Net, Num } from "../../core";
 import { Rewire } from '../../sim/rewire';
-import { Iter, occurences, createCache } from "../../utils";
-import { GraphViz } from '../graphviz/graphviz';
+import { createCache, Iter, occurences } from "../../utils";
 import { parseSymbolLibrary, SymbolDef, SymbolPin } from './parse';
 import { SExpr } from './s-expr';
-import { writeFile } from 'fs/promises';
 
 export type SymbolOccurence = KiCadConfig<any, any> & {
   node: ModuleNode,
@@ -191,6 +189,31 @@ const collectUsedSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): Pr
   return kicadSymbols;
 };
 
+const collectNets = (circuit: Circuit) => {
+  const nets: { start: Net, end: Net }[] = [];
+  const netMapping = createCache<Net, Set<Net>>();
+
+  for (const [net, { in: inp, out }] of circuit.nets) {
+    for (const incomingNet of inp) {
+      nets.push({ start: incomingNet, end: net });
+    }
+
+    for (const outcomingNet of out) {
+      nets.push({ start: net, end: outcomingNet });
+    }
+  }
+
+  for (const { start, end } of nets) {
+    const startNets = netMapping.key(start, () => new Set());
+    const endNets = netMapping.key(end, () => new Set());
+
+    startNets.add(end);
+    endNets.add(start);
+  }
+
+  return netMapping;
+};
+
 const generateNetlist = async (top: Module<{}, {}>, libsDir: string): Promise<SExpr> => {
   const libs = await scanLibraries(libsDir);
   const symbols = await collectUsedSymbols(top, libs);
@@ -200,9 +223,7 @@ const generateNetlist = async (top: Module<{}, {}>, libsDir: string): Promise<SE
   const kicadModuleIds = new Set([0, ...symbols.map(s => s.node.id)]);
   const circuit = Rewire.keepModules(metadata(top).circuit, node => kicadModuleIds.has(node.id));
   const reverseMappings = createCache<string, Record<string, number>>();
-
-  const gv = GraphViz.generateDotFile(circuit);
-  await writeFile('./out/lab.gv', gv);
+  const netlist = collectNets(circuit);
 
   return list(
     sym('export'),
@@ -229,11 +250,11 @@ const generateNetlist = async (top: Module<{}, {}>, libsDir: string): Promise<SE
     ),
     list(
       sym('nets'),
-      ...Iter.map(circuit.nets, ([netName, net], index) => {
-        const connectedNodes = [netName, ...net.in, ...net.out]
-          .filter(net => (id => id !== 0 && kicadModuleIds.has(id))(Number(net.split(':')[1])))
-          .map(net => [net, circuit.modules.get(Number(net.split(':')[1]))!] as const);
-          
+      ...Iter.map(netlist.raw, ([netName, connectedNets], index) => {
+        const connectedNodes = [netName, ...connectedNets]
+          .filter(net => Net.modId(net) !== 0)
+          .map(net => [net, circuit.modules.get(Net.modId(net))!] as const);
+
         return list(
           sym('net'),
           list(sym('code'), num(index)),

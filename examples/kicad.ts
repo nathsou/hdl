@@ -2,7 +2,7 @@ import { defineModule, Tuple } from '../src';
 import { KiCad } from '../src/export/kicad/kicad';
 import { SExpr } from '../src/export/kicad/s-expr';
 import { isolateGates, u74x08, u74x32, u74x86 } from '../src/modules/74xx';
-import { pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
+import { pinHeaders1x2, pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
 
 const KICAD_LIBS_DIR = '/Applications/KiCad/KiCad.app/Contents/SharedSupport';
 
@@ -64,10 +64,13 @@ const top = defineModule({
   inputs: {},
   outputs: {},
   connect() {
-    const a = pinHeaders1x8();
-    const b = pinHeaders1x8();
-    const outputPins = pinHeaders1x9();
+    const power = pinHeaders1x2('Horizontal');
+    const a = pinHeaders1x8('Horizontal');
+    const b = pinHeaders1x8('Horizontal');
+    const outputPins = pinHeaders1x9('Horizontal');
     const uAdder = adder8();
+
+    power.out.pins = [0, 1];
 
     uAdder.in.cin = 0;
     uAdder.in.a = a.out.pins;
@@ -79,7 +82,7 @@ const top = defineModule({
 
 const main = async () => {
   const netlist = await KiCad.generateNetlist(top, KICAD_LIBS_DIR);
-  console.log(SExpr.show(netlist, true));
+  console.log(SExpr.show(netlist, false));
 };
 
 main();

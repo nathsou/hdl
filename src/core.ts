@@ -173,6 +173,18 @@ export type NodeState = NodeStateConst | NodeStateRef;
 export type Net = string;
 export type CircuitState = Record<string, NodeState>;
 
+export const Net = {
+  modId(net: Net): ModuleId {
+    return Number(net.split(':')[1]);
+  },
+  pin(net: Net): string {
+    return net.split(':')[0];
+  },
+  decompose(net: Net): [string, ModuleId] {
+    return [Net.pin(net), Net.modId(net)];
+  },
+};
+
 type GlobalState = {
   circuit: Circuit,
   nextId: number,
