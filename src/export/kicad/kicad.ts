@@ -1,10 +1,9 @@
-import { readdir, readFile } from 'fs/promises';
-import { join } from 'path';
 import { Circuit, IO, KiCadConfig, metadata, Module, ModuleNode, Net, Num } from "../../core";
 import { Rewire } from '../../sim/rewire';
 import { createCache, Iter, occurences } from "../../utils";
 import { parseSymbolLibrary, SymbolDef, SymbolPin } from './parse';
 import { SExpr } from './s-expr';
+import { FileSystem } from '../fs/fs';
 
 export type SymbolOccurence = KiCadConfig<any, any> & {
   node: ModuleNode,
@@ -22,11 +21,11 @@ const findByExt = (files: string[], ext: string): string[] => {
   return files.filter(f => f.endsWith(ext)).map(f => f.replace(ext, ''));
 };
 
-const scanLibraries = async (libsDir: string): Promise<KiCadLibraries> => {
-  const symbolsDir = join(libsDir, 'symbols');
-  const footprintsDir = join(libsDir, 'footprints');
-  const symbolLibs = new Set(findByExt(await readdir(symbolsDir), '.kicad_sym'));
-  const footprintLibs = new Set(findByExt(await readdir(footprintsDir), '.pretty'));
+const scanLibraries = async (libsDir: string, fs: FileSystem): Promise<KiCadLibraries> => {
+  const symbolsDir = fs.joinPaths(libsDir, 'symbols');
+  const footprintsDir = fs.joinPaths(libsDir, 'footprints');
+  const symbolLibs = new Set(findByExt(await fs.readDir(symbolsDir), '.kicad_sym'));
+  const footprintLibs = new Set(findByExt(await fs.readDir(footprintsDir), '.pretty'));
   const symbolsCache = createCache<string, Map<string, SymbolDef>>();
   const footprintsCache = createCache<string, Set<string>>();
 
@@ -39,8 +38,8 @@ const scanLibraries = async (libsDir: string): Promise<KiCadLibraries> => {
       }
 
       const libParts = await symbolsCache.keyAsync(lib, async () => {
-        const libFile = join(symbolsDir, `${lib}.kicad_sym`);
-        const contents = (await readFile(libFile)).toString();
+        const libFile = fs.joinPaths(symbolsDir, `${lib}.kicad_sym`);
+        const contents = await fs.readFile(libFile);
         return parseSymbolLibrary(contents);
       });
 
@@ -56,8 +55,8 @@ const scanLibraries = async (libsDir: string): Promise<KiCadLibraries> => {
       }
 
       const parts = await footprintsCache.keyAsync(lib, async () => {
-        const libDir = join(footprintsDir, `${lib}.pretty`);
-        return new Set(findByExt(await readdir(libDir), '.kicad_mod'));
+        const libDir = fs.joinPaths(footprintsDir, `${lib}.pretty`);
+        return new Set(findByExt(await fs.readDir(libDir), '.kicad_mod'));
       });
 
       if (!parts.has(part)) {
@@ -110,7 +109,10 @@ const pinReverseMapping = (
   return reversePinMapping;
 };
 
-const collectUsedSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): Promise<SymbolOccurence[]> => {
+/**
+ * gather all kicad symbols used in the circuit and perform basic checks
+ */
+const collectKiCadSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): Promise<SymbolOccurence[]> => {
   const { circuit, id } = metadata(top);
   const mod = circuit.modules.get(id)!;
   const topSig = circuit.signatures.get(mod.name)!;
@@ -189,7 +191,10 @@ const collectUsedSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): Pr
   return kicadSymbols;
 };
 
-const collectNets = (circuit: Circuit) => {
+/**
+ * associate each net with its incoming and outcoming nets
+ */
+const collectNets = (circuit: Circuit): Map<Net, Set<Net>> => {
   const nets: { start: Net, end: Net }[] = [];
   const netMapping = createCache<Net, Set<Net>>();
 
@@ -211,12 +216,12 @@ const collectNets = (circuit: Circuit) => {
     endNets.add(start);
   }
 
-  return netMapping;
+  return netMapping.raw;
 };
 
-const generateNetlist = async (top: Module<{}, {}>, libsDir: string): Promise<SExpr> => {
-  const libs = await scanLibraries(libsDir);
-  const symbols = await collectUsedSymbols(top, libs);
+const generateNetlist = async (top: Module<{}, {}>, libsDir: string, fs: FileSystem): Promise<SExpr> => {
+  const libs = await scanLibraries(libsDir, fs);
+  const symbols = await collectKiCadSymbols(top, libs);
   const { num, str, sym, list } = SExpr;
   
   // 0 is the power module
@@ -230,7 +235,7 @@ const generateNetlist = async (top: Module<{}, {}>, libsDir: string): Promise<SE
     list(sym('version'), str('E')),
     list(
       sym('design'),
-      list(sym('source'), str(join(__dirname, __filename))),
+      list(sym('source'), str(fs.joinPaths(__dirname, __filename))),
       list(sym('date'), str(new Date().toISOString())),
       list(sym('tool'), str('nathsou_hdl (0.0.1)')),
     ),
@@ -250,18 +255,18 @@ const generateNetlist = async (top: Module<{}, {}>, libsDir: string): Promise<SE
     ),
     list(
       sym('nets'),
-      ...Iter.map(netlist.raw, ([netName, connectedNets], index) => {
+      ...Iter.map(netlist, ([netName, connectedNets], index) => {
         const connectedNodes = [netName, ...connectedNets]
-          .filter(net => Net.modId(net) !== 0)
-          .map(net => [net, circuit.modules.get(Net.modId(net))!] as const);
+          .filter(net => Net.modId(net) !== 0);
 
         return list(
           sym('net'),
           list(sym('code'), num(index)),
           list(sym('name'), str(netName)),
-          ...connectedNodes.map(([net, mod]) => {
+          ...connectedNodes.map(net => {
+            const [pinName, modId] = Net.decompose(net);
+            const mod = circuit.modules.get(modId)!;
             const sig = circuit.signatures.get(mod.name)!;
-            const pinName = net.split(':')[0];
             const reverseMapping = reverseMappings.key(mod.name, () => {
               return pinReverseMapping(
                 mod.name,
