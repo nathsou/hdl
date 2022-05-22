@@ -1,4 +1,4 @@
-import { defineModule, metadata, Tuple } from '../src';
+import { defineModule, metadata, Rewire, Tuple } from '../src';
 import { KiCad } from '../src/export/kicad/kicad';
 import { Elk } from '../src/export/elk/elk';
 import { SExpr } from '../src/export/kicad/s-expr';
@@ -62,7 +62,7 @@ const adder8 = defineModule({
 });
 
 const top = defineModule({
-  name: 'lab',
+  name: 'top',
   inputs: {},
   outputs: {},
   connect() {
@@ -85,7 +85,8 @@ const top = defineModule({
 const main = async () => {
   const { circuit } = metadata(top);
 
-  const elk = Elk.generateElkFile(circuit);
+  const elk = Elk.generateHierarchy(circuit);
+  // const elk = Elk.generateElkFile(Rewire.keepKiCadModules(circuit));
   console.log(elk);
 
   // const netlist = await KiCad.generateNetlist(top, KICAD_LIBS_DIR, nodeFileSystem);
