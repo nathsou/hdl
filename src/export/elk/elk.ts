@@ -1,32 +1,18 @@
-import { Circuit, IO, Connection, Module, ModuleNode, Net, RawConnection, ModuleId } from "../../core";
-import { Iter, joinWithEndingSep } from "../../utils";
+import ELK, { ElkNode, ElkPort, ElkExtendedEdge } from 'elkjs';
+import { Circuit, IO, metadata, Module, ModuleNode, RawConnection } from "../../core";
+import { ElkRenderer } from './renderer';
+ 
+const generateElkFile = (circuit: Circuit): string => {
+  const edges: string[] = [];
 
-type ElkOptions = {
-  showHierarchy: boolean,
-};
-
-const hierarchy = (circuit: Circuit): string => {
-  const netPaths = new Map<Net, string>();
-  const edges: [Net, Net][] = [];
-  const visitedModules = new Set<ModuleId>();
-
-  const aux = (node: ModuleNode, path: string[]): string => {
-    if (visitedModules.has(node.id)) {
-      return '';
-    }
-
-    visitedModules.add(node.id);
-    const label = (c: RawConnection) => `${c.pin}:${c.modId}`;
-    const sig = circuit.signatures.get(node.name)!;
+  const subgraph = (mod: ModuleNode): string => {
+    const label = (c: RawConnection) => `n${c.modId}.${c.pin}`;
+    const sig = circuit.signatures.get(mod.name)!;
     const ports: string[] = [];
     const inputPorts = IO.linearizePinout(sig.inputs);
     const outputPorts = IO.linearizePinout(sig.outputs);
-
-    const nodeName = `n${node.id}`;
-    const newPath = [...path, nodeName];
-    
+  
     for (const pin of inputPorts) {
-      netPaths.set(`${pin}:${node.id}`, `${joinWithEndingSep(newPath, '.')}${pin}`);
       ports.push(`
   port ${pin} {
     ^port.side: WEST
@@ -36,7 +22,6 @@ const hierarchy = (circuit: Circuit): string => {
     }
   
     for (const pin of outputPorts) {
-      netPaths.set(`${pin}:${node.id}`, `${joinWithEndingSep(newPath, '.')}${pin}`);
       ports.push(`
   port ${pin} {
     ^port.side: EAST
@@ -45,113 +30,42 @@ const hierarchy = (circuit: Circuit): string => {
       );
     }
   
-    for (const [pin, connections] of Object.entries(node.pins.in)) {
-      const start: RawConnection = { modId: node.id, pin };
-      for (const conn of connections) {
-        const net1 = label(start);
-        const net2 = label(conn);
-        if (net1 !== net2) {
-          edges.push([net2, net1]);
-        }
-      }
-    }
-  
-    for (const [pin, connections] of Object.entries(node.pins.out)) {
-      const start: RawConnection = { modId: node.id, pin };
-      for (const conn of connections) {
-        const net1 = label(start);
-        const net2 = label(conn);
-        if (start !== conn) {
-          edges.push([net1, net2]);
-        }
-      }
-    }
-
     const maxPinCount = Math.max(inputPorts.length, outputPorts.length);
   
-    return [
-      `node ${nodeName} {`,
-      `layout [ size: 100, ${Math.max(50, maxPinCount * 20)} ]`,
-      'nodeLabels.placement: "H_LEFT V_TOP OUTSIDE"',
-      'portConstraints: FIXED_SIDE',
-      'portLabels.placement: INSIDE',
-      `label "${node.name}:${node.id}"`,
-      `${ports.join('')}`,
-      `${node.subModules.filter(m => !visitedModules.has(m.id)).map(s => aux(s, newPath)).join('\n')}`,
-      '}'
-    ].join('\n');
+    for (const [pin, connections] of Object.entries(mod.pins.in)) {
+      const start: RawConnection = { modId: mod.id, pin };
+      for (const conn of connections) {
+        const label1 = label(start);
+        const label2 = label(conn);
+        if (label1 !== label2) {
+          edges.push(`edge ${label2} -> ${label1}`);
+        }
+      }
+    }
+  
+    for (const [pin, connections] of Object.entries(mod.pins.out)) {
+      const start: RawConnection = { modId: mod.id, pin };
+      for (const conn of connections) {
+        const label1 = label(start);
+        const label2 = label(conn);
+        if (label1 !== label2) {
+          edges.push(`edge ${label1} -> ${label2}`);
+        }
+      }
+    }
+  
+    return `
+  node n${mod.id} {
+  layout [ size: 100, ${Math.max(50, maxPinCount * 20)} ]
+  nodeLabels.placement: "H_LEFT V_TOP OUTSIDE"
+  portConstraints: FIXED_SIDE
+  portLabels.placement: INSIDE
+  label "${mod.name}_${mod.id}"
+  ${ports.join('')}
+  }`;
   };
 
-  return [
-    'algorithm: layered',
-    ...Iter.filter(Iter.map(circuit.modules.values(), node => aux(node, [])), s => s !== ''),
-    edges.map(([start, end]) => `edge ${netPaths.get(start)} -> ${netPaths.get(end)}`).join('\n'),
-  ].join('\n');
-};
-
-const subgraph = (mod: ModuleNode, edges: string[], circuit: Circuit): string => {
-  const label = (c: RawConnection) => `n${c.modId}.${c.pin}`;
-  const sig = circuit.signatures.get(mod.name)!;
-  const ports: string[] = [];
-  const inputPorts = IO.linearizePinout(sig.inputs);
-  const outputPorts = IO.linearizePinout(sig.outputs);
-
-  for (const pin of inputPorts) {
-    ports.push(`
-port ${pin} {
-  ^port.side: WEST
-  label "${pin}"
-}`
-    );
-  }
-
-  for (const pin of outputPorts) {
-    ports.push(`
-port ${pin} {
-  ^port.side: EAST
-  label "${pin}"
-}`
-    );
-  }
-
-  const maxPinCount = Math.max(inputPorts.length, outputPorts.length);
-
-  for (const [pin, connections] of Object.entries(mod.pins.in)) {
-    const start: RawConnection = { modId: mod.id, pin };
-    for (const conn of connections) {
-      const label1 = label(start);
-      const label2 = label(conn);
-      if (label1 !== label2) {
-        edges.push(`edge ${label2} -> ${label1}`);
-      }
-    }
-  }
-
-  for (const [pin, connections] of Object.entries(mod.pins.out)) {
-    const start: RawConnection = { modId: mod.id, pin };
-    for (const conn of connections) {
-      const label1 = label(start);
-      const label2 = label(conn);
-      if (label1 !== label2) {
-        edges.push(`edge ${label1} -> ${label2}`);
-      }
-    }
-  }
-
-  return `
-node n${mod.id} {
-layout [ size: 100, ${Math.max(50, maxPinCount * 20)} ]
-nodeLabels.placement: "H_LEFT V_TOP OUTSIDE"
-portConstraints: FIXED_SIDE
-portLabels.placement: INSIDE
-label "${mod.name}:${mod.id}"
-${ports.join('')}
-}`;
-};
-
-const generateElkFile = (circuit: Circuit): string => {
-  const edges: string[] = [];
-  const subgraphs = [...circuit.modules.values()].map(n => subgraph(n, edges, circuit));
+  const subgraphs = [...circuit.modules.values()].map(subgraph);
 
   return [
     'algorithm: layered',
@@ -160,7 +74,93 @@ const generateElkFile = (circuit: Circuit): string => {
   ].join('\n');
 };
 
+const generateElkJson = (circuit: Circuit): ElkNode => {
+  const edges: ElkExtendedEdge[] = [];
+
+  const subNode = (mod: ModuleNode): ElkNode => {
+    const sig = circuit.signatures.get(mod.name)!;
+    const ports: ElkPort[] = [];
+    const inputPorts = IO.linearizePinout(sig.inputs);
+    const outputPorts = IO.linearizePinout(sig.outputs);
+  
+    [
+      { pins: inputPorts, isInput: true },
+      { pins: outputPorts, isInput: false }
+    ].forEach(({ pins, isInput }) => {
+      pins.forEach(pin => {
+        ports.push({
+          id: `${pin}_${mod.id}`,
+          labels: [{
+            id: `${pin}_${mod.id}_label`,
+            text: pin,
+          }],
+          layoutOptions: {
+            'port.side': isInput ? 'WEST' : 'EAST',
+          },
+        });
+      });
+    });
+  
+    const maxPinCount = Math.max(inputPorts.length, outputPorts.length);
+  
+    [
+      { pins: mod.pins.in, isOutput: false },
+      { pins: mod.pins.out, isOutput: true }
+    ].forEach(({ pins, isOutput }) => {
+      for (const [pin, connections] of Object.entries(pins)) {
+        const start: RawConnection = { modId: mod.id, pin };
+        for (const conn of connections) {
+          const [from, to] = isOutput ? [start, conn] : [conn, start];
+          edges.push({
+            id: `e${edges.length}`,
+            sources: [`${from.pin}_${from.modId}`],
+            targets: [`${to.pin}_${to.modId}`],
+            sections: [],
+          });
+        }
+      }
+    });
+
+    return {
+      id: `n${mod.id}`,
+      width: 100,
+      height: Math.max(50, maxPinCount * 20),
+      labels: [{ id: `n${mod.id}_label`, text: `${mod.name}_${mod.id}` }],
+      ports,
+      edges: [],
+      children: [],
+      layoutOptions: {
+        'nodeLabels.placement': '[H_LEFT, V_TOP, OUTSIDE]',
+        'spacing.portPort': '10',
+        'portConstraints': 'FIXED_SIDE',
+        'portLabels.placement': '[INSIDE]',
+      },
+    };
+  };
+
+  const subNodes = [...circuit.modules.values()].map(subNode);
+
+  return {
+    id: 'root',
+    children: subNodes,
+    edges,
+    ports: [],
+    layoutOptions: {
+      algorithm: 'layered',
+    },
+  };
+};
+
 export const Elk = {
   generateElkFile,
-  generateHierarchy: hierarchy,
+  generateElkJson,
+  async layout(circuit: Circuit): Promise<ElkNode> {
+    const elk = new ELK();
+    return await elk.layout(generateElkJson(circuit));
+  },
+  async renderSvg(circuit: Circuit): Promise<string> {
+    const layout = await Elk.layout(circuit);
+    const { shapes, dims } = ElkRenderer.asShapeList(layout);
+    return ElkRenderer.renderSvg(shapes, dims);
+  },
 };

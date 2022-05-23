@@ -459,7 +459,7 @@ export const defineModule = <In extends Record<string, Num>, Out extends Record<
 };
 
 const createConstants = defineSimulatedModule({
-  name: '<power>',
+  name: '__power',
   inputs: {},
   outputs: { vcc: 1, gnd: 1 },
   simulate(_, out) {

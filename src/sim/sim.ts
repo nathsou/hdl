@@ -45,7 +45,7 @@ export const initState = (circuit: Circuit): CircuitState => {
   for (const [id, node] of circuit.modules.entries()) {
     for (const [pin, connections] of Iter.join(Object.entries(node.pins.in), Object.entries(node.pins.out))) {
       for (const conn of connections) {
-        if (circuit.modules.get(conn.modId)!.name === '<power>') {
+        if (circuit.modules.get(conn.modId)!.name === '__power') {
           state[`${pin}:${id}`] = {
             type: 'const',
             value: conn.pin === 'vcc' ? 1 : 0,

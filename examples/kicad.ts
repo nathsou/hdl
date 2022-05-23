@@ -1,10 +1,9 @@
+import { writeFile } from 'fs/promises';
 import { defineModule, metadata, Rewire, Tuple } from '../src';
-import { KiCad } from '../src/export/kicad/kicad';
 import { Elk } from '../src/export/elk/elk';
-import { SExpr } from '../src/export/kicad/s-expr';
+import { ElkRenderer } from '../src/export/elk/renderer';
 import { isolateGates, u74x08, u74x32, u74x86 } from '../src/modules/74xx';
 import { pinHeaders1x2, pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
-import { nodeFileSystem } from '../src/export/fs/nodeFileSystem';
 
 const KICAD_LIBS_DIR = '/Applications/KiCad/KiCad.app/Contents/SharedSupport';
 
@@ -66,13 +65,10 @@ const top = defineModule({
   inputs: {},
   outputs: {},
   connect() {
-    const power = pinHeaders1x2();
     const a = pinHeaders1x8();
     const b = pinHeaders1x8();
     const outputPins = pinHeaders1x9();
     const uAdder = adder8();
-
-    power.out.pins = [0, 1];
 
     uAdder.in.cin = 0;
     uAdder.in.a = a.out.pins;
@@ -84,10 +80,8 @@ const top = defineModule({
 
 const main = async () => {
   const { circuit } = metadata(top);
-
-  const elk = Elk.generateHierarchy(circuit);
-  // const elk = Elk.generateElkFile(Rewire.keepKiCadModules(circuit));
-  console.log(elk);
+  const svg = await Elk.renderSvg(Rewire.keepKiCadModules(circuit));
+  await writeFile('./out/lab.svg', svg);
 
   // const netlist = await KiCad.generateNetlist(top, KICAD_LIBS_DIR, nodeFileSystem);
   // console.log(SExpr.show(netlist, false));

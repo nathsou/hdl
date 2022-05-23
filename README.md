@@ -2,7 +2,7 @@
 
 Hardware Description (and Simulation) Library
 
-![8-bit adder & subtractor](res/addersub8.png)
+![8-bit adder using 74xx series gates](res/adder8.svg)
 
 ## Resources
 

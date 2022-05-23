@@ -192,7 +192,7 @@ const collectKiCadSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): P
 };
 
 /**
- * associate each net with its incoming and outcoming nets
+ * associate each net with its incoming and outgoing nets
  */
 const collectNets = (circuit: Circuit): Map<Net, Set<Net>> => {
   const nets: { start: Net, end: Net }[] = [];
@@ -203,8 +203,8 @@ const collectNets = (circuit: Circuit): Map<Net, Set<Net>> => {
       nets.push({ start: incomingNet, end: net });
     }
 
-    for (const outcomingNet of out) {
-      nets.push({ start: net, end: outcomingNet });
+    for (const outgoingNet of out) {
+      nets.push({ start: net, end: outgoingNet });
     }
   }
 
