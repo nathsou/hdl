@@ -1,11 +1,12 @@
 import { writeFile } from 'fs/promises';
-import { defineModule, metadata, Rewire, Tuple } from '../src';
+import { defineModule, KiCad, metadata, Rewire, SExpr, Tuple } from '../src';
 import { Elk } from '../src/export/elk/elk';
 import { ElkRenderer } from '../src/export/elk/renderer';
+import { nodeFileSystem } from '../src/export/fs/nodeFileSystem';
 import { isolateGates, u74x08, u74x32, u74x86 } from '../src/modules/74xx';
 import { pinHeaders1x2, pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
 
-const KICAD_LIBS_DIR = '/Applications/KiCad/KiCad.app/Contents/SharedSupport';
+const KICAD_LIBS_DIR = '/mnt/c/Program Files/KiCad/6.0/share/kicad';
 
 const adder4 = defineModule({
   name: '74xx.full_adder4',
@@ -80,7 +81,7 @@ const top = defineModule({
 
 const main = async () => {
   const { circuit } = metadata(top);
-  const svg = await Elk.renderSvg(Rewire.keepKiCadModules(circuit));
+  const svg = await Elk.renderSvg(circuit);
   await writeFile('./out/lab.svg', svg);
 
   // const netlist = await KiCad.generateNetlist(top, KICAD_LIBS_DIR, nodeFileSystem);
