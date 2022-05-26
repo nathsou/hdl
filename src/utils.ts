@@ -125,14 +125,14 @@ export const deepEqualObject = <V>(a: Record<string, V>, b: Record<string, V>): 
       return false;
     }
 
-   if (typeof x === 'object') {
-    const keysx = Object.keys(x);
-    const keysy = Object.keys(y);
-  
-    return keysx.length === keysy.length && keysx.every(k => y.hasOwnProperty(k) && aux(x[k], y[k])); 
-   } else {
-     return x === y;
-   }
+    if (typeof x === 'object') {
+      const keysx = Object.keys(x);
+      const keysy = Object.keys(y);
+
+      return keysx.length === keysy.length && keysx.every(k => y.hasOwnProperty(k) && aux(x[k], y[k]));
+    } else {
+      return x === y;
+    }
   };
 
   return aux(a, b);
@@ -149,6 +149,9 @@ export const assert: Assert = (condition, msg) => {
 export const Tuple = {
   map: <N extends number, T, U>(values: Tuple<T, N>, f: (v: T, index: number) => U): Tuple<U, N> => {
     return values.map(f) as Tuple<U, N>;
+  },
+  forEach: <N extends number, T>(values: Tuple<T, N>, f: (v: T, index: number) => void): void => {
+    values.forEach(f);
   },
   gen: <N extends number, T>(count: N, factory: (n: number) => T): Tuple<T, N> => {
     const result = Array<T>();

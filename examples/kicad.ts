@@ -1,10 +1,10 @@
+import ELK from 'elkjs';
 import { writeFile } from 'fs/promises';
 import { defineModule, KiCad, metadata, Rewire, SExpr, Tuple } from '../src';
 import { Elk } from '../src/export/elk/elk';
-import { ElkRenderer } from '../src/export/elk/renderer';
 import { nodeFileSystem } from '../src/export/fs/nodeFileSystem';
 import { isolateGates, u74x08, u74x32, u74x86 } from '../src/modules/74xx';
-import { pinHeaders1x2, pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
+import { pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
 
 const KICAD_LIBS_DIR = '/mnt/c/Program Files/KiCad/6.0/share/kicad';
 
@@ -81,11 +81,10 @@ const top = defineModule({
 
 const main = async () => {
   const { circuit } = metadata(top);
-  const svg = await Elk.renderSvg(circuit);
+  const svg = await Elk.renderSvg(new ELK(), Rewire.keepKiCadModules(circuit));
+  const netlist = await KiCad.generateNetlist(top, KICAD_LIBS_DIR, nodeFileSystem);
   await writeFile('./out/lab.svg', svg);
-
-  // const netlist = await KiCad.generateNetlist(top, KICAD_LIBS_DIR, nodeFileSystem);
-  // console.log(SExpr.show(netlist, false));
+  await writeFile('./out/lab.net', SExpr.show(netlist, false));
 };
 
 main();

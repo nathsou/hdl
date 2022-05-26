@@ -11,9 +11,9 @@
   "scripts": {
     "test": "jest",
     "typeCheck": "tsc --noEmit",
-    "esbuild": "esbuild examples/kicad.ts --sourcemap --bundle --outfile=dist/kicad.js --platform=node",
+    "esbuild": "esbuild examples/cpu.ts --sourcemap --bundle --outfile=dist/cpu.js --platform=node",
     "build": "tsc",
-    "watch": "esbuild examples/kicad.ts --sourcemap --bundle --outfile=dist/kicad.js --platform=node --watch"
+    "watch": "esbuild examples/jlcpcb.ts --sourcemap --bundle --outfile=dist/jlcpcb.js --platform=node --watch"
   },
   "keywords": [
     "hardware-description",

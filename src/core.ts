@@ -116,12 +116,12 @@ export const IO = {
 
     for (const [pin, width] of Object.entries(pins)) {
       if (width === 1) {
-        notLinearized.push(pin.toLowerCase());
+        notLinearized.push(pin);
       } else {
         const start = startIndexAtOne ? 1 : 0;
         const end = startIndexAtOne ? (width + 1) as Num : width;
         Range.iter(start, end, n => {
-          linearized.push(`${pin.toLowerCase()}${n}`);
+          linearized.push(`${pin}${n}`);
         });
       }
     }

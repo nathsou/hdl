@@ -1,12 +1,10 @@
-import { compare8, Rewire } from "../src";
-import { Connection, IO, State, defineModule , metadata} from "../src/core";
-import { demux16, match8, matchN, match1 } from "../src/modules/mux";
-import { adder, add, subtract, shiftLeft, shiftRight, isEqual, isEqualConst } from "../src/modules/arith";
+import { Connection, defineModule, IO, State } from "../src/core";
+import { add, adder, isEqual, isEqualConst, shiftLeft, shiftRight, subtract, compare8 } from "../src/modules/arith";
+import { and, not, or, xor } from "../src/modules/gates";
+import { demux16, match1, match8, matchN } from "../src/modules/mux";
 import { reg8 } from "../src/modules/regs";
-import { and, or, not, xor } from "../src/modules/gates";
 import { createSimulator } from '../src/sim/sim';
-import { Tuple, Range } from "../src/utils";
-import { Elk } from "../src/export/elk/elk";
+import { Range, Tuple } from "../src/utils";
 
 const { bin } = Tuple;
 
@@ -156,22 +154,18 @@ const top = defineModule({
 })();
 
 const main = () => {
-  // const sim = createSimulator(top);
-  // const din = Tuple.repeat(8, State.zero);
+  const sim = createSimulator(top);
+  const din = Tuple.repeat(8, State.zero);
 
-  // for (let i = 0; i < 198914; i++) {
-  //   sim.input({ din, clk: 0 });
-  //   if (sim.state.read(top.out.write) === 1) {
-  //     console.log({
-  //       dout: sim.state.read(top.out.dout).join(''),
-  //     });
-  //   }
-  //   sim.input({ din, clk: 1 });
-  // }
-
-  const {  circuit } = metadata(top);
-  const elk = Elk.generateElkFile(circuit);
-  console.log(elk);
+  for (let i = 0; i < 198914; i++) {
+    sim.input({ din, clk: 0 });
+    if (sim.state.read(top.out.write) === 1) {
+      console.log({
+        dout: sim.state.read(top.out.dout).join(''),
+      });
+    }
+    sim.input({ din, clk: 1 });
+  }
 };
 
 main();

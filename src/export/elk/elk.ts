@@ -1,4 +1,4 @@
-import ELK, { ElkExtendedEdge, ElkNode, ElkPort } from 'elkjs';
+import { ELK, ElkExtendedEdge, ElkNode, ElkPort } from 'elkjs/lib/elk-api';
 import { Circuit, IO, ModuleNode, RawConnection } from "../../core";
 import { ElkRenderer, RendererStyle } from './renderer';
 
@@ -18,7 +18,7 @@ const generateElkJson = (circuit: Circuit): ElkNode => {
     ].forEach(({ pins, isInput }) => {
       pins.forEach(pin => {
         ports.push({
-          id: `${pin}_${mod.id}`,
+          id: `${pin}:${mod.id}`,
           labels: [{
             id: `${pin}_${mod.id}_label`,
             text: pin,
@@ -47,8 +47,8 @@ const generateElkJson = (circuit: Circuit): ElkNode => {
           const [from, to] = isOutput ? [start, conn] : [conn, start];
           edges.push({
             id: `e${edges.length}`,
-            sources: [`${from.pin}_${from.modId}`],
-            targets: [`${to.pin}_${to.modId}`],
+            sources: [`${from.pin}:${from.modId}`],
+            targets: [`${to.pin}:${to.modId}`],
             sections: [],
           });
         }
@@ -86,18 +86,17 @@ const generateElkJson = (circuit: Circuit): ElkNode => {
 };
 
 export const Elk = {
-  generateElkJson,
-  async layout(circuit: Circuit): Promise<ElkNode> {
-    const elk = new ELK();
-    return await elk.layout(generateElkJson(circuit));
+  generateJSON: generateElkJson,
+  async layout(elkInstance: ELK, circuit: Circuit): Promise<ElkNode> {
+    return await elkInstance.layout(generateElkJson(circuit));
   },
-  async renderSvg(circuit: Circuit, style?: RendererStyle): Promise<string> {
-    const layout = await Elk.layout(circuit);
+  async renderSvg(elkInstance: ELK, circuit: Circuit, style?: RendererStyle): Promise<string> {
+    const layout = await Elk.layout(elkInstance, circuit);
     const { shapes, dims } = ElkRenderer.asShapeList(layout);
     return ElkRenderer.renderSvg(shapes, dims, style);
   },
-  async renderCanvas(circuit: Circuit, ctx: CanvasRenderingContext2D, style?: RendererStyle): Promise<void> {
-    const layout = await Elk.layout(circuit);
+  async renderCanvas(elkInstance: ELK, circuit: Circuit, ctx: CanvasRenderingContext2D, style?: RendererStyle): Promise<void> {
+    const layout = await Elk.layout(elkInstance, circuit);
     const { shapes, dims } = ElkRenderer.asShapeList(layout);
     ElkRenderer.renderCanvas(shapes, dims, ctx, style);
   },

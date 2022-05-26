@@ -18,17 +18,17 @@ export const arith = {
   }),
   fullAdder1: defineModule({
     name: 'full_adder1',
-    inputs: { a: 1, b: 1, carry_in: 1 },
-    outputs: { sum: 1, carry_out: 1 },
+    inputs: { a: 1, b: 1, carryIn: 1 },
+    outputs: { sum: 1, carryOut: 1 },
     connect(inp, out) {
       const xor1 = xor<1>(inp.a, inp.b);
 
       // sum
-      out.sum = xor<1>(xor1, inp.carry_in);
+      out.sum = xor<1>(xor1, inp.carryIn);
 
       // carry
-      out.carry_out = or<1>(
-        and<1>(inp.carry_in, xor1),
+      out.carryOut = or<1>(
+        and<1>(inp.carryIn, xor1),
         and<1>(inp.a, inp.b)
       );
     },
@@ -41,13 +41,13 @@ export const arith = {
       const adders = Tuple.gen(N, arith.fullAdder1);
 
       for (let i = 0; i < N; i++) {
-        adders[i].in.carry_in = i === 0 ? inp.carryIn : adders[i - 1].out.carry_out;
+        adders[i].in.carryIn = i === 0 ? inp.carryIn : adders[i - 1].out.carryOut;
         adders[i].in.a = inp.a[N - 1 - i];
         adders[i].in.b = inp.b[N - 1 - i];
       }
 
       out.sum = IO.gen(N, i => adders[N - 1 - i].out.sum);
-      out.carryOut = last(adders).out.carry_out;
+      out.carryOut = last(adders).out.carryOut;
     },
   }),
   adderSubtractor: <N extends Multi>(N: N) => defineModule({

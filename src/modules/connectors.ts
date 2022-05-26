@@ -4,7 +4,7 @@ import { Range } from "../utils";
 const definePinHeaders = <N extends Num>(cols: N) => {
   const nPadded = cols.toString().padStart(2, '0');
   return (orientation: 'Vertical' | 'Horizontal' = 'Vertical') => defineSimulatedModule({
-    name: `std.pin_header_1x${cols}`,
+    name: `pin_header_1x${cols}`,
     inputs: {},
     outputs: { pins: cols },
     kicad: {
@@ -12,7 +12,7 @@ const definePinHeaders = <N extends Num>(cols: N) => {
       footprint: `Connector_PinHeader_2.54mm:PinHeader_1x${nPadded}_P2.54mm_${orientation}`,
       pins: Object.fromEntries(Range.map(1, (cols + 1) as Num, n => [n, `pins${n}`])),
     },
-    simulate() {}
+    simulate() { }
   })();
 };
 

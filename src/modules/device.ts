@@ -18,3 +18,22 @@ export const resistor = (options: ResistorOptions) => defineSimulatedModule({
     out.rhs = inp.lhs;
   },
 })();
+
+type LedOptions = {
+  value: string,
+  footprint?: string,
+};
+
+export const led = (options: LedOptions) => defineSimulatedModule({
+  name: `LED_${options.value}`,
+  inputs: { '1': 1 },
+  outputs: { '2': 1 },
+  kicad: {
+    symbol: 'Device:LED',
+    footprint: options.footprint ?? 'LED_THT:LED_D5.0mm',
+    pins: { 1: '1', 2: '2' },
+  },
+  simulate(inp, out) {
+    out['2'] = inp['1'];
+  },
+})();

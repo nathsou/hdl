@@ -8,8 +8,10 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/examples/kicad.ts",
-      "outFiles": ["${workspaceFolder}/dist/kicad.js"]
+      "program": "${workspaceFolder}/examples/jlcpcb.ts",
+      "outFiles": [
+        "${workspaceFolder}/dist/jlcpcb.js"
+      ]
     }
   ]
 }

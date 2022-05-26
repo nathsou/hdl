@@ -26,6 +26,8 @@ type Line = {
   y1: number,
   y2: number,
   kind: 'wire',
+  sourceNet: string,
+  targetNet: string,
 };
 
 type Circle = {
@@ -75,7 +77,7 @@ const formatStyle = (style: Record<string, string | number>): string => {
 const defaultStyle: RendererStyle = {
   circuit: { backgroundColor: 'white' },
   module: { fill: 'white', stroke: 'black', strokeWidth: 2 },
-  port: { fill: 'black', stroke: 'black', strokeWidth: 1 },
+  port: { fill: 'white', stroke: 'black', strokeWidth: 1 },
   wire: { fill: 'none', stroke: 'black', strokeWidth: 1 },
   junction: { fill: 'black', stroke: 'none', strokeWidth: 0 },
   moduleLabel: { fontFamily: 'sans-serif', fontSize: 10, fill: 'black', strokeWidth: 1, stroke: 'none' },
@@ -91,8 +93,8 @@ const renderSvg = (shapes: Shape[], { width, height }: { width: number, height: 
     return `<text x="${x}" y="${y}" class="${kind}">${text}</text>`;
   };
 
-  const line = ({ x1, y1, x2, y2, kind }: Line) => {
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${kind}" />`;
+  const line = ({ x1, y1, x2, y2, kind, sourceNet, targetNet }: Line) => {
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${kind} source-net-${sourceNet} target-net-${targetNet}" />`;
   };
 
   const circle = ({ x, y, radius, kind }: Circle) => {
@@ -222,6 +224,9 @@ export const ElkRenderer = {
 
     const traverseEdge = (edge: ElkEdge, parentPos: { x: number, y: number }): void => {
       if (isExtendedEdge(edge)) {
+        const sourceNet = edge.sources[0].split(':').join('_');
+        const targetNet = edge.targets[0].split(':').join('_');
+
         edge.sections.forEach(section => {
           const prev = { x: section.startPoint.x, y: section.startPoint.y };
 
@@ -233,6 +238,8 @@ export const ElkRenderer = {
               x2: parentPos.x + bendPoint.x,
               y2: parentPos.y + bendPoint.y,
               kind: 'wire',
+              sourceNet,
+              targetNet,
             });
 
             prev.x = bendPoint.x;
@@ -246,6 +253,8 @@ export const ElkRenderer = {
             x2: parentPos.x + section.endPoint.x,
             y2: parentPos.y + section.endPoint.y,
             kind: 'wire',
+            sourceNet,
+            targetNet,
           });
         });
 

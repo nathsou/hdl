@@ -116,7 +116,7 @@ const collectKiCadSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): P
   const { circuit, id } = metadata(top);
   const mod = circuit.modules.get(id)!;
   const topSig = circuit.signatures.get(mod.name)!;
-  
+
   if (Object.keys(topSig.inputs).length + Object.keys(topSig.outputs).length > 0) {
     throw new Error(`Top module must define empty inputs and outputs when targetting KiCad`);
   }
@@ -223,7 +223,7 @@ const generateNetlist = async (top: Module<{}, {}>, libsDir: string, fs: FileSys
   const libs = await scanLibraries(libsDir, fs);
   const symbols = await collectKiCadSymbols(top, libs);
   const { num, str, sym, list } = SExpr;
-  
+
   // 0 is the power module
   const kicadModuleIds = new Set([0, ...symbols.map(s => s.node.id)]);
   const circuit = Rewire.keepModules(metadata(top).circuit, node => kicadModuleIds.has(node.id));
