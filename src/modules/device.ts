@@ -26,14 +26,14 @@ type LedOptions = {
 
 export const led = (options: LedOptions) => defineSimulatedModule({
   name: `LED_${options.value}`,
-  inputs: { '1': 1 },
-  outputs: { '2': 1 },
+  inputs: { lhs: 1 },
+  outputs: { rhs: 1 },
   kicad: {
     symbol: 'Device:LED',
     footprint: options.footprint ?? 'LED_THT:LED_D5.0mm',
-    pins: { 1: '1', 2: '2' },
+    pins: { 1: 'lhs', 2: 'rhs' },
   },
   simulate(inp, out) {
-    out['2'] = inp['1'];
+    out.rhs = inp.lhs;
   },
 })();

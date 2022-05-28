@@ -1,4 +1,4 @@
-import { checkConnections, Circuit, CircuitState, Connection, MapStates, Module, ModuleNode, Net, NodeStateConst, State } from "../core";
+import { checkConnections, Circuit, CircuitState, Connection, MapStates, Module, ModuleNode, Net, NodeStateConst, POWER_MODULE_NAME, State } from "../core";
 import { deepEqualObject, Iter, Tuple } from "../utils";
 import { createEventDrivenSimulator } from "./event-sim";
 import { createLevelizedSimulator } from "./level-sim";
@@ -45,7 +45,7 @@ export const initState = (circuit: Circuit): CircuitState => {
   for (const [id, node] of circuit.modules.entries()) {
     for (const [pin, connections] of Iter.join(Object.entries(node.pins.in), Object.entries(node.pins.out))) {
       for (const conn of connections) {
-        if (circuit.modules.get(conn.modId)!.name === '__power') {
+        if (circuit.modules.get(conn.modId)!.name === POWER_MODULE_NAME) {
           state[`${pin}:${id}`] = {
             type: 'const',
             value: conn.pin === 'vcc' ? 1 : 0,
@@ -126,7 +126,7 @@ export const createSimulator = <
   })();
 
   type InputVector<M extends Module<Record<string, number>, any>> =
-  MapStates<M extends Module<infer In, any> ? In : never>;
+    MapStates<M extends Module<infer In, any> ? In : never>;
 
   type OutputVector<M extends Module<any, Record<string, number>>> =
     MapStates<M extends Module<any, infer Out> ? Out : never>;
@@ -138,9 +138,9 @@ export const createSimulator = <
 
       const actualOutput: Record<string, State | State[]> = {};
       for (const k of Object.keys(expectedOutput)) {
-        actualOutput[k] = sim.state.read(top.out[k]); 
+        actualOutput[k] = sim.state.read(top.out[k]);
       }
-    
+
       if (!deepEqualObject(actualOutput, expectedOutput)) {
         throw new Error(`Invalid state for ${JSON.stringify(input)}, expected ${JSON.stringify(expectedOutput)}, got ${JSON.stringify(actualOutput)}`);
       }

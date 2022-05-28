@@ -458,8 +458,11 @@ export const defineModule = <In extends Record<string, Num>, Out extends Record<
   return _createModule({ ...def, type: 'compound' });
 };
 
-const createConstants = defineSimulatedModule({
-  name: '__power',
+export const POWER_MODULE_ID: ModuleId = 0;
+export const POWER_MODULE_NAME: string = '_power_';
+
+const createPowerModule = defineSimulatedModule({
+  name: POWER_MODULE_NAME,
   inputs: {},
   outputs: { vcc: 1, gnd: 1 },
   simulate(_, out) {
@@ -469,7 +472,7 @@ const createConstants = defineSimulatedModule({
 });
 
 // initialize gnd and vcc
-createConstants();
+createPowerModule();
 
 // ensure that all pins (exepted the primary inputs/outputs) are connected
 export const checkConnections = (topMod: Module<{}, {}>): void => {

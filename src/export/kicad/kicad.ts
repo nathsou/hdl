@@ -1,4 +1,4 @@
-import { Circuit, IO, KiCadConfig, metadata, Module, ModuleNode, Net, Num } from "../../core";
+import { Circuit, IO, KiCadConfig, metadata, Module, ModuleNode, Net, Num, POWER_MODULE_ID, POWER_MODULE_NAME } from "../../core";
 import { Rewire } from '../../sim/rewire';
 import { createCache, Iter, occurences } from "../../utils";
 import { parseSymbolLibrary, SymbolDef, SymbolPin } from './parse';
@@ -186,6 +186,8 @@ const collectKiCadSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): P
     }
   };
 
+  // include the power module
+  await aux(circuit.modules.get(0)!);
   await aux(mod);
 
   return kicadSymbols;
@@ -219,13 +221,20 @@ const collectNets = (circuit: Circuit): Map<Net, Set<Net>> => {
   return netMapping.raw;
 };
 
-const generateNetlist = async (top: Module<{}, {}>, libsDir: string, fs: FileSystem): Promise<SExpr> => {
+type NetListOptions = {
+  topModule: Module<{}, {}>,
+  librariesLocation: string,
+  power: KiCadConfig<{}, { gnd: 1, vcc: 1 }>,
+  fs: FileSystem,
+};
+
+const generateNetlist = async ({ topModule: top, librariesLocation: libsDir, power: powerModuleKiCadConfig, fs }: NetListOptions): Promise<SExpr> => {
   const libs = await scanLibraries(libsDir, fs);
+  metadata(top).circuit.signatures.get(POWER_MODULE_NAME)!.kicad = powerModuleKiCadConfig;
   const symbols = await collectKiCadSymbols(top, libs);
   const { num, str, sym, list } = SExpr;
 
-  // 0 is the power module
-  const kicadModuleIds = new Set([0, ...symbols.map(s => s.node.id)]);
+  const kicadModuleIds = new Set([POWER_MODULE_ID, ...symbols.map(s => s.node.id)]);
   const circuit = Rewire.keepModules(metadata(top).circuit, node => kicadModuleIds.has(node.id));
   const reverseMappings = createCache<string, Record<string, number>>();
   const netlist = collectNets(circuit);
@@ -256,12 +265,11 @@ const generateNetlist = async (top: Module<{}, {}>, libsDir: string, fs: FileSys
     list(
       sym('nets'),
       ...Iter.map(netlist, ([netName, connectedNets], index) => {
-        const connectedNodes = [netName, ...connectedNets]
-          .filter(net => Net.modId(net) !== 0);
+        const connectedNodes = [netName, ...connectedNets];
 
         return list(
           sym('net'),
-          list(sym('code'), num(index)),
+          list(sym('code'), num(index + 1)), // the code must start at 1, 0 does not seem to be valid
           list(sym('name'), str(netName)),
           ...connectedNodes.map(net => {
             const [pinName, modId] = Net.decompose(net);

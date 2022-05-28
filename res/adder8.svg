@@ -1,740 +1,748 @@
-
-<svg viewBox="0 0 1164 1774.3232323232323" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="0" width="1164" height="1774.3232323232323" style="fill: white; stroke: black; stroke-width: 1;" />
-<rect x="12" y="1411.050505050505" width="100" height="160" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="12" y="1406.050505050505" style="font-family: sans-serif; font-size: 10; fill: black;">std.pin_header_1x8_2</text>
-<rect x="109.5" y="1515.2171717171718" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1517.7171717171718" style="font-family: sans-serif; font-size: 10; fill: black;">pins0</text>
-<rect x="109.5" y="1497.439393939394" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1499.939393939394" style="font-family: sans-serif; font-size: 10; fill: black;">pins1</text>
-<rect x="109.5" y="1550.7727272727273" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1553.2727272727273" style="font-family: sans-serif; font-size: 10; fill: black;">pins2</text>
-<rect x="109.5" y="1532.9949494949494" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1535.4949494949494" style="font-family: sans-serif; font-size: 10; fill: black;">pins3</text>
-<rect x="109.5" y="1444.1060606060607" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1446.6060606060607" style="font-family: sans-serif; font-size: 10; fill: black;">pins4</text>
-<rect x="109.5" y="1426.328282828283" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1428.828282828283" style="font-family: sans-serif; font-size: 10; fill: black;">pins5</text>
-<rect x="109.5" y="1479.6616161616162" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1482.1616161616162" style="font-family: sans-serif; font-size: 10; fill: black;">pins6</text>
-<rect x="109.5" y="1461.8838383838383" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1464.3838383838383" style="font-family: sans-serif; font-size: 10; fill: black;">pins7</text>
-<rect x="12" y="1597.1010101010102" width="100" height="160" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="12" y="1592.1010101010102" style="font-family: sans-serif; font-size: 10; fill: black;">std.pin_header_1x8_3</text>
-<rect x="109.5" y="1683.489898989899" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1685.989898989899" style="font-family: sans-serif; font-size: 10; fill: black;">pins0</text>
-<rect x="109.5" y="1701.267676767677" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1703.767676767677" style="font-family: sans-serif; font-size: 10; fill: black;">pins1</text>
-<rect x="109.5" y="1719.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1721.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">pins2</text>
-<rect x="109.5" y="1736.8232323232323" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1739.3232323232323" style="font-family: sans-serif; font-size: 10; fill: black;">pins3</text>
-<rect x="109.5" y="1612.378787878788" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1614.878787878788" style="font-family: sans-serif; font-size: 10; fill: black;">pins4</text>
-<rect x="109.5" y="1630.1565656565658" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1632.6565656565658" style="font-family: sans-serif; font-size: 10; fill: black;">pins5</text>
-<rect x="109.5" y="1665.7121212121212" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1668.2121212121212" style="font-family: sans-serif; font-size: 10; fill: black;">pins6</text>
-<rect x="109.5" y="1647.9343434343434" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="61" y="1650.4343434343434" style="font-family: sans-serif; font-size: 10; fill: black;">pins7</text>
-<rect x="432" y="358" width="100" height="180" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="432" y="353" style="font-family: sans-serif; font-size: 10; fill: black;">std.pin_header_1x9_4</text>
-<rect x="529.5" y="445.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="448" style="font-family: sans-serif; font-size: 10; fill: black;">pins0</text>
-<rect x="529.5" y="391.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="394" style="font-family: sans-serif; font-size: 10; fill: black;">pins1</text>
-<rect x="529.5" y="517.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="520" style="font-family: sans-serif; font-size: 10; fill: black;">pins2</text>
-<rect x="529.5" y="499.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="502" style="font-family: sans-serif; font-size: 10; fill: black;">pins3</text>
-<rect x="529.5" y="427.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="430" style="font-family: sans-serif; font-size: 10; fill: black;">pins4</text>
-<rect x="529.5" y="409.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="412" style="font-family: sans-serif; font-size: 10; fill: black;">pins5</text>
-<rect x="529.5" y="463.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="466" style="font-family: sans-serif; font-size: 10; fill: black;">pins6</text>
-<rect x="529.5" y="481.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="484" style="font-family: sans-serif; font-size: 10; fill: black;">pins7</text>
-<rect x="529.5" y="373.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="481" y="376" style="font-family: sans-serif; font-size: 10; fill: black;">pins8</text>
-<rect x="652" y="906" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="652" y="901" style="font-family: sans-serif; font-size: 10; fill: black;">74x86_7</text>
-<rect x="649.5" y="1012.5909090909091" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1015.0909090909091" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="649.5" y="1030.7727272727273" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1033.2727272727273" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="649.5" y="1085.3181818181818" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1087.8181818181818" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="649.5" y="921.6818181818181" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="924.1818181818181" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="649.5" y="1067.1363636363637" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1069.6363636363637" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="649.5" y="939.8636363636364" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="942.3636363636364" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="649.5" y="994.4090909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="996.9090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="649.5" y="976.2272727272727" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="978.7272727272727" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="649.5" y="1048.9545454545455" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1051.4545454545455" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="649.5" y="958.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="960.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="749.5" y="1063.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="1066" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="749.5" y="983.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="986" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="749.5" y="1023.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="1026" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="749.5" y="943.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="946" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="652" y="1480.5454545454545" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="652" y="1475.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">74x86_12</text>
-<rect x="649.5" y="1605.3181818181818" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1607.8181818181818" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="649.5" y="1623.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1626" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="649.5" y="1659.8636363636363" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1662.3636363636363" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="649.5" y="1532.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1535.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="649.5" y="1641.6818181818182" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1644.1818181818182" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="649.5" y="1550.7727272727273" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1553.2727272727273" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="649.5" y="1514.4090909090908" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1516.9090909090908" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="649.5" y="1587.1363636363635" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1589.6363636363635" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="649.5" y="1496.2272727272727" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1498.7272727272727" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="649.5" y="1568.9545454545455" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="1571.4545454545455" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="749.5" y="1518.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="1520.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="749.5" y="1558.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="1560.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="749.5" y="1638.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="1640.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="749.5" y="1598.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="1600.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="262" y="987.5454545454545" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="262" y="982.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">74x08_17</text>
-<rect x="259.5" y="1148.6818181818182" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1151.1818181818182" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="259.5" y="1166.8636363636363" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1169.3636363636363" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="259.5" y="1039.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1042.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="259.5" y="1021.4090909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1023.9090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="259.5" y="1057.7727272727273" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1060.2727272727273" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="259.5" y="1003.2272727272726" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1005.7272727272726" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="259.5" y="1094.1363636363635" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1096.6363636363635" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="259.5" y="1112.3181818181818" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1114.8181818181818" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="259.5" y="1075.9545454545455" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1078.4545454545455" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="259.5" y="1130.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="268" y="1133" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="359.5" y="1145.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="341" y="1147.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="359.5" y="1065.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="341" y="1067.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="359.5" y="1025.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="341" y="1027.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="359.5" y="1105.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="341" y="1107.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="852" y="1506" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="852" y="1501" style="font-family: sans-serif; font-size: 10; fill: black;">74x08_22</text>
-<rect x="849.5" y="1667.1363636363637" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1669.6363636363637" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="849.5" y="1685.3181818181818" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1687.8181818181818" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="849.5" y="1521.6818181818182" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1524.1818181818182" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="849.5" y="1558.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1560.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="849.5" y="1539.8636363636363" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1542.3636363636363" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="849.5" y="1576.2272727272727" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1578.7272727272727" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="849.5" y="1648.9545454545455" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1651.4545454545455" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="849.5" y="1612.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1615.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="849.5" y="1630.7727272727273" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1633.2727272727273" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="849.5" y="1594.409090909091" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="1596.909090909091" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="949.5" y="1543.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="1546" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="949.5" y="1663.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="1666" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="949.5" y="1623.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="1626" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="949.5" y="1583.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="1586" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="432" y="1212.5454545454545" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="432" y="1207.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">74x32_27</text>
-<rect x="429.5" y="1373.6818181818182" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1376.1818181818182" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="429.5" y="1391.8636363636363" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1394.3636363636363" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="429.5" y="1355.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1358" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="429.5" y="1246.4090909090908" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1248.9090909090908" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="429.5" y="1282.7727272727273" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1285.2727272727273" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="429.5" y="1300.9545454545455" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1303.4545454545455" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="429.5" y="1228.2272727272727" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1230.7272727272727" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="429.5" y="1337.3181818181818" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1339.8181818181818" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="429.5" y="1319.1363636363635" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1321.6363636363635" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="429.5" y="1264.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="438" y="1267.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="529.5" y="1290.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="511" y="1292.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="529.5" y="1370.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="511" y="1372.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="529.5" y="1330.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="511" y="1332.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="529.5" y="1250.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="511" y="1252.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="652" y="38" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="652" y="33" style="font-family: sans-serif; font-size: 10; fill: black;">74x86_33</text>
-<rect x="649.5" y="162.77272727272728" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="165.27272727272728" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="649.5" y="180.95454545454547" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="183.45454545454547" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="649.5" y="217.31818181818184" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="219.81818181818184" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="649.5" y="71.86363636363636" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="74.36363636363636" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="649.5" y="199.13636363636365" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="201.63636363636365" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="649.5" y="90.04545454545453" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="92.54545454545453" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="649.5" y="53.68181818181818" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="56.18181818181818" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="649.5" y="126.4090909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="128.9090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="649.5" y="144.5909090909091" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="147.0909090909091" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="649.5" y="108.22727272727272" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="110.72727272727272" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="749.5" y="195.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="198" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="749.5" y="75.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="78" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="749.5" y="155.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="158" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="749.5" y="115.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="118" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="652" y="617" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="652" y="612" style="font-family: sans-serif; font-size: 10; fill: black;">74x86_38</text>
-<rect x="649.5" y="741.7727272727273" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="744.2727272727273" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="649.5" y="759.9545454545455" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="762.4545454545455" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="649.5" y="796.3181818181819" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="798.8181818181819" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="649.5" y="632.6818181818181" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="635.1818181818181" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="649.5" y="778.1363636363636" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="780.6363636363636" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="649.5" y="650.8636363636364" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="653.3636363636364" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="649.5" y="723.5909090909091" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="726.0909090909091" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="649.5" y="669.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="671.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="649.5" y="705.4090909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="707.9090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="649.5" y="687.2272727272727" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="658" y="689.7272727272727" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="749.5" y="654.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="657" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="749.5" y="734.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="737" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="749.5" y="694.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="697" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="749.5" y="774.5" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="731" y="777" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="852" y="218.090909090909" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="852" y="213.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">74x08_43</text>
-<rect x="849.5" y="379.22727272727263" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="381.72727272727263" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="849.5" y="397.4090909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="399.9090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="849.5" y="288.31818181818176" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="290.81818181818176" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="849.5" y="251.95454545454538" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="254.45454545454538" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="849.5" y="306.4999999999999" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="308.9999999999999" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="849.5" y="270.13636363636357" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="272.63636363636357" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="849.5" y="361.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="363.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="849.5" y="233.7727272727272" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="236.2727272727272" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="849.5" y="324.68181818181813" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="327.18181818181813" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="849.5" y="342.86363636363626" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="345.36363636363626" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="949.5" y="375.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="378.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="949.5" y="295.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="298.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="949.5" y="255.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="258.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="949.5" y="335.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="338.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="852" y="490.090909090909" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="852" y="485.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">74x08_48</text>
-<rect x="849.5" y="651.2272727272726" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="653.7272727272726" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="849.5" y="669.4090909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="671.9090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="849.5" y="523.9545454545454" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="526.4545454545454" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="849.5" y="596.6818181818181" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="599.1818181818181" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="849.5" y="542.1363636363635" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="544.6363636363635" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="849.5" y="614.8636363636363" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="617.3636363636363" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="849.5" y="560.3181818181818" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="562.8181818181818" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="849.5" y="505.7727272727272" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="508.2727272727272" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="849.5" y="578.4999999999999" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="580.9999999999999" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="849.5" y="633.0454545454545" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="858" y="635.5454545454545" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="949.5" y="607.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="610.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="949.5" y="527.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="530.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="949.5" y="647.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="650.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="949.5" y="567.590909090909" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="931" y="570.090909090909" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<rect x="1032" y="239.90909090909076" width="100" height="200" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1032" y="234.90909090909076" style="font-family: sans-serif; font-size: 10; fill: black;">74x32_53</text>
-<rect x="1029.5" y="401.0454545454544" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="403.5454545454544" style="font-family: sans-serif; font-size: 10; fill: black;">gnd</text>
-<rect x="1029.5" y="419.22727272727263" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="421.72727272727263" style="font-family: sans-serif; font-size: 10; fill: black;">vcc</text>
-<rect x="1029.5" y="328.31818181818164" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="330.81818181818164" style="font-family: sans-serif; font-size: 10; fill: black;">a0</text>
-<rect x="1029.5" y="346.4999999999999" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="348.9999999999999" style="font-family: sans-serif; font-size: 10; fill: black;">a1</text>
-<rect x="1029.5" y="273.77272727272714" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="276.27272727272714" style="font-family: sans-serif; font-size: 10; fill: black;">a2</text>
-<rect x="1029.5" y="291.9545454545453" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="294.4545454545453" style="font-family: sans-serif; font-size: 10; fill: black;">a3</text>
-<rect x="1029.5" y="364.681818181818" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="367.181818181818" style="font-family: sans-serif; font-size: 10; fill: black;">b0</text>
-<rect x="1029.5" y="382.86363636363626" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="385.36363636363626" style="font-family: sans-serif; font-size: 10; fill: black;">b1</text>
-<rect x="1029.5" y="310.1363636363635" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="312.6363636363635" style="font-family: sans-serif; font-size: 10; fill: black;">b2</text>
-<rect x="1029.5" y="255.59090909090895" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1038" y="258.09090909090895" style="font-family: sans-serif; font-size: 10; fill: black;">b3</text>
-<rect x="1129.5" y="317.40909090909076" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1111" y="319.90909090909076" style="font-family: sans-serif; font-size: 10; fill: black;">y0</text>
-<rect x="1129.5" y="397.40909090909076" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1111" y="399.90909090909076" style="font-family: sans-serif; font-size: 10; fill: black;">y1</text>
-<rect x="1129.5" y="357.40909090909076" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1111" y="359.90909090909076" style="font-family: sans-serif; font-size: 10; fill: black;">y2</text>
-<rect x="1129.5" y="277.40909090909076" width="5" height="5" style="fill: white; stroke: black; stroke-width: 1;" />
-<text x="1111" y="279.90909090909076" style="font-family: sans-serif; font-size: 10; fill: black;">y3</text>
-<line x1="532" y1="376" x2="552" y2="376" stroke="black" />
-<line x1="552" y1="376" x2="552" y2="12" stroke="black" />
-<line x1="552" y1="12" x2="1152" y2="12" stroke="black" />
-<line x1="1152" y1="12" x2="1152" y2="319.90909090909076" stroke="black" />
-<line x1="1152" y1="319.90909090909076" x2="1132" y2="319.90909090909076" stroke="black" />
-<line x1="532" y1="484" x2="612" y2="484" stroke="black" />
-<line x1="612" y1="484" x2="612" y2="602" stroke="black" />
-<line x1="612" y1="602" x2="782" y2="602" stroke="black" />
-<line x1="782" y1="602" x2="782" y2="657" stroke="black" />
-<line x1="782" y1="657" x2="752" y2="657" stroke="black" />
-<line x1="532" y1="466" x2="622" y2="466" stroke="black" />
-<line x1="622" y1="466" x2="622" y2="592" stroke="black" />
-<line x1="622" y1="592" x2="792" y2="592" stroke="black" />
-<line x1="792" y1="592" x2="792" y2="697" stroke="black" />
-<line x1="792" y1="697" x2="752" y2="697" stroke="black" />
-<line x1="532" y1="412" x2="572" y2="412" stroke="black" />
-<line x1="572" y1="412" x2="572" y2="278" stroke="black" />
-<line x1="572" y1="278" x2="782" y2="278" stroke="black" />
-<line x1="782" y1="278" x2="782" y2="198" stroke="black" />
-<line x1="782" y1="198" x2="752" y2="198" stroke="black" />
-<line x1="532" y1="430" x2="582" y2="430" stroke="black" />
-<line x1="582" y1="430" x2="582" y2="288" stroke="black" />
-<line x1="582" y1="288" x2="792" y2="288" stroke="black" />
-<line x1="792" y1="288" x2="792" y2="158" stroke="black" />
-<line x1="792" y1="158" x2="752" y2="158" stroke="black" />
-<line x1="532" y1="502" x2="602" y2="502" stroke="black" />
-<line x1="602" y1="502" x2="602" y2="1444.5454545454545" stroke="black" />
-<line x1="602" y1="1444.5454545454545" x2="782" y2="1444.5454545454545" stroke="black" />
-<line x1="782" y1="1444.5454545454545" x2="782" y2="1520.5454545454545" stroke="black" />
-<line x1="782" y1="1520.5454545454545" x2="752" y2="1520.5454545454545" stroke="black" />
-<line x1="532" y1="520" x2="582" y2="520" stroke="black" />
-<line x1="582" y1="520" x2="582" y2="1454.5454545454545" stroke="black" />
-<line x1="582" y1="1454.5454545454545" x2="792" y2="1454.5454545454545" stroke="black" />
-<line x1="792" y1="1454.5454545454545" x2="792" y2="1640.5454545454545" stroke="black" />
-<line x1="792" y1="1640.5454545454545" x2="752" y2="1640.5454545454545" stroke="black" />
-<line x1="532" y1="394" x2="562" y2="394" stroke="black" />
-<line x1="562" y1="394" x2="562" y2="268" stroke="black" />
-<line x1="562" y1="268" x2="812" y2="268" stroke="black" />
-<line x1="812" y1="268" x2="812" y2="1066" stroke="black" />
-<line x1="812" y1="1066" x2="752" y2="1066" stroke="black" />
-<line x1="532" y1="448" x2="802" y2="448" stroke="black" />
-<line x1="802" y1="448" x2="802" y2="1026" stroke="black" />
-<line x1="802" y1="1026" x2="752" y2="1026" stroke="black" />
-<line x1="112" y1="1517.7171717171718" x2="212" y2="1517.7171717171718" stroke="black" />
-<line x1="212" y1="1517.7171717171718" x2="212" y2="949.5454545454545" stroke="black" />
-<line x1="212" y1="949.5454545454545" x2="612" y2="949.5454545454545" stroke="black" />
-<line x1="612" y1="949.5454545454545" x2="612" y2="942.3636363636364" stroke="black" />
-<line x1="612" y1="942.3636363636364" x2="652" y2="942.3636363636364" stroke="black" />
-<line x1="112" y1="1685.989898989899" x2="222" y2="1685.989898989899" stroke="black" />
-<line x1="222" y1="1685.989898989899" x2="222" y2="960.5454545454545" stroke="black" />
-<line x1="222" y1="960.5454545454545" x2="652" y2="960.5454545454545" stroke="black" />
-<line x1="752" y1="946" x2="772" y2="946" stroke="black" />
-<line x1="772" y1="946" x2="772" y2="1126" stroke="black" />
-<line x1="772" y1="1126" x2="632" y2="1126" stroke="black" />
-<line x1="632" y1="1126" x2="632" y2="1069.6363636363635" stroke="black" />
-<line x1="632" y1="1069.6363636363635" x2="652" y2="1069.6363636363637" stroke="black" />
-<line x1="112" y1="1499.939393939394" x2="202" y2="1499.939393939394" stroke="black" />
-<line x1="202" y1="1499.939393939394" x2="202" y2="938.5454545454545" stroke="black" />
-<line x1="202" y1="938.5454545454545" x2="542" y2="938.5454545454545" stroke="black" />
-<line x1="542" y1="938.5454545454545" x2="542" y2="924.1818181818181" stroke="black" />
-<line x1="542" y1="924.1818181818181" x2="652" y2="924.1818181818181" stroke="black" />
-<line x1="112" y1="1703.767676767677" x2="232" y2="1703.7676767676767" stroke="black" />
-<line x1="232" y1="1703.7676767676767" x2="232" y2="971.5454545454545" stroke="black" />
-<line x1="232" y1="971.5454545454545" x2="612" y2="971.5454545454545" stroke="black" />
-<line x1="612" y1="971.5454545454545" x2="612" y2="978.7272727272727" stroke="black" />
-<line x1="612" y1="978.7272727272727" x2="652" y2="978.7272727272727" stroke="black" />
-<line x1="752" y1="986" x2="762" y2="986" stroke="black" />
-<line x1="762" y1="986" x2="762" y2="1116" stroke="black" />
-<line x1="762" y1="1116" x2="642" y2="1116" stroke="black" />
-<line x1="642" y1="1116" x2="642" y2="1087.818181818182" stroke="black" />
-<line x1="642" y1="1087.818181818182" x2="652" y2="1087.8181818181818" stroke="black" />
-<line x1="532" y1="1252.5454545454545" x2="542" y2="1252.5454545454545" stroke="black" />
-<line x1="542" y1="1252.5454545454545" x2="542" y2="996.9090909090909" stroke="black" />
-<line x1="542" y1="996.9090909090909" x2="652" y2="996.9090909090909" stroke="black" />
-<line x1="112" y1="1553.2727272727273" x2="652" y2="1553.2727272727273" stroke="black" />
-<line x1="112" y1="1721.5454545454545" x2="242" y2="1721.5454545454545" stroke="black" />
-<line x1="242" y1="1721.5454545454545" x2="242" y2="1699.5454545454545" stroke="black" />
-<line x1="242" y1="1699.5454545454545" x2="542" y2="1699.5454545454545" stroke="black" />
-<line x1="542" y1="1699.5454545454545" x2="542" y2="1571.4545454545455" stroke="black" />
-<line x1="542" y1="1571.4545454545455" x2="652" y2="1571.4545454545455" stroke="black" />
-<circle cx="242" cy="1721.5454545454545" r="2" />
-<line x1="752" y1="1600.5454545454545" x2="772" y2="1600.5454545454545" stroke="black" />
-<line x1="772" y1="1600.5454545454545" x2="772" y2="1700.5454545454545" stroke="black" />
-<line x1="772" y1="1700.5454545454545" x2="632" y2="1700.5454545454545" stroke="black" />
-<line x1="632" y1="1700.5454545454545" x2="632" y2="1644.1818181818182" stroke="black" />
-<line x1="632" y1="1644.1818181818182" x2="652" y2="1644.1818181818182" stroke="black" />
-<line x1="532" y1="1332.5454545454545" x2="572" y2="1332.5454545454545" stroke="black" />
-<line x1="572" y1="1332.5454545454545" x2="572" y2="1498.7272727272727" stroke="black" />
-<line x1="572" y1="1498.7272727272727" x2="652" y2="1498.7272727272727" stroke="black" />
-<line x1="112" y1="1535.4949494949494" x2="572" y2="1535.4949494949494" stroke="black" />
-<line x1="572" y1="1535.4949494949494" x2="572" y2="1535.090909090909" stroke="black" />
-<line x1="572" y1="1535.090909090909" x2="652" y2="1535.090909090909" stroke="black" />
-<line x1="112" y1="1739.3232323232323" x2="252" y2="1739.3232323232323" stroke="black" />
-<line x1="252" y1="1739.3232323232323" x2="252" y2="1710.5454545454545" stroke="black" />
-<line x1="252" y1="1710.5454545454545" x2="552" y2="1710.5454545454545" stroke="black" />
-<line x1="552" y1="1710.5454545454545" x2="552" y2="1589.6363636363637" stroke="black" />
-<line x1="552" y1="1589.6363636363637" x2="652" y2="1589.6363636363635" stroke="black" />
-<circle cx="252" cy="1739.3232323232323" r="2" />
-<line x1="752" y1="1560.5454545454545" x2="762" y2="1560.5454545454545" stroke="black" />
-<line x1="762" y1="1560.5454545454545" x2="762" y2="1690.5454545454545" stroke="black" />
-<line x1="762" y1="1690.5454545454545" x2="642" y2="1690.5454545454545" stroke="black" />
-<line x1="642" y1="1690.5454545454545" x2="642" y2="1662.3636363636365" stroke="black" />
-<line x1="642" y1="1662.3636363636365" x2="652" y2="1662.3636363636363" stroke="black" />
-<line x1="532" y1="1372.5454545454545" x2="562" y2="1372.5454545454545" stroke="black" />
-<line x1="562" y1="1372.5454545454545" x2="562" y2="1516.909090909091" stroke="black" />
-<line x1="562" y1="1516.909090909091" x2="652" y2="1516.9090909090908" stroke="black" />
-<circle cx="562" cy="1516.909090909091" r="2" />
-<line x1="752" y1="946" x2="782" y2="946" stroke="black" />
-<line x1="782" y1="946" x2="782" y2="879" stroke="black" />
-<line x1="782" y1="879" x2="252" y2="879" stroke="black" />
-<line x1="252" y1="879" x2="252" y2="1005.7272727272726" stroke="black" />
-<line x1="252" y1="1005.7272727272726" x2="262" y2="1005.7272727272726" stroke="black" />
-<line x1="112" y1="1517.7171717171718" x2="212" y2="1517.7171717171718" stroke="black" />
-<line x1="212" y1="1517.7171717171718" x2="212" y2="1060.2727272727273" stroke="black" />
-<line x1="212" y1="1060.2727272727273" x2="262" y2="1060.2727272727273" stroke="black" />
-<circle cx="212" cy="1060.2727272727273" r="2" />
-<line x1="112" y1="1685.989898989899" x2="222" y2="1685.989898989899" stroke="black" />
-<line x1="222" y1="1685.989898989899" x2="222" y2="1078.4545454545455" stroke="black" />
-<line x1="222" y1="1078.4545454545455" x2="262" y2="1078.4545454545455" stroke="black" />
-<circle cx="222" cy="1078.4545454545455" r="2" />
-<line x1="752" y1="986" x2="792" y2="986" stroke="black" />
-<line x1="792" y1="986" x2="792" y2="868" stroke="black" />
-<line x1="792" y1="868" x2="242" y2="868" stroke="black" />
-<line x1="242" y1="868" x2="242" y2="1023.9090909090909" stroke="black" />
-<line x1="242" y1="1023.9090909090909" x2="262" y2="1023.9090909090909" stroke="black" />
-<line x1="532" y1="1252.5454545454545" x2="542" y2="1252.5454545454545" stroke="black" />
-<line x1="542" y1="1252.5454545454545" x2="542" y2="1197.5454545454545" stroke="black" />
-<line x1="542" y1="1197.5454545454545" x2="252" y2="1197.5454545454545" stroke="black" />
-<line x1="252" y1="1197.5454545454545" x2="252" y2="1114.8181818181818" stroke="black" />
-<line x1="252" y1="1114.8181818181818" x2="262" y2="1114.8181818181818" stroke="black" />
-<circle cx="542" cy="1197.5454545454545" r="2" />
-<line x1="112" y1="1499.939393939394" x2="202" y2="1499.939393939394" stroke="black" />
-<line x1="202" y1="1499.939393939394" x2="202" y2="1042.090909090909" stroke="black" />
-<line x1="202" y1="1042.090909090909" x2="262" y2="1042.090909090909" stroke="black" />
-<circle cx="202" cy="1042.090909090909" r="2" />
-<line x1="112" y1="1703.767676767677" x2="232" y2="1703.7676767676767" stroke="black" />
-<line x1="232" y1="1703.7676767676767" x2="232" y2="1096.6363636363635" stroke="black" />
-<line x1="232" y1="1096.6363636363635" x2="262" y2="1096.6363636363635" stroke="black" />
-<circle cx="232" cy="1096.6363636363635" r="2" />
-<line x1="752" y1="1600.5454545454545" x2="802" y2="1600.5454545454545" stroke="black" />
-<line x1="802" y1="1600.5454545454545" x2="802" y2="1578.7272727272727" stroke="black" />
-<line x1="802" y1="1578.7272727272727" x2="852" y2="1578.7272727272727" stroke="black" />
-<line x1="532" y1="1332.5454545454545" x2="572" y2="1332.5454545454545" stroke="black" />
-<line x1="572" y1="1332.5454545454545" x2="572" y2="1464.5454545454545" stroke="black" />
-<line x1="572" y1="1464.5454545454545" x2="812" y2="1464.5454545454545" stroke="black" />
-<line x1="812" y1="1464.5454545454545" x2="812" y2="1596.909090909091" stroke="black" />
-<line x1="812" y1="1596.909090909091" x2="852" y2="1596.909090909091" stroke="black" />
-<circle cx="572" cy="1464.5454545454545" r="2" />
-<line x1="112" y1="1553.2727272727273" x2="252" y2="1553.2727272727273" stroke="black" />
-<line x1="252" y1="1553.2727272727273" x2="252" y2="1433.5454545454545" stroke="black" />
-<line x1="252" y1="1433.5454545454545" x2="822" y2="1433.5454545454545" stroke="black" />
-<line x1="822" y1="1433.5454545454545" x2="822" y2="1542.3636363636365" stroke="black" />
-<line x1="822" y1="1542.3636363636365" x2="852" y2="1542.3636363636363" stroke="black" />
-<circle cx="252" cy="1553.2727272727273" r="2" />
-<line x1="112" y1="1721.5454545454545" x2="812" y2="1721.5454545454545" stroke="black" />
-<line x1="812" y1="1721.5454545454545" x2="812" y2="1633.2727272727273" stroke="black" />
-<line x1="812" y1="1633.2727272727273" x2="852" y2="1633.2727272727273" stroke="black" />
-<line x1="752" y1="1560.5454545454545" x2="852" y2="1560.5454545454545" stroke="black" />
-<line x1="532" y1="1372.5454545454545" x2="562" y2="1372.5454545454545" stroke="black" />
-<line x1="562" y1="1372.5454545454545" x2="562" y2="1710.5454545454545" stroke="black" />
-<line x1="562" y1="1710.5454545454545" x2="802" y2="1710.5454545454545" stroke="black" />
-<line x1="802" y1="1710.5454545454545" x2="802" y2="1615.090909090909" stroke="black" />
-<line x1="802" y1="1615.090909090909" x2="852" y2="1615.090909090909" stroke="black" />
-<line x1="112" y1="1535.4949494949494" x2="242" y2="1535.4949494949494" stroke="black" />
-<line x1="242" y1="1535.4949494949494" x2="242" y2="1422.5454545454545" stroke="black" />
-<line x1="242" y1="1422.5454545454545" x2="832" y2="1422.5454545454545" stroke="black" />
-<line x1="832" y1="1422.5454545454545" x2="832" y2="1524.1818181818182" stroke="black" />
-<line x1="832" y1="1524.1818181818182" x2="852" y2="1524.1818181818182" stroke="black" />
-<circle cx="242" cy="1535.4949494949494" r="2" />
-<line x1="112" y1="1739.3232323232323" x2="822" y2="1739.3232323232323" stroke="black" />
-<line x1="822" y1="1739.3232323232323" x2="822" y2="1651.4545454545455" stroke="black" />
-<line x1="822" y1="1651.4545454545455" x2="852" y2="1651.4545454545455" stroke="black" />
-<line x1="362" y1="1107.5454545454545" x2="382" y2="1107.5454545454545" stroke="black" />
-<line x1="382" y1="1107.5454545454545" x2="382" y2="1303.4545454545455" stroke="black" />
-<line x1="382" y1="1303.4545454545455" x2="432" y2="1303.4545454545455" stroke="black" />
-<line x1="362" y1="1027.5454545454545" x2="402" y2="1027.5454545454545" stroke="black" />
-<line x1="402" y1="1027.5454545454545" x2="402" y2="1267.090909090909" stroke="black" />
-<line x1="402" y1="1267.090909090909" x2="432" y2="1267.090909090909" stroke="black" />
-<line x1="362" y1="1067.5454545454545" x2="392" y2="1067.5454545454545" stroke="black" />
-<line x1="392" y1="1067.5454545454545" x2="392" y2="1285.2727272727273" stroke="black" />
-<line x1="392" y1="1285.2727272727273" x2="432" y2="1285.2727272727273" stroke="black" />
-<line x1="362" y1="1147.5454545454545" x2="372" y2="1147.5454545454545" stroke="black" />
-<line x1="372" y1="1147.5454545454545" x2="372" y2="1321.6363636363635" stroke="black" />
-<line x1="372" y1="1321.6363636363635" x2="432" y2="1321.6363636363635" stroke="black" />
-<line x1="952" y1="1586" x2="972" y2="1586" stroke="black" />
-<line x1="972" y1="1586" x2="972" y2="890" stroke="black" />
-<line x1="972" y1="890" x2="412" y2="890" stroke="black" />
-<line x1="412" y1="890" x2="412" y2="1248.909090909091" stroke="black" />
-<line x1="412" y1="1248.909090909091" x2="432" y2="1248.9090909090908" stroke="black" />
-<line x1="952" y1="1626" x2="972" y2="1626" stroke="black" />
-<line x1="972" y1="1626" x2="972" y2="1761.3232323232323" stroke="black" />
-<line x1="972" y1="1761.3232323232323" x2="372" y2="1761.3232323232323" stroke="black" />
-<line x1="372" y1="1761.3232323232323" x2="372" y2="1339.8181818181818" stroke="black" />
-<line x1="372" y1="1339.8181818181818" x2="432" y2="1339.8181818181818" stroke="black" />
-<line x1="952" y1="1666" x2="962" y2="1666" stroke="black" />
-<line x1="962" y1="1666" x2="962" y2="1750.3232323232323" stroke="black" />
-<line x1="962" y1="1750.3232323232323" x2="422" y2="1750.3232323232323" stroke="black" />
-<line x1="422" y1="1750.3232323232323" x2="422" y2="1358" stroke="black" />
-<line x1="422" y1="1358" x2="432" y2="1358" stroke="black" />
-<line x1="952" y1="1546" x2="962" y2="1546" stroke="black" />
-<line x1="962" y1="1546" x2="962" y2="1187.5454545454545" stroke="black" />
-<line x1="962" y1="1187.5454545454545" x2="422" y2="1187.5454545454545" stroke="black" />
-<line x1="422" y1="1187.5454545454545" x2="422" y2="1230.7272727272725" stroke="black" />
-<line x1="422" y1="1230.7272727272725" x2="432" y2="1230.7272727272727" stroke="black" />
-<line x1="112" y1="1446.6060606060607" x2="132" y2="1446.6060606060605" stroke="black" />
-<line x1="132" y1="1446.6060606060605" x2="132" y2="99.72727272727275" stroke="black" />
-<line x1="132" y1="99.72727272727275" x2="562" y2="99.72727272727275" stroke="black" />
-<line x1="562" y1="99.72727272727275" x2="562" y2="92.5454545454545" stroke="black" />
-<line x1="562" y1="92.5454545454545" x2="652" y2="92.54545454545453" stroke="black" />
-<line x1="112" y1="1614.878787878788" x2="142" y2="1614.878787878788" stroke="black" />
-<line x1="142" y1="1614.878787878788" x2="142" y2="110.72727272727275" stroke="black" />
-<line x1="142" y1="110.72727272727275" x2="652" y2="110.72727272727272" stroke="black" />
-<line x1="752" y1="118" x2="772" y2="118" stroke="black" />
-<line x1="772" y1="118" x2="772" y2="258" stroke="black" />
-<line x1="772" y1="258" x2="632" y2="258" stroke="black" />
-<line x1="632" y1="258" x2="632" y2="201.63636363636374" stroke="black" />
-<line x1="632" y1="201.63636363636374" x2="652" y2="201.63636363636365" stroke="black" />
-<line x1="532" y1="1292.5454545454545" x2="592" y2="1292.5454545454545" stroke="black" />
-<line x1="592" y1="1292.5454545454545" x2="592" y2="147.090909090909" stroke="black" />
-<line x1="592" y1="147.090909090909" x2="652" y2="147.0909090909091" stroke="black" />
-<line x1="112" y1="1428.828282828283" x2="122" y2="1428.828282828283" stroke="black" />
-<line x1="122" y1="1428.828282828283" x2="122" y2="88.72727272727275" stroke="black" />
-<line x1="122" y1="88.72727272727275" x2="542" y2="88.72727272727275" stroke="black" />
-<line x1="542" y1="88.72727272727275" x2="542" y2="74.36363636363626" stroke="black" />
-<line x1="542" y1="74.36363636363626" x2="652" y2="74.36363636363636" stroke="black" />
-<line x1="112" y1="1632.6565656565658" x2="152" y2="1632.6565656565658" stroke="black" />
-<line x1="152" y1="1632.6565656565658" x2="152" y2="287" stroke="black" />
-<line x1="152" y1="287" x2="542" y2="287" stroke="black" />
-<line x1="542" y1="287" x2="542" y2="128.909090909091" stroke="black" />
-<line x1="542" y1="128.909090909091" x2="652" y2="128.9090909090909" stroke="black" />
-<line x1="752" y1="78" x2="762" y2="78" stroke="black" />
-<line x1="762" y1="78" x2="762" y2="248" stroke="black" />
-<line x1="762" y1="248" x2="642" y2="248" stroke="black" />
-<line x1="642" y1="248" x2="642" y2="219.81818181818176" stroke="black" />
-<line x1="642" y1="219.81818181818176" x2="652" y2="219.81818181818184" stroke="black" />
-<line x1="1132" y1="279.90909090909076" x2="1142" y2="279.90909090909076" stroke="black" />
-<line x1="1142" y1="279.90909090909076" x2="1142" y2="23" stroke="black" />
-<line x1="1142" y1="23" x2="622" y2="23" stroke="black" />
-<line x1="622" y1="23" x2="622" y2="56.181818181818244" stroke="black" />
-<line x1="622" y1="56.181818181818244" x2="652" y2="56.18181818181818" stroke="black" />
-<line x1="112" y1="1482.1616161616162" x2="172" y2="1482.1616161616162" stroke="black" />
-<line x1="172" y1="1482.1616161616162" x2="172" y2="660.5454545454545" stroke="black" />
-<line x1="172" y1="660.5454545454545" x2="612" y2="660.5454545454545" stroke="black" />
-<line x1="612" y1="660.5454545454545" x2="612" y2="653.3636363636363" stroke="black" />
-<line x1="612" y1="653.3636363636363" x2="652" y2="653.3636363636364" stroke="black" />
-<circle cx="172" cy="660.5454545454545" r="2" />
-<line x1="112" y1="1668.2121212121212" x2="192" y2="1668.2121212121212" stroke="black" />
-<line x1="192" y1="1668.2121212121212" x2="192" y2="857" stroke="black" />
-<line x1="192" y1="857" x2="542" y2="857" stroke="black" />
-<line x1="542" y1="857" x2="542" y2="689.7272727272727" stroke="black" />
-<line x1="542" y1="689.7272727272727" x2="652" y2="689.7272727272727" stroke="black" />
-<circle cx="192" cy="857" r="2" />
-<line x1="752" y1="777" x2="772" y2="777" stroke="black" />
-<line x1="772" y1="777" x2="772" y2="837" stroke="black" />
-<line x1="772" y1="837" x2="632" y2="837" stroke="black" />
-<line x1="632" y1="837" x2="632" y2="780.6363636363636" stroke="black" />
-<line x1="632" y1="780.6363636363636" x2="652" y2="780.6363636363636" stroke="black" />
-<line x1="1132" y1="359.90909090909076" x2="1152" y2="359.90909090909076" stroke="black" />
-<line x1="1152" y1="359.90909090909076" x2="1152" y2="858" stroke="black" />
-<line x1="1152" y1="858" x2="612" y2="858" stroke="black" />
-<line x1="612" y1="858" x2="612" y2="707.909090909091" stroke="black" />
-<line x1="612" y1="707.909090909091" x2="652" y2="707.9090909090909" stroke="black" />
-<line x1="112" y1="1464.3838383838383" x2="162" y2="1464.3838383838383" stroke="black" />
-<line x1="162" y1="1464.3838383838383" x2="162" y2="649.5454545454545" stroke="black" />
-<line x1="162" y1="649.5454545454545" x2="542" y2="649.5454545454545" stroke="black" />
-<line x1="542" y1="649.5454545454545" x2="542" y2="635.1818181818182" stroke="black" />
-<line x1="542" y1="635.1818181818182" x2="652" y2="635.1818181818181" stroke="black" />
-<circle cx="162" cy="649.5454545454545" r="2" />
-<line x1="112" y1="1650.4343434343434" x2="182" y2="1650.4343434343434" stroke="black" />
-<line x1="182" y1="1650.4343434343434" x2="182" y2="671.5454545454545" stroke="black" />
-<line x1="182" y1="671.5454545454545" x2="652" y2="671.5454545454545" stroke="black" />
-<circle cx="182" cy="671.5454545454545" r="2" />
-<line x1="752" y1="737" x2="762" y2="737" stroke="black" />
-<line x1="762" y1="737" x2="762" y2="827" stroke="black" />
-<line x1="762" y1="827" x2="642" y2="827" stroke="black" />
-<line x1="642" y1="827" x2="642" y2="798.8181818181819" stroke="black" />
-<line x1="642" y1="798.8181818181819" x2="652" y2="798.8181818181819" stroke="black" />
-<line x1="1132" y1="399.90909090909076" x2="1142" y2="399.90909090909076" stroke="black" />
-<line x1="1142" y1="399.90909090909076" x2="1142" y2="847" stroke="black" />
-<line x1="1142" y1="847" x2="622" y2="847" stroke="black" />
-<line x1="622" y1="847" x2="622" y2="726.090909090909" stroke="black" />
-<line x1="622" y1="726.090909090909" x2="652" y2="726.0909090909091" stroke="black" />
-<line x1="752" y1="118" x2="822" y2="118" stroke="black" />
-<line x1="822" y1="118" x2="822" y2="272.6363636363635" stroke="black" />
-<line x1="822" y1="272.6363636363635" x2="852" y2="272.63636363636357" stroke="black" />
-<line x1="532" y1="1292.5454545454545" x2="592" y2="1292.5454545454545" stroke="black" />
-<line x1="592" y1="1292.5454545454545" x2="592" y2="331" stroke="black" />
-<line x1="592" y1="331" x2="822" y2="331" stroke="black" />
-<line x1="822" y1="331" x2="822" y2="345.36363636363626" stroke="black" />
-<line x1="822" y1="345.36363636363626" x2="852" y2="345.36363636363626" stroke="black" />
-<circle cx="592" cy="331" r="2" />
-<line x1="112" y1="1446.6060606060607" x2="132" y2="1446.6060606060605" stroke="black" />
-<line x1="132" y1="1446.6060606060605" x2="132" y2="309" stroke="black" />
-<line x1="132" y1="309" x2="852" y2="308.9999999999999" stroke="black" />
-<circle cx="132" cy="309" r="2" />
-<line x1="112" y1="1614.878787878788" x2="142" y2="1614.878787878788" stroke="black" />
-<line x1="142" y1="1614.878787878788" x2="142" y2="320" stroke="black" />
-<line x1="142" y1="320" x2="832" y2="320" stroke="black" />
-<line x1="832" y1="320" x2="832" y2="327.181818181818" stroke="black" />
-<line x1="832" y1="327.181818181818" x2="852" y2="327.18181818181813" stroke="black" />
-<circle cx="142" cy="320" r="2" />
-<line x1="752" y1="78" x2="832" y2="78" stroke="black" />
-<line x1="832" y1="78" x2="832" y2="254.45454545454527" stroke="black" />
-<line x1="832" y1="254.45454545454527" x2="852" y2="254.45454545454538" stroke="black" />
-<line x1="1132" y1="279.90909090909076" x2="1142" y2="279.90909090909076" stroke="black" />
-<line x1="1142" y1="279.90909090909076" x2="1142" y2="23" stroke="black" />
-<line x1="1142" y1="23" x2="842" y2="23" stroke="black" />
-<line x1="842" y1="23" x2="842" y2="236.27272727272725" stroke="black" />
-<line x1="842" y1="236.27272727272725" x2="852" y2="236.2727272727272" stroke="black" />
-<circle cx="842" cy="23" r="2" />
-<line x1="112" y1="1428.828282828283" x2="122" y2="1428.828282828283" stroke="black" />
-<line x1="122" y1="1428.828282828283" x2="122" y2="298" stroke="black" />
-<line x1="122" y1="298" x2="822" y2="298" stroke="black" />
-<line x1="822" y1="298" x2="822" y2="290.81818181818176" stroke="black" />
-<line x1="822" y1="290.81818181818176" x2="852" y2="290.81818181818176" stroke="black" />
-<circle cx="122" cy="298" r="2" />
-<line x1="112" y1="1632.6565656565658" x2="152" y2="1632.6565656565658" stroke="black" />
-<line x1="152" y1="1632.6565656565658" x2="152" y2="342" stroke="black" />
-<line x1="152" y1="342" x2="782" y2="342" stroke="black" />
-<line x1="782" y1="342" x2="782" y2="363.5454545454545" stroke="black" />
-<line x1="782" y1="363.5454545454545" x2="852" y2="363.5454545454545" stroke="black" />
-<circle cx="152" cy="342" r="2" />
-<line x1="752" y1="777" x2="832" y2="777" stroke="black" />
-<line x1="832" y1="777" x2="832" y2="617.3636363636363" stroke="black" />
-<line x1="832" y1="617.3636363636363" x2="852" y2="617.3636363636363" stroke="black" />
-<line x1="1132" y1="359.90909090909076" x2="1152" y2="359.90909090909076" stroke="black" />
-<line x1="1152" y1="359.90909090909076" x2="1152" y2="700.090909090909" stroke="black" />
-<line x1="1152" y1="700.090909090909" x2="842" y2="700.090909090909" stroke="black" />
-<line x1="842" y1="700.090909090909" x2="842" y2="635.5454545454545" stroke="black" />
-<line x1="842" y1="635.5454545454545" x2="852" y2="635.5454545454545" stroke="black" />
-<circle cx="1152" cy="700.090909090909" r="2" />
-<line x1="112" y1="1482.1616161616162" x2="172" y2="1482.1616161616162" stroke="black" />
-<line x1="172" y1="1482.1616161616162" x2="172" y2="559" stroke="black" />
-<line x1="172" y1="559" x2="822" y2="559" stroke="black" />
-<line x1="822" y1="559" x2="822" y2="544.6363636363635" stroke="black" />
-<line x1="822" y1="544.6363636363635" x2="852" y2="544.6363636363635" stroke="black" />
-<line x1="112" y1="1668.2121212121212" x2="192" y2="1668.2121212121212" stroke="black" />
-<line x1="192" y1="1668.2121212121212" x2="192" y2="581" stroke="black" />
-<line x1="192" y1="581" x2="852" y2="580.9999999999999" stroke="black" />
-<line x1="752" y1="737" x2="822" y2="737" stroke="black" />
-<line x1="822" y1="737" x2="822" y2="599.181818181818" stroke="black" />
-<line x1="822" y1="599.181818181818" x2="852" y2="599.1818181818181" stroke="black" />
-<line x1="1132" y1="399.90909090909076" x2="1142" y2="399.90909090909076" stroke="black" />
-<line x1="1142" y1="399.90909090909076" x2="1142" y2="475.090909090909" stroke="black" />
-<line x1="1142" y1="475.090909090909" x2="842" y2="475.090909090909" stroke="black" />
-<line x1="842" y1="475.090909090909" x2="842" y2="508.27272727272725" stroke="black" />
-<line x1="842" y1="508.27272727272725" x2="852" y2="508.2727272727272" stroke="black" />
-<circle cx="1142" cy="475.090909090909" r="2" />
-<line x1="112" y1="1464.3838383838383" x2="162" y2="1464.3838383838383" stroke="black" />
-<line x1="162" y1="1464.3838383838383" x2="162" y2="548" stroke="black" />
-<line x1="162" y1="548" x2="782" y2="548" stroke="black" />
-<line x1="782" y1="548" x2="782" y2="526.4545454545453" stroke="black" />
-<line x1="782" y1="526.4545454545453" x2="852" y2="526.4545454545454" stroke="black" />
-<line x1="112" y1="1650.4343434343434" x2="182" y2="1650.4343434343434" stroke="black" />
-<line x1="182" y1="1650.4343434343434" x2="182" y2="570" stroke="black" />
-<line x1="182" y1="570" x2="832" y2="570" stroke="black" />
-<line x1="832" y1="570" x2="832" y2="562.8181818181818" stroke="black" />
-<line x1="832" y1="562.8181818181818" x2="852" y2="562.8181818181818" stroke="black" />
-<line x1="952" y1="338.090909090909" x2="972" y2="338.090909090909" stroke="black" />
-<line x1="972" y1="338.090909090909" x2="972" y2="294.45454545454527" stroke="black" />
-<line x1="972" y1="294.45454545454527" x2="1032" y2="294.4545454545453" stroke="black" />
-<line x1="952" y1="258.090909090909" x2="1032" y2="258.09090909090895" stroke="black" />
-<line x1="952" y1="298.090909090909" x2="962" y2="298.090909090909" stroke="black" />
-<line x1="962" y1="298.090909090909" x2="962" y2="276.272727272727" stroke="black" />
-<line x1="962" y1="276.272727272727" x2="1032" y2="276.27272727272714" stroke="black" />
-<line x1="952" y1="378.090909090909" x2="982" y2="378.090909090909" stroke="black" />
-<line x1="982" y1="378.090909090909" x2="982" y2="312.6363636363635" stroke="black" />
-<line x1="982" y1="312.6363636363635" x2="1032" y2="312.6363636363635" stroke="black" />
-<line x1="952" y1="570.090909090909" x2="1002" y2="570.090909090909" stroke="black" />
-<line x1="1002" y1="570.090909090909" x2="1002" y2="348.9999999999998" stroke="black" />
-<line x1="1002" y1="348.9999999999998" x2="1032" y2="348.9999999999999" stroke="black" />
-<line x1="952" y1="650.090909090909" x2="1022" y2="650.090909090909" stroke="black" />
-<line x1="1022" y1="650.090909090909" x2="1022" y2="385.36363636363626" stroke="black" />
-<line x1="1022" y1="385.36363636363626" x2="1032" y2="385.36363636363626" stroke="black" />
-<line x1="952" y1="530.090909090909" x2="992" y2="530.090909090909" stroke="black" />
-<line x1="992" y1="530.090909090909" x2="992" y2="330.81818181818176" stroke="black" />
-<line x1="992" y1="330.81818181818176" x2="1032" y2="330.81818181818164" stroke="black" />
-<line x1="952" y1="610.090909090909" x2="1012" y2="610.090909090909" stroke="black" />
-<line x1="1012" y1="610.090909090909" x2="1012" y2="367.181818181818" stroke="black" />
-<line x1="1012" y1="367.181818181818" x2="1032" y2="367.181818181818" stroke="black" />
+<svg viewBox="0 0 1064 1774.3232323232323" xmlns="http://www.w3.org/2000/svg" class="circuit">
+  <style type="text/css">
+    .circuit { background-color: white; }
+    .module { fill: white; stroke: black; stroke-width: 2px; }
+    .port { fill: white; stroke: black; stroke-width: 1px; }
+    .wire { fill: none; stroke: black; stroke-width: 1px; }
+    .junction { fill: black; stroke: none; stroke-width: 0px; }
+    .moduleLabel { font-family: sans-serif; font-size: 10px; fill: black; stroke-width: 1px; stroke: none; }
+    .portLabel { font-family: sans-serif; font-size: 10px; fill: black; stroke-width: 1px; stroke: none; }
+  </style>
+  <rect x="0" y="0" width="1064" height="1774.3232323232323" class="module" />
+  <rect x="12" y="1411.050505050505" width="110" height="160" class="module" />
+  <text x="12" y="1406.050505050505" class="moduleLabel">pin_header_1x8_2</text>
+  <rect x="119.5" y="1515.2171717171718" width="5" height="5" class="port" />
+  <text x="71" y="1517.7171717171718" class="portLabel">pins0</text>
+  <rect x="119.5" y="1497.439393939394" width="5" height="5" class="port" />
+  <text x="71" y="1499.939393939394" class="portLabel">pins1</text>
+  <rect x="119.5" y="1550.7727272727273" width="5" height="5" class="port" />
+  <text x="71" y="1553.2727272727273" class="portLabel">pins2</text>
+  <rect x="119.5" y="1532.9949494949494" width="5" height="5" class="port" />
+  <text x="71" y="1535.4949494949494" class="portLabel">pins3</text>
+  <rect x="119.5" y="1444.1060606060607" width="5" height="5" class="port" />
+  <text x="71" y="1446.6060606060607" class="portLabel">pins4</text>
+  <rect x="119.5" y="1426.328282828283" width="5" height="5" class="port" />
+  <text x="71" y="1428.828282828283" class="portLabel">pins5</text>
+  <rect x="119.5" y="1479.6616161616162" width="5" height="5" class="port" />
+  <text x="71" y="1482.1616161616162" class="portLabel">pins6</text>
+  <rect x="119.5" y="1461.8838383838383" width="5" height="5" class="port" />
+  <text x="71" y="1464.3838383838383" class="portLabel">pins7</text>
+  <rect x="12" y="1597.1010101010102" width="110" height="160" class="module" />
+  <text x="12" y="1592.1010101010102" class="moduleLabel">pin_header_1x8_3</text>
+  <rect x="119.5" y="1683.489898989899" width="5" height="5" class="port" />
+  <text x="71" y="1685.989898989899" class="portLabel">pins0</text>
+  <rect x="119.5" y="1701.267676767677" width="5" height="5" class="port" />
+  <text x="71" y="1703.767676767677" class="portLabel">pins1</text>
+  <rect x="119.5" y="1719.0454545454545" width="5" height="5" class="port" />
+  <text x="71" y="1721.5454545454545" class="portLabel">pins2</text>
+  <rect x="119.5" y="1736.8232323232323" width="5" height="5" class="port" />
+  <text x="71" y="1739.3232323232323" class="portLabel">pins3</text>
+  <rect x="119.5" y="1612.378787878788" width="5" height="5" class="port" />
+  <text x="71" y="1614.878787878788" class="portLabel">pins4</text>
+  <rect x="119.5" y="1630.1565656565658" width="5" height="5" class="port" />
+  <text x="71" y="1632.6565656565658" class="portLabel">pins5</text>
+  <rect x="119.5" y="1665.7121212121212" width="5" height="5" class="port" />
+  <text x="71" y="1668.2121212121212" class="portLabel">pins6</text>
+  <rect x="119.5" y="1647.9343434343434" width="5" height="5" class="port" />
+  <text x="71" y="1650.4343434343434" class="portLabel">pins7</text>
+  <rect x="412" y="358" width="110" height="180" class="module" />
+  <text x="412" y="353" class="moduleLabel">pin_header_1x9_4</text>
+  <rect x="519.5" y="445.5" width="5" height="5" class="port" />
+  <text x="471" y="448" class="portLabel">pins0</text>
+  <rect x="519.5" y="391.5" width="5" height="5" class="port" />
+  <text x="471" y="394" class="portLabel">pins1</text>
+  <rect x="519.5" y="517.5" width="5" height="5" class="port" />
+  <text x="471" y="520" class="portLabel">pins2</text>
+  <rect x="519.5" y="499.5" width="5" height="5" class="port" />
+  <text x="471" y="502" class="portLabel">pins3</text>
+  <rect x="519.5" y="427.5" width="5" height="5" class="port" />
+  <text x="471" y="430" class="portLabel">pins4</text>
+  <rect x="519.5" y="409.5" width="5" height="5" class="port" />
+  <text x="471" y="412" class="portLabel">pins5</text>
+  <rect x="519.5" y="463.5" width="5" height="5" class="port" />
+  <text x="471" y="466" class="portLabel">pins6</text>
+  <rect x="519.5" y="481.5" width="5" height="5" class="port" />
+  <text x="471" y="484" class="portLabel">pins7</text>
+  <rect x="519.5" y="373.5" width="5" height="5" class="port" />
+  <text x="471" y="376" class="portLabel">pins8</text>
+  <rect x="642" y="906" width="70" height="200" class="module" />
+  <text x="642" y="901" class="moduleLabel">74x86_7</text>
+  <rect x="639.5" y="1012.5909090909091" width="5" height="5" class="port" />
+  <text x="648" y="1015.0909090909091" class="portLabel">gnd</text>
+  <rect x="639.5" y="1030.7727272727273" width="5" height="5" class="port" />
+  <text x="648" y="1033.2727272727273" class="portLabel">vcc</text>
+  <rect x="639.5" y="1085.3181818181818" width="5" height="5" class="port" />
+  <text x="648" y="1087.8181818181818" class="portLabel">a0</text>
+  <rect x="639.5" y="921.6818181818181" width="5" height="5" class="port" />
+  <text x="648" y="924.1818181818181" class="portLabel">a1</text>
+  <rect x="639.5" y="1067.1363636363637" width="5" height="5" class="port" />
+  <text x="648" y="1069.6363636363637" class="portLabel">a2</text>
+  <rect x="639.5" y="939.8636363636364" width="5" height="5" class="port" />
+  <text x="648" y="942.3636363636364" class="portLabel">a3</text>
+  <rect x="639.5" y="994.4090909090909" width="5" height="5" class="port" />
+  <text x="648" y="996.9090909090909" class="portLabel">b0</text>
+  <rect x="639.5" y="976.2272727272727" width="5" height="5" class="port" />
+  <text x="648" y="978.7272727272727" class="portLabel">b1</text>
+  <rect x="639.5" y="1048.9545454545455" width="5" height="5" class="port" />
+  <text x="648" y="1051.4545454545455" class="portLabel">b2</text>
+  <rect x="639.5" y="958.0454545454545" width="5" height="5" class="port" />
+  <text x="648" y="960.5454545454545" class="portLabel">b3</text>
+  <rect x="709.5" y="1063.5" width="5" height="5" class="port" />
+  <text x="691" y="1066" class="portLabel">y0</text>
+  <rect x="709.5" y="983.5" width="5" height="5" class="port" />
+  <text x="691" y="986" class="portLabel">y1</text>
+  <rect x="709.5" y="1023.5" width="5" height="5" class="port" />
+  <text x="691" y="1026" class="portLabel">y2</text>
+  <rect x="709.5" y="943.5" width="5" height="5" class="port" />
+  <text x="691" y="946" class="portLabel">y3</text>
+  <rect x="642" y="1480.5454545454545" width="70" height="200" class="module" />
+  <text x="642" y="1475.5454545454545" class="moduleLabel">74x86_12</text>
+  <rect x="639.5" y="1605.3181818181818" width="5" height="5" class="port" />
+  <text x="648" y="1607.8181818181818" class="portLabel">gnd</text>
+  <rect x="639.5" y="1623.5" width="5" height="5" class="port" />
+  <text x="648" y="1626" class="portLabel">vcc</text>
+  <rect x="639.5" y="1659.8636363636363" width="5" height="5" class="port" />
+  <text x="648" y="1662.3636363636363" class="portLabel">a0</text>
+  <rect x="639.5" y="1532.590909090909" width="5" height="5" class="port" />
+  <text x="648" y="1535.090909090909" class="portLabel">a1</text>
+  <rect x="639.5" y="1641.6818181818182" width="5" height="5" class="port" />
+  <text x="648" y="1644.1818181818182" class="portLabel">a2</text>
+  <rect x="639.5" y="1550.7727272727273" width="5" height="5" class="port" />
+  <text x="648" y="1553.2727272727273" class="portLabel">a3</text>
+  <rect x="639.5" y="1514.4090909090908" width="5" height="5" class="port" />
+  <text x="648" y="1516.9090909090908" class="portLabel">b0</text>
+  <rect x="639.5" y="1587.1363636363635" width="5" height="5" class="port" />
+  <text x="648" y="1589.6363636363635" class="portLabel">b1</text>
+  <rect x="639.5" y="1496.2272727272727" width="5" height="5" class="port" />
+  <text x="648" y="1498.7272727272727" class="portLabel">b2</text>
+  <rect x="639.5" y="1568.9545454545455" width="5" height="5" class="port" />
+  <text x="648" y="1571.4545454545455" class="portLabel">b3</text>
+  <rect x="709.5" y="1518.0454545454545" width="5" height="5" class="port" />
+  <text x="691" y="1520.5454545454545" class="portLabel">y0</text>
+  <rect x="709.5" y="1558.0454545454545" width="5" height="5" class="port" />
+  <text x="691" y="1560.5454545454545" class="portLabel">y1</text>
+  <rect x="709.5" y="1638.0454545454545" width="5" height="5" class="port" />
+  <text x="691" y="1640.5454545454545" class="portLabel">y2</text>
+  <rect x="709.5" y="1598.0454545454545" width="5" height="5" class="port" />
+  <text x="691" y="1600.5454545454545" class="portLabel">y3</text>
+  <rect x="272" y="987.5454545454545" width="70" height="200" class="module" />
+  <text x="272" y="982.5454545454545" class="moduleLabel">74x08_17</text>
+  <rect x="269.5" y="1148.6818181818182" width="5" height="5" class="port" />
+  <text x="278" y="1151.1818181818182" class="portLabel">gnd</text>
+  <rect x="269.5" y="1166.8636363636363" width="5" height="5" class="port" />
+  <text x="278" y="1169.3636363636363" class="portLabel">vcc</text>
+  <rect x="269.5" y="1039.590909090909" width="5" height="5" class="port" />
+  <text x="278" y="1042.090909090909" class="portLabel">a0</text>
+  <rect x="269.5" y="1021.4090909090909" width="5" height="5" class="port" />
+  <text x="278" y="1023.9090909090909" class="portLabel">a1</text>
+  <rect x="269.5" y="1057.7727272727273" width="5" height="5" class="port" />
+  <text x="278" y="1060.2727272727273" class="portLabel">a2</text>
+  <rect x="269.5" y="1003.2272727272726" width="5" height="5" class="port" />
+  <text x="278" y="1005.7272727272726" class="portLabel">a3</text>
+  <rect x="269.5" y="1094.1363636363635" width="5" height="5" class="port" />
+  <text x="278" y="1096.6363636363635" class="portLabel">b0</text>
+  <rect x="269.5" y="1112.3181818181818" width="5" height="5" class="port" />
+  <text x="278" y="1114.8181818181818" class="portLabel">b1</text>
+  <rect x="269.5" y="1075.9545454545455" width="5" height="5" class="port" />
+  <text x="278" y="1078.4545454545455" class="portLabel">b2</text>
+  <rect x="269.5" y="1130.5" width="5" height="5" class="port" />
+  <text x="278" y="1133" class="portLabel">b3</text>
+  <rect x="339.5" y="1145.0454545454545" width="5" height="5" class="port" />
+  <text x="321" y="1147.5454545454545" class="portLabel">y0</text>
+  <rect x="339.5" y="1065.0454545454545" width="5" height="5" class="port" />
+  <text x="321" y="1067.5454545454545" class="portLabel">y1</text>
+  <rect x="339.5" y="1025.0454545454545" width="5" height="5" class="port" />
+  <text x="321" y="1027.5454545454545" class="portLabel">y2</text>
+  <rect x="339.5" y="1105.0454545454545" width="5" height="5" class="port" />
+  <text x="321" y="1107.5454545454545" class="portLabel">y3</text>
+  <rect x="812" y="1506" width="70" height="200" class="module" />
+  <text x="812" y="1501" class="moduleLabel">74x08_22</text>
+  <rect x="809.5" y="1667.1363636363637" width="5" height="5" class="port" />
+  <text x="818" y="1669.6363636363637" class="portLabel">gnd</text>
+  <rect x="809.5" y="1685.3181818181818" width="5" height="5" class="port" />
+  <text x="818" y="1687.8181818181818" class="portLabel">vcc</text>
+  <rect x="809.5" y="1521.6818181818182" width="5" height="5" class="port" />
+  <text x="818" y="1524.1818181818182" class="portLabel">a0</text>
+  <rect x="809.5" y="1558.0454545454545" width="5" height="5" class="port" />
+  <text x="818" y="1560.5454545454545" class="portLabel">a1</text>
+  <rect x="809.5" y="1539.8636363636363" width="5" height="5" class="port" />
+  <text x="818" y="1542.3636363636363" class="portLabel">a2</text>
+  <rect x="809.5" y="1576.2272727272727" width="5" height="5" class="port" />
+  <text x="818" y="1578.7272727272727" class="portLabel">a3</text>
+  <rect x="809.5" y="1648.9545454545455" width="5" height="5" class="port" />
+  <text x="818" y="1651.4545454545455" class="portLabel">b0</text>
+  <rect x="809.5" y="1612.590909090909" width="5" height="5" class="port" />
+  <text x="818" y="1615.090909090909" class="portLabel">b1</text>
+  <rect x="809.5" y="1630.7727272727273" width="5" height="5" class="port" />
+  <text x="818" y="1633.2727272727273" class="portLabel">b2</text>
+  <rect x="809.5" y="1594.409090909091" width="5" height="5" class="port" />
+  <text x="818" y="1596.909090909091" class="portLabel">b3</text>
+  <rect x="879.5" y="1543.5" width="5" height="5" class="port" />
+  <text x="861" y="1546" class="portLabel">y0</text>
+  <rect x="879.5" y="1663.5" width="5" height="5" class="port" />
+  <text x="861" y="1666" class="portLabel">y1</text>
+  <rect x="879.5" y="1623.5" width="5" height="5" class="port" />
+  <text x="861" y="1626" class="portLabel">y2</text>
+  <rect x="879.5" y="1583.5" width="5" height="5" class="port" />
+  <text x="861" y="1586" class="portLabel">y3</text>
+  <rect x="436.61538461538464" y="1212.5454545454545" width="70" height="200" class="module" />
+  <text x="436.61538461538464" y="1207.5454545454545" class="moduleLabel">74x32_27</text>
+  <rect x="434.11538461538464" y="1373.6818181818182" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1376.1818181818182" class="portLabel">gnd</text>
+  <rect x="434.11538461538464" y="1391.8636363636363" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1394.3636363636363" class="portLabel">vcc</text>
+  <rect x="434.11538461538464" y="1355.5" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1358" class="portLabel">a0</text>
+  <rect x="434.11538461538464" y="1246.4090909090908" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1248.9090909090908" class="portLabel">a1</text>
+  <rect x="434.11538461538464" y="1282.7727272727273" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1285.2727272727273" class="portLabel">a2</text>
+  <rect x="434.11538461538464" y="1300.9545454545455" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1303.4545454545455" class="portLabel">a3</text>
+  <rect x="434.11538461538464" y="1228.2272727272727" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1230.7272727272727" class="portLabel">b0</text>
+  <rect x="434.11538461538464" y="1337.3181818181818" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1339.8181818181818" class="portLabel">b1</text>
+  <rect x="434.11538461538464" y="1319.1363636363635" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1321.6363636363635" class="portLabel">b2</text>
+  <rect x="434.11538461538464" y="1264.590909090909" width="5" height="5" class="port" />
+  <text x="442.61538461538464" y="1267.090909090909" class="portLabel">b3</text>
+  <rect x="504.11538461538464" y="1290.0454545454545" width="5" height="5" class="port" />
+  <text x="485.61538461538464" y="1292.5454545454545" class="portLabel">y0</text>
+  <rect x="504.11538461538464" y="1370.0454545454545" width="5" height="5" class="port" />
+  <text x="485.61538461538464" y="1372.5454545454545" class="portLabel">y1</text>
+  <rect x="504.11538461538464" y="1330.0454545454545" width="5" height="5" class="port" />
+  <text x="485.61538461538464" y="1332.5454545454545" class="portLabel">y2</text>
+  <rect x="504.11538461538464" y="1250.0454545454545" width="5" height="5" class="port" />
+  <text x="485.61538461538464" y="1252.5454545454545" class="portLabel">y3</text>
+  <rect x="642" y="38" width="70" height="200" class="module" />
+  <text x="642" y="33" class="moduleLabel">74x86_33</text>
+  <rect x="639.5" y="162.77272727272728" width="5" height="5" class="port" />
+  <text x="648" y="165.27272727272728" class="portLabel">gnd</text>
+  <rect x="639.5" y="180.95454545454547" width="5" height="5" class="port" />
+  <text x="648" y="183.45454545454547" class="portLabel">vcc</text>
+  <rect x="639.5" y="217.31818181818184" width="5" height="5" class="port" />
+  <text x="648" y="219.81818181818184" class="portLabel">a0</text>
+  <rect x="639.5" y="71.86363636363636" width="5" height="5" class="port" />
+  <text x="648" y="74.36363636363636" class="portLabel">a1</text>
+  <rect x="639.5" y="199.13636363636365" width="5" height="5" class="port" />
+  <text x="648" y="201.63636363636365" class="portLabel">a2</text>
+  <rect x="639.5" y="90.04545454545453" width="5" height="5" class="port" />
+  <text x="648" y="92.54545454545453" class="portLabel">a3</text>
+  <rect x="639.5" y="53.68181818181818" width="5" height="5" class="port" />
+  <text x="648" y="56.18181818181818" class="portLabel">b0</text>
+  <rect x="639.5" y="126.4090909090909" width="5" height="5" class="port" />
+  <text x="648" y="128.9090909090909" class="portLabel">b1</text>
+  <rect x="639.5" y="144.5909090909091" width="5" height="5" class="port" />
+  <text x="648" y="147.0909090909091" class="portLabel">b2</text>
+  <rect x="639.5" y="108.22727272727272" width="5" height="5" class="port" />
+  <text x="648" y="110.72727272727272" class="portLabel">b3</text>
+  <rect x="709.5" y="195.5" width="5" height="5" class="port" />
+  <text x="691" y="198" class="portLabel">y0</text>
+  <rect x="709.5" y="75.5" width="5" height="5" class="port" />
+  <text x="691" y="78" class="portLabel">y1</text>
+  <rect x="709.5" y="155.5" width="5" height="5" class="port" />
+  <text x="691" y="158" class="portLabel">y2</text>
+  <rect x="709.5" y="115.5" width="5" height="5" class="port" />
+  <text x="691" y="118" class="portLabel">y3</text>
+  <rect x="642" y="617" width="70" height="200" class="module" />
+  <text x="642" y="612" class="moduleLabel">74x86_38</text>
+  <rect x="639.5" y="741.7727272727273" width="5" height="5" class="port" />
+  <text x="648" y="744.2727272727273" class="portLabel">gnd</text>
+  <rect x="639.5" y="759.9545454545455" width="5" height="5" class="port" />
+  <text x="648" y="762.4545454545455" class="portLabel">vcc</text>
+  <rect x="639.5" y="796.3181818181819" width="5" height="5" class="port" />
+  <text x="648" y="798.8181818181819" class="portLabel">a0</text>
+  <rect x="639.5" y="632.6818181818181" width="5" height="5" class="port" />
+  <text x="648" y="635.1818181818181" class="portLabel">a1</text>
+  <rect x="639.5" y="778.1363636363636" width="5" height="5" class="port" />
+  <text x="648" y="780.6363636363636" class="portLabel">a2</text>
+  <rect x="639.5" y="650.8636363636364" width="5" height="5" class="port" />
+  <text x="648" y="653.3636363636364" class="portLabel">a3</text>
+  <rect x="639.5" y="723.5909090909091" width="5" height="5" class="port" />
+  <text x="648" y="726.0909090909091" class="portLabel">b0</text>
+  <rect x="639.5" y="669.0454545454545" width="5" height="5" class="port" />
+  <text x="648" y="671.5454545454545" class="portLabel">b1</text>
+  <rect x="639.5" y="705.4090909090909" width="5" height="5" class="port" />
+  <text x="648" y="707.9090909090909" class="portLabel">b2</text>
+  <rect x="639.5" y="687.2272727272727" width="5" height="5" class="port" />
+  <text x="648" y="689.7272727272727" class="portLabel">b3</text>
+  <rect x="709.5" y="654.5" width="5" height="5" class="port" />
+  <text x="691" y="657" class="portLabel">y0</text>
+  <rect x="709.5" y="734.5" width="5" height="5" class="port" />
+  <text x="691" y="737" class="portLabel">y1</text>
+  <rect x="709.5" y="694.5" width="5" height="5" class="port" />
+  <text x="691" y="697" class="portLabel">y2</text>
+  <rect x="709.5" y="774.5" width="5" height="5" class="port" />
+  <text x="691" y="777" class="portLabel">y3</text>
+  <rect x="812" y="218.090909090909" width="70" height="200" class="module" />
+  <text x="812" y="213.090909090909" class="moduleLabel">74x08_43</text>
+  <rect x="809.5" y="379.22727272727263" width="5" height="5" class="port" />
+  <text x="818" y="381.72727272727263" class="portLabel">gnd</text>
+  <rect x="809.5" y="397.4090909090909" width="5" height="5" class="port" />
+  <text x="818" y="399.9090909090909" class="portLabel">vcc</text>
+  <rect x="809.5" y="288.31818181818176" width="5" height="5" class="port" />
+  <text x="818" y="290.81818181818176" class="portLabel">a0</text>
+  <rect x="809.5" y="251.95454545454538" width="5" height="5" class="port" />
+  <text x="818" y="254.45454545454538" class="portLabel">a1</text>
+  <rect x="809.5" y="306.4999999999999" width="5" height="5" class="port" />
+  <text x="818" y="308.9999999999999" class="portLabel">a2</text>
+  <rect x="809.5" y="270.13636363636357" width="5" height="5" class="port" />
+  <text x="818" y="272.63636363636357" class="portLabel">a3</text>
+  <rect x="809.5" y="361.0454545454545" width="5" height="5" class="port" />
+  <text x="818" y="363.5454545454545" class="portLabel">b0</text>
+  <rect x="809.5" y="233.7727272727272" width="5" height="5" class="port" />
+  <text x="818" y="236.2727272727272" class="portLabel">b1</text>
+  <rect x="809.5" y="324.68181818181813" width="5" height="5" class="port" />
+  <text x="818" y="327.18181818181813" class="portLabel">b2</text>
+  <rect x="809.5" y="342.86363636363626" width="5" height="5" class="port" />
+  <text x="818" y="345.36363636363626" class="portLabel">b3</text>
+  <rect x="879.5" y="375.590909090909" width="5" height="5" class="port" />
+  <text x="861" y="378.090909090909" class="portLabel">y0</text>
+  <rect x="879.5" y="295.590909090909" width="5" height="5" class="port" />
+  <text x="861" y="298.090909090909" class="portLabel">y1</text>
+  <rect x="879.5" y="255.590909090909" width="5" height="5" class="port" />
+  <text x="861" y="258.090909090909" class="portLabel">y2</text>
+  <rect x="879.5" y="335.590909090909" width="5" height="5" class="port" />
+  <text x="861" y="338.090909090909" class="portLabel">y3</text>
+  <rect x="812" y="490.090909090909" width="70" height="200" class="module" />
+  <text x="812" y="485.090909090909" class="moduleLabel">74x08_48</text>
+  <rect x="809.5" y="651.2272727272726" width="5" height="5" class="port" />
+  <text x="818" y="653.7272727272726" class="portLabel">gnd</text>
+  <rect x="809.5" y="669.4090909090909" width="5" height="5" class="port" />
+  <text x="818" y="671.9090909090909" class="portLabel">vcc</text>
+  <rect x="809.5" y="523.9545454545454" width="5" height="5" class="port" />
+  <text x="818" y="526.4545454545454" class="portLabel">a0</text>
+  <rect x="809.5" y="596.6818181818181" width="5" height="5" class="port" />
+  <text x="818" y="599.1818181818181" class="portLabel">a1</text>
+  <rect x="809.5" y="542.1363636363635" width="5" height="5" class="port" />
+  <text x="818" y="544.6363636363635" class="portLabel">a2</text>
+  <rect x="809.5" y="614.8636363636363" width="5" height="5" class="port" />
+  <text x="818" y="617.3636363636363" class="portLabel">a3</text>
+  <rect x="809.5" y="560.3181818181818" width="5" height="5" class="port" />
+  <text x="818" y="562.8181818181818" class="portLabel">b0</text>
+  <rect x="809.5" y="505.7727272727272" width="5" height="5" class="port" />
+  <text x="818" y="508.2727272727272" class="portLabel">b1</text>
+  <rect x="809.5" y="578.4999999999999" width="5" height="5" class="port" />
+  <text x="818" y="580.9999999999999" class="portLabel">b2</text>
+  <rect x="809.5" y="633.0454545454545" width="5" height="5" class="port" />
+  <text x="818" y="635.5454545454545" class="portLabel">b3</text>
+  <rect x="879.5" y="607.590909090909" width="5" height="5" class="port" />
+  <text x="861" y="610.090909090909" class="portLabel">y0</text>
+  <rect x="879.5" y="527.590909090909" width="5" height="5" class="port" />
+  <text x="861" y="530.090909090909" class="portLabel">y1</text>
+  <rect x="879.5" y="647.590909090909" width="5" height="5" class="port" />
+  <text x="861" y="650.090909090909" class="portLabel">y2</text>
+  <rect x="879.5" y="567.590909090909" width="5" height="5" class="port" />
+  <text x="861" y="570.090909090909" class="portLabel">y3</text>
+  <rect x="962" y="239.90909090909076" width="70" height="200" class="module" />
+  <text x="962" y="234.90909090909076" class="moduleLabel">74x32_53</text>
+  <rect x="959.5" y="401.0454545454544" width="5" height="5" class="port" />
+  <text x="968" y="403.5454545454544" class="portLabel">gnd</text>
+  <rect x="959.5" y="419.22727272727263" width="5" height="5" class="port" />
+  <text x="968" y="421.72727272727263" class="portLabel">vcc</text>
+  <rect x="959.5" y="328.31818181818164" width="5" height="5" class="port" />
+  <text x="968" y="330.81818181818164" class="portLabel">a0</text>
+  <rect x="959.5" y="346.4999999999999" width="5" height="5" class="port" />
+  <text x="968" y="348.9999999999999" class="portLabel">a1</text>
+  <rect x="959.5" y="273.77272727272714" width="5" height="5" class="port" />
+  <text x="968" y="276.27272727272714" class="portLabel">a2</text>
+  <rect x="959.5" y="291.9545454545453" width="5" height="5" class="port" />
+  <text x="968" y="294.4545454545453" class="portLabel">a3</text>
+  <rect x="959.5" y="364.681818181818" width="5" height="5" class="port" />
+  <text x="968" y="367.181818181818" class="portLabel">b0</text>
+  <rect x="959.5" y="382.86363636363626" width="5" height="5" class="port" />
+  <text x="968" y="385.36363636363626" class="portLabel">b1</text>
+  <rect x="959.5" y="310.1363636363635" width="5" height="5" class="port" />
+  <text x="968" y="312.6363636363635" class="portLabel">b2</text>
+  <rect x="959.5" y="255.59090909090895" width="5" height="5" class="port" />
+  <text x="968" y="258.09090909090895" class="portLabel">b3</text>
+  <rect x="1029.5" y="317.40909090909076" width="5" height="5" class="port" />
+  <text x="1011" y="319.90909090909076" class="portLabel">y0</text>
+  <rect x="1029.5" y="397.40909090909076" width="5" height="5" class="port" />
+  <text x="1011" y="399.90909090909076" class="portLabel">y1</text>
+  <rect x="1029.5" y="357.40909090909076" width="5" height="5" class="port" />
+  <text x="1011" y="359.90909090909076" class="portLabel">y2</text>
+  <rect x="1029.5" y="277.40909090909076" width="5" height="5" class="port" />
+  <text x="1011" y="279.90909090909076" class="portLabel">y3</text>
+  <line x1="522" y1="376" x2="542" y2="376" class="wire source-net-pins8_4 target-net-y0_53" />
+  <line x1="542" y1="376" x2="542" y2="12" class="wire source-net-pins8_4 target-net-y0_53" />
+  <line x1="542" y1="12" x2="1052" y2="12" class="wire source-net-pins8_4 target-net-y0_53" />
+  <line x1="1052" y1="12" x2="1052" y2="319.90909090909076" class="wire source-net-pins8_4 target-net-y0_53" />
+  <line x1="1052" y1="319.90909090909076" x2="1032" y2="319.90909090909076" class="wire source-net-pins8_4 target-net-y0_53" />
+  <line x1="522" y1="484" x2="602" y2="484" class="wire source-net-pins7_4 target-net-y0_38" />
+  <line x1="602" y1="484" x2="602" y2="602" class="wire source-net-pins7_4 target-net-y0_38" />
+  <line x1="602" y1="602" x2="742" y2="602" class="wire source-net-pins7_4 target-net-y0_38" />
+  <line x1="742" y1="602" x2="742" y2="657" class="wire source-net-pins7_4 target-net-y0_38" />
+  <line x1="742" y1="657" x2="712" y2="657" class="wire source-net-pins7_4 target-net-y0_38" />
+  <line x1="522" y1="466" x2="612" y2="466" class="wire source-net-pins6_4 target-net-y2_38" />
+  <line x1="612" y1="466" x2="612" y2="592" class="wire source-net-pins6_4 target-net-y2_38" />
+  <line x1="612" y1="592" x2="752" y2="592" class="wire source-net-pins6_4 target-net-y2_38" />
+  <line x1="752" y1="592" x2="752" y2="697" class="wire source-net-pins6_4 target-net-y2_38" />
+  <line x1="752" y1="697" x2="712" y2="697" class="wire source-net-pins6_4 target-net-y2_38" />
+  <line x1="522" y1="412" x2="562" y2="412" class="wire source-net-pins5_4 target-net-y0_33" />
+  <line x1="562" y1="412" x2="562" y2="278" class="wire source-net-pins5_4 target-net-y0_33" />
+  <line x1="562" y1="278" x2="742" y2="278" class="wire source-net-pins5_4 target-net-y0_33" />
+  <line x1="742" y1="278" x2="742" y2="198" class="wire source-net-pins5_4 target-net-y0_33" />
+  <line x1="742" y1="198" x2="712" y2="198" class="wire source-net-pins5_4 target-net-y0_33" />
+  <line x1="522" y1="430" x2="572" y2="430" class="wire source-net-pins4_4 target-net-y2_33" />
+  <line x1="572" y1="430" x2="572" y2="288" class="wire source-net-pins4_4 target-net-y2_33" />
+  <line x1="572" y1="288" x2="752" y2="288" class="wire source-net-pins4_4 target-net-y2_33" />
+  <line x1="752" y1="288" x2="752" y2="158" class="wire source-net-pins4_4 target-net-y2_33" />
+  <line x1="752" y1="158" x2="712" y2="158" class="wire source-net-pins4_4 target-net-y2_33" />
+  <line x1="522" y1="502" x2="592" y2="502" class="wire source-net-pins3_4 target-net-y0_12" />
+  <line x1="592" y1="502" x2="592" y2="1444.5454545454545" class="wire source-net-pins3_4 target-net-y0_12" />
+  <line x1="592" y1="1444.5454545454545" x2="742" y2="1444.5454545454545" class="wire source-net-pins3_4 target-net-y0_12" />
+  <line x1="742" y1="1444.5454545454545" x2="742" y2="1520.5454545454545" class="wire source-net-pins3_4 target-net-y0_12" />
+  <line x1="742" y1="1520.5454545454545" x2="712" y2="1520.5454545454545" class="wire source-net-pins3_4 target-net-y0_12" />
+  <line x1="522" y1="520" x2="572" y2="520" class="wire source-net-pins2_4 target-net-y2_12" />
+  <line x1="572" y1="520" x2="572" y2="1454.5454545454545" class="wire source-net-pins2_4 target-net-y2_12" />
+  <line x1="572" y1="1454.5454545454545" x2="752" y2="1454.5454545454545" class="wire source-net-pins2_4 target-net-y2_12" />
+  <line x1="752" y1="1454.5454545454545" x2="752" y2="1640.5454545454545" class="wire source-net-pins2_4 target-net-y2_12" />
+  <line x1="752" y1="1640.5454545454545" x2="712" y2="1640.5454545454545" class="wire source-net-pins2_4 target-net-y2_12" />
+  <line x1="522" y1="394" x2="552" y2="394" class="wire source-net-pins1_4 target-net-y0_7" />
+  <line x1="552" y1="394" x2="552" y2="268" class="wire source-net-pins1_4 target-net-y0_7" />
+  <line x1="552" y1="268" x2="772" y2="268" class="wire source-net-pins1_4 target-net-y0_7" />
+  <line x1="772" y1="268" x2="772" y2="1066" class="wire source-net-pins1_4 target-net-y0_7" />
+  <line x1="772" y1="1066" x2="712" y2="1066" class="wire source-net-pins1_4 target-net-y0_7" />
+  <line x1="522" y1="448" x2="762" y2="448" class="wire source-net-pins0_4 target-net-y2_7" />
+  <line x1="762" y1="448" x2="762" y2="1026" class="wire source-net-pins0_4 target-net-y2_7" />
+  <line x1="762" y1="1026" x2="712" y2="1026" class="wire source-net-pins0_4 target-net-y2_7" />
+  <line x1="122" y1="1517.7171717171718" x2="222" y2="1517.7171717171718" class="wire source-net-pins0_2 target-net-a3_7" />
+  <line x1="222" y1="1517.7171717171718" x2="222" y2="949.5454545454545" class="wire source-net-pins0_2 target-net-a3_7" />
+  <line x1="222" y1="949.5454545454545" x2="602" y2="949.5454545454545" class="wire source-net-pins0_2 target-net-a3_7" />
+  <line x1="602" y1="949.5454545454545" x2="602" y2="942.3636363636364" class="wire source-net-pins0_2 target-net-a3_7" />
+  <line x1="602" y1="942.3636363636364" x2="642" y2="942.3636363636364" class="wire source-net-pins0_2 target-net-a3_7" />
+  <line x1="122" y1="1685.989898989899" x2="232" y2="1685.989898989899" class="wire source-net-pins0_3 target-net-b3_7" />
+  <line x1="232" y1="1685.989898989899" x2="232" y2="960.5454545454545" class="wire source-net-pins0_3 target-net-b3_7" />
+  <line x1="232" y1="960.5454545454545" x2="642" y2="960.5454545454545" class="wire source-net-pins0_3 target-net-b3_7" />
+  <line x1="712" y1="946" x2="732" y2="946" class="wire source-net-y3_7 target-net-a2_7" />
+  <line x1="732" y1="946" x2="732" y2="1126" class="wire source-net-y3_7 target-net-a2_7" />
+  <line x1="732" y1="1126" x2="622" y2="1126" class="wire source-net-y3_7 target-net-a2_7" />
+  <line x1="622" y1="1126" x2="622" y2="1069.6363636363635" class="wire source-net-y3_7 target-net-a2_7" />
+  <line x1="622" y1="1069.6363636363635" x2="642" y2="1069.6363636363637" class="wire source-net-y3_7 target-net-a2_7" />
+  <line x1="122" y1="1499.939393939394" x2="212" y2="1499.939393939394" class="wire source-net-pins1_2 target-net-a1_7" />
+  <line x1="212" y1="1499.939393939394" x2="212" y2="938.5454545454545" class="wire source-net-pins1_2 target-net-a1_7" />
+  <line x1="212" y1="938.5454545454545" x2="532" y2="938.5454545454545" class="wire source-net-pins1_2 target-net-a1_7" />
+  <line x1="532" y1="938.5454545454545" x2="532" y2="924.1818181818181" class="wire source-net-pins1_2 target-net-a1_7" />
+  <line x1="532" y1="924.1818181818181" x2="642" y2="924.1818181818181" class="wire source-net-pins1_2 target-net-a1_7" />
+  <line x1="122" y1="1703.767676767677" x2="242" y2="1703.7676767676767" class="wire source-net-pins1_3 target-net-b1_7" />
+  <line x1="242" y1="1703.7676767676767" x2="242" y2="971.5454545454545" class="wire source-net-pins1_3 target-net-b1_7" />
+  <line x1="242" y1="971.5454545454545" x2="602" y2="971.5454545454545" class="wire source-net-pins1_3 target-net-b1_7" />
+  <line x1="602" y1="971.5454545454545" x2="602" y2="978.7272727272727" class="wire source-net-pins1_3 target-net-b1_7" />
+  <line x1="602" y1="978.7272727272727" x2="642" y2="978.7272727272727" class="wire source-net-pins1_3 target-net-b1_7" />
+  <line x1="712" y1="986" x2="722" y2="986" class="wire source-net-y1_7 target-net-a0_7" />
+  <line x1="722" y1="986" x2="722" y2="1116" class="wire source-net-y1_7 target-net-a0_7" />
+  <line x1="722" y1="1116" x2="632" y2="1116" class="wire source-net-y1_7 target-net-a0_7" />
+  <line x1="632" y1="1116" x2="632" y2="1087.818181818182" class="wire source-net-y1_7 target-net-a0_7" />
+  <line x1="632" y1="1087.818181818182" x2="642" y2="1087.8181818181818" class="wire source-net-y1_7 target-net-a0_7" />
+  <line x1="506.61538461538464" y1="1252.5454545454545" x2="532" y2="1252.5454545454545" class="wire source-net-y3_27 target-net-b0_7" />
+  <line x1="532" y1="1252.5454545454545" x2="532" y2="996.9090909090909" class="wire source-net-y3_27 target-net-b0_7" />
+  <line x1="532" y1="996.9090909090909" x2="642" y2="996.9090909090909" class="wire source-net-y3_27 target-net-b0_7" />
+  <line x1="122" y1="1553.2727272727273" x2="642" y2="1553.2727272727273" class="wire source-net-pins2_2 target-net-a3_12" />
+  <line x1="122" y1="1721.5454545454545" x2="252" y2="1721.5454545454545" class="wire source-net-pins2_3 target-net-b3_12" />
+  <line x1="252" y1="1721.5454545454545" x2="252" y2="1699.5454545454545" class="wire source-net-pins2_3 target-net-b3_12" />
+  <line x1="252" y1="1699.5454545454545" x2="532" y2="1699.5454545454545" class="wire source-net-pins2_3 target-net-b3_12" />
+  <line x1="532" y1="1699.5454545454545" x2="532" y2="1571.4545454545455" class="wire source-net-pins2_3 target-net-b3_12" />
+  <line x1="532" y1="1571.4545454545455" x2="642" y2="1571.4545454545455" class="wire source-net-pins2_3 target-net-b3_12" />
+  <circle cx="252" cy="1721.5454545454545" r="2" fill="white" class="junction" />
+  <line x1="712" y1="1600.5454545454545" x2="732" y2="1600.5454545454545" class="wire source-net-y3_12 target-net-a2_12" />
+  <line x1="732" y1="1600.5454545454545" x2="732" y2="1700.5454545454545" class="wire source-net-y3_12 target-net-a2_12" />
+  <line x1="732" y1="1700.5454545454545" x2="622" y2="1700.5454545454545" class="wire source-net-y3_12 target-net-a2_12" />
+  <line x1="622" y1="1700.5454545454545" x2="622" y2="1644.1818181818182" class="wire source-net-y3_12 target-net-a2_12" />
+  <line x1="622" y1="1644.1818181818182" x2="642" y2="1644.1818181818182" class="wire source-net-y3_12 target-net-a2_12" />
+  <line x1="506.61538461538464" y1="1332.5454545454545" x2="562" y2="1332.5454545454545" class="wire source-net-y2_27 target-net-b2_12" />
+  <line x1="562" y1="1332.5454545454545" x2="562" y2="1498.7272727272727" class="wire source-net-y2_27 target-net-b2_12" />
+  <line x1="562" y1="1498.7272727272727" x2="642" y2="1498.7272727272727" class="wire source-net-y2_27 target-net-b2_12" />
+  <line x1="122" y1="1535.4949494949494" x2="562" y2="1535.4949494949494" class="wire source-net-pins3_2 target-net-a1_12" />
+  <line x1="562" y1="1535.4949494949494" x2="562" y2="1535.090909090909" class="wire source-net-pins3_2 target-net-a1_12" />
+  <line x1="562" y1="1535.090909090909" x2="642" y2="1535.090909090909" class="wire source-net-pins3_2 target-net-a1_12" />
+  <line x1="122" y1="1739.3232323232323" x2="262" y2="1739.3232323232323" class="wire source-net-pins3_3 target-net-b1_12" />
+  <line x1="262" y1="1739.3232323232323" x2="262" y2="1710.5454545454545" class="wire source-net-pins3_3 target-net-b1_12" />
+  <line x1="262" y1="1710.5454545454545" x2="542" y2="1710.5454545454545" class="wire source-net-pins3_3 target-net-b1_12" />
+  <line x1="542" y1="1710.5454545454545" x2="542" y2="1589.6363636363637" class="wire source-net-pins3_3 target-net-b1_12" />
+  <line x1="542" y1="1589.6363636363637" x2="642" y2="1589.6363636363635" class="wire source-net-pins3_3 target-net-b1_12" />
+  <circle cx="262" cy="1739.3232323232323" r="2" fill="white" class="junction" />
+  <line x1="712" y1="1560.5454545454545" x2="722" y2="1560.5454545454545" class="wire source-net-y1_12 target-net-a0_12" />
+  <line x1="722" y1="1560.5454545454545" x2="722" y2="1690.5454545454545" class="wire source-net-y1_12 target-net-a0_12" />
+  <line x1="722" y1="1690.5454545454545" x2="632" y2="1690.5454545454545" class="wire source-net-y1_12 target-net-a0_12" />
+  <line x1="632" y1="1690.5454545454545" x2="632" y2="1662.3636363636365" class="wire source-net-y1_12 target-net-a0_12" />
+  <line x1="632" y1="1662.3636363636365" x2="642" y2="1662.3636363636363" class="wire source-net-y1_12 target-net-a0_12" />
+  <line x1="506.61538461538464" y1="1372.5454545454545" x2="552" y2="1372.5454545454545" class="wire source-net-y1_27 target-net-b0_12" />
+  <line x1="552" y1="1372.5454545454545" x2="552" y2="1516.909090909091" class="wire source-net-y1_27 target-net-b0_12" />
+  <line x1="552" y1="1516.909090909091" x2="642" y2="1516.9090909090908" class="wire source-net-y1_27 target-net-b0_12" />
+  <circle cx="552" cy="1516.909090909091" r="2" fill="white" class="junction" />
+  <line x1="712" y1="946" x2="742" y2="946" class="wire source-net-y3_7 target-net-a3_17" />
+  <line x1="742" y1="946" x2="742" y2="879" class="wire source-net-y3_7 target-net-a3_17" />
+  <line x1="742" y1="879" x2="262" y2="879" class="wire source-net-y3_7 target-net-a3_17" />
+  <line x1="262" y1="879" x2="262" y2="1005.7272727272726" class="wire source-net-y3_7 target-net-a3_17" />
+  <line x1="262" y1="1005.7272727272726" x2="272" y2="1005.7272727272726" class="wire source-net-y3_7 target-net-a3_17" />
+  <line x1="122" y1="1517.7171717171718" x2="222" y2="1517.7171717171718" class="wire source-net-pins0_2 target-net-a2_17" />
+  <line x1="222" y1="1517.7171717171718" x2="222" y2="1060.2727272727273" class="wire source-net-pins0_2 target-net-a2_17" />
+  <line x1="222" y1="1060.2727272727273" x2="272" y2="1060.2727272727273" class="wire source-net-pins0_2 target-net-a2_17" />
+  <circle cx="222" cy="1060.2727272727273" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1685.989898989899" x2="232" y2="1685.989898989899" class="wire source-net-pins0_3 target-net-b2_17" />
+  <line x1="232" y1="1685.989898989899" x2="232" y2="1078.4545454545455" class="wire source-net-pins0_3 target-net-b2_17" />
+  <line x1="232" y1="1078.4545454545455" x2="272" y2="1078.4545454545455" class="wire source-net-pins0_3 target-net-b2_17" />
+  <circle cx="232" cy="1078.4545454545455" r="2" fill="white" class="junction" />
+  <line x1="712" y1="986" x2="752" y2="986" class="wire source-net-y1_7 target-net-a1_17" />
+  <line x1="752" y1="986" x2="752" y2="868" class="wire source-net-y1_7 target-net-a1_17" />
+  <line x1="752" y1="868" x2="252" y2="868" class="wire source-net-y1_7 target-net-a1_17" />
+  <line x1="252" y1="868" x2="252" y2="1023.9090909090909" class="wire source-net-y1_7 target-net-a1_17" />
+  <line x1="252" y1="1023.9090909090909" x2="272" y2="1023.9090909090909" class="wire source-net-y1_7 target-net-a1_17" />
+  <line x1="506.61538461538464" y1="1252.5454545454545" x2="532" y2="1252.5454545454545" class="wire source-net-y3_27 target-net-b1_17" />
+  <line x1="532" y1="1252.5454545454545" x2="532" y2="1197.5454545454545" class="wire source-net-y3_27 target-net-b1_17" />
+  <line x1="532" y1="1197.5454545454545" x2="262" y2="1197.5454545454545" class="wire source-net-y3_27 target-net-b1_17" />
+  <line x1="262" y1="1197.5454545454545" x2="262" y2="1114.8181818181818" class="wire source-net-y3_27 target-net-b1_17" />
+  <line x1="262" y1="1114.8181818181818" x2="272" y2="1114.8181818181818" class="wire source-net-y3_27 target-net-b1_17" />
+  <circle cx="532" cy="1197.5454545454545" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1499.939393939394" x2="212" y2="1499.939393939394" class="wire source-net-pins1_2 target-net-a0_17" />
+  <line x1="212" y1="1499.939393939394" x2="212" y2="1042.090909090909" class="wire source-net-pins1_2 target-net-a0_17" />
+  <line x1="212" y1="1042.090909090909" x2="272" y2="1042.090909090909" class="wire source-net-pins1_2 target-net-a0_17" />
+  <circle cx="212" cy="1042.090909090909" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1703.767676767677" x2="242" y2="1703.7676767676767" class="wire source-net-pins1_3 target-net-b0_17" />
+  <line x1="242" y1="1703.7676767676767" x2="242" y2="1096.6363636363635" class="wire source-net-pins1_3 target-net-b0_17" />
+  <line x1="242" y1="1096.6363636363635" x2="272" y2="1096.6363636363635" class="wire source-net-pins1_3 target-net-b0_17" />
+  <circle cx="242" cy="1096.6363636363635" r="2" fill="white" class="junction" />
+  <line x1="712" y1="1600.5454545454545" x2="762" y2="1600.5454545454545" class="wire source-net-y3_12 target-net-a3_22" />
+  <line x1="762" y1="1600.5454545454545" x2="762" y2="1578.7272727272727" class="wire source-net-y3_12 target-net-a3_22" />
+  <line x1="762" y1="1578.7272727272727" x2="812" y2="1578.7272727272727" class="wire source-net-y3_12 target-net-a3_22" />
+  <line x1="506.61538461538464" y1="1332.5454545454545" x2="562" y2="1332.5454545454545" class="wire source-net-y2_27 target-net-b3_22" />
+  <line x1="562" y1="1332.5454545454545" x2="562" y2="1464.5454545454545" class="wire source-net-y2_27 target-net-b3_22" />
+  <line x1="562" y1="1464.5454545454545" x2="772" y2="1464.5454545454545" class="wire source-net-y2_27 target-net-b3_22" />
+  <line x1="772" y1="1464.5454545454545" x2="772" y2="1596.909090909091" class="wire source-net-y2_27 target-net-b3_22" />
+  <line x1="772" y1="1596.909090909091" x2="812" y2="1596.909090909091" class="wire source-net-y2_27 target-net-b3_22" />
+  <circle cx="562" cy="1464.5454545454545" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1553.2727272727273" x2="262" y2="1553.2727272727273" class="wire source-net-pins2_2 target-net-a2_22" />
+  <line x1="262" y1="1553.2727272727273" x2="262" y2="1433.5454545454545" class="wire source-net-pins2_2 target-net-a2_22" />
+  <line x1="262" y1="1433.5454545454545" x2="782" y2="1433.5454545454545" class="wire source-net-pins2_2 target-net-a2_22" />
+  <line x1="782" y1="1433.5454545454545" x2="782" y2="1542.3636363636365" class="wire source-net-pins2_2 target-net-a2_22" />
+  <line x1="782" y1="1542.3636363636365" x2="812" y2="1542.3636363636363" class="wire source-net-pins2_2 target-net-a2_22" />
+  <circle cx="262" cy="1553.2727272727273" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1721.5454545454545" x2="772" y2="1721.5454545454545" class="wire source-net-pins2_3 target-net-b2_22" />
+  <line x1="772" y1="1721.5454545454545" x2="772" y2="1633.2727272727273" class="wire source-net-pins2_3 target-net-b2_22" />
+  <line x1="772" y1="1633.2727272727273" x2="812" y2="1633.2727272727273" class="wire source-net-pins2_3 target-net-b2_22" />
+  <line x1="712" y1="1560.5454545454545" x2="812" y2="1560.5454545454545" class="wire source-net-y1_12 target-net-a1_22" />
+  <line x1="506.61538461538464" y1="1372.5454545454545" x2="552" y2="1372.5454545454545" class="wire source-net-y1_27 target-net-b1_22" />
+  <line x1="552" y1="1372.5454545454545" x2="552" y2="1710.5454545454545" class="wire source-net-y1_27 target-net-b1_22" />
+  <line x1="552" y1="1710.5454545454545" x2="762" y2="1710.5454545454545" class="wire source-net-y1_27 target-net-b1_22" />
+  <line x1="762" y1="1710.5454545454545" x2="762" y2="1615.090909090909" class="wire source-net-y1_27 target-net-b1_22" />
+  <line x1="762" y1="1615.090909090909" x2="812" y2="1615.090909090909" class="wire source-net-y1_27 target-net-b1_22" />
+  <line x1="122" y1="1535.4949494949494" x2="252" y2="1535.4949494949494" class="wire source-net-pins3_2 target-net-a0_22" />
+  <line x1="252" y1="1535.4949494949494" x2="252" y2="1422.5454545454545" class="wire source-net-pins3_2 target-net-a0_22" />
+  <line x1="252" y1="1422.5454545454545" x2="792" y2="1422.5454545454545" class="wire source-net-pins3_2 target-net-a0_22" />
+  <line x1="792" y1="1422.5454545454545" x2="792" y2="1524.1818181818182" class="wire source-net-pins3_2 target-net-a0_22" />
+  <line x1="792" y1="1524.1818181818182" x2="812" y2="1524.1818181818182" class="wire source-net-pins3_2 target-net-a0_22" />
+  <circle cx="252" cy="1535.4949494949494" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1739.3232323232323" x2="782" y2="1739.3232323232323" class="wire source-net-pins3_3 target-net-b0_22" />
+  <line x1="782" y1="1739.3232323232323" x2="782" y2="1651.4545454545455" class="wire source-net-pins3_3 target-net-b0_22" />
+  <line x1="782" y1="1651.4545454545455" x2="812" y2="1651.4545454545455" class="wire source-net-pins3_3 target-net-b0_22" />
+  <line x1="342" y1="1107.5454545454545" x2="362" y2="1107.5454545454545" class="wire source-net-y3_17 target-net-a3_27" />
+  <line x1="362" y1="1107.5454545454545" x2="362" y2="1303.4545454545455" class="wire source-net-y3_17 target-net-a3_27" />
+  <line x1="362" y1="1303.4545454545455" x2="436.61538461538464" y2="1303.4545454545455" class="wire source-net-y3_17 target-net-a3_27" />
+  <line x1="342" y1="1027.5454545454545" x2="382" y2="1027.5454545454545" class="wire source-net-y2_17 target-net-b3_27" />
+  <line x1="382" y1="1027.5454545454545" x2="382" y2="1267.090909090909" class="wire source-net-y2_17 target-net-b3_27" />
+  <line x1="382" y1="1267.090909090909" x2="436.61538461538464" y2="1267.090909090909" class="wire source-net-y2_17 target-net-b3_27" />
+  <line x1="342" y1="1067.5454545454545" x2="372" y2="1067.5454545454545" class="wire source-net-y1_17 target-net-a2_27" />
+  <line x1="372" y1="1067.5454545454545" x2="372" y2="1285.2727272727273" class="wire source-net-y1_17 target-net-a2_27" />
+  <line x1="372" y1="1285.2727272727273" x2="436.61538461538464" y2="1285.2727272727273" class="wire source-net-y1_17 target-net-a2_27" />
+  <line x1="342" y1="1147.5454545454545" x2="352" y2="1147.5454545454545" class="wire source-net-y0_17 target-net-b2_27" />
+  <line x1="352" y1="1147.5454545454545" x2="352" y2="1321.6363636363635" class="wire source-net-y0_17 target-net-b2_27" />
+  <line x1="352" y1="1321.6363636363635" x2="436.61538461538464" y2="1321.6363636363635" class="wire source-net-y0_17 target-net-b2_27" />
+  <line x1="882" y1="1586" x2="902" y2="1586" class="wire source-net-y3_22 target-net-a1_27" />
+  <line x1="902" y1="1586" x2="902" y2="890" class="wire source-net-y3_22 target-net-a1_27" />
+  <line x1="902" y1="890" x2="392" y2="890" class="wire source-net-y3_22 target-net-a1_27" />
+  <line x1="392" y1="890" x2="392" y2="1248.909090909091" class="wire source-net-y3_22 target-net-a1_27" />
+  <line x1="392" y1="1248.909090909091" x2="436.61538461538464" y2="1248.9090909090908" class="wire source-net-y3_22 target-net-a1_27" />
+  <line x1="882" y1="1626" x2="902" y2="1626" class="wire source-net-y2_22 target-net-b1_27" />
+  <line x1="902" y1="1626" x2="902" y2="1761.3232323232323" class="wire source-net-y2_22 target-net-b1_27" />
+  <line x1="902" y1="1761.3232323232323" x2="352" y2="1761.3232323232323" class="wire source-net-y2_22 target-net-b1_27" />
+  <line x1="352" y1="1761.3232323232323" x2="352" y2="1339.8181818181818" class="wire source-net-y2_22 target-net-b1_27" />
+  <line x1="352" y1="1339.8181818181818" x2="436.61538461538464" y2="1339.8181818181818" class="wire source-net-y2_22 target-net-b1_27" />
+  <line x1="882" y1="1666" x2="892" y2="1666" class="wire source-net-y1_22 target-net-a0_27" />
+  <line x1="892" y1="1666" x2="892" y2="1750.3232323232323" class="wire source-net-y1_22 target-net-a0_27" />
+  <line x1="892" y1="1750.3232323232323" x2="402" y2="1750.3232323232323" class="wire source-net-y1_22 target-net-a0_27" />
+  <line x1="402" y1="1750.3232323232323" x2="402" y2="1358" class="wire source-net-y1_22 target-net-a0_27" />
+  <line x1="402" y1="1358" x2="436.61538461538464" y2="1358" class="wire source-net-y1_22 target-net-a0_27" />
+  <line x1="882" y1="1546" x2="892" y2="1546" class="wire source-net-y0_22 target-net-b0_27" />
+  <line x1="892" y1="1546" x2="892" y2="1187.5454545454545" class="wire source-net-y0_22 target-net-b0_27" />
+  <line x1="892" y1="1187.5454545454545" x2="402" y2="1187.5454545454545" class="wire source-net-y0_22 target-net-b0_27" />
+  <line x1="402" y1="1187.5454545454545" x2="402" y2="1230.7272727272725" class="wire source-net-y0_22 target-net-b0_27" />
+  <line x1="402" y1="1230.7272727272725" x2="436.61538461538464" y2="1230.7272727272727" class="wire source-net-y0_22 target-net-b0_27" />
+  <line x1="122" y1="1446.6060606060607" x2="142" y2="1446.6060606060605" class="wire source-net-pins4_2 target-net-a3_33" />
+  <line x1="142" y1="1446.6060606060605" x2="142" y2="99.72727272727275" class="wire source-net-pins4_2 target-net-a3_33" />
+  <line x1="142" y1="99.72727272727275" x2="552" y2="99.72727272727275" class="wire source-net-pins4_2 target-net-a3_33" />
+  <line x1="552" y1="99.72727272727275" x2="552" y2="92.5454545454545" class="wire source-net-pins4_2 target-net-a3_33" />
+  <line x1="552" y1="92.5454545454545" x2="642" y2="92.54545454545453" class="wire source-net-pins4_2 target-net-a3_33" />
+  <line x1="122" y1="1614.878787878788" x2="152" y2="1614.878787878788" class="wire source-net-pins4_3 target-net-b3_33" />
+  <line x1="152" y1="1614.878787878788" x2="152" y2="110.72727272727275" class="wire source-net-pins4_3 target-net-b3_33" />
+  <line x1="152" y1="110.72727272727275" x2="642" y2="110.72727272727272" class="wire source-net-pins4_3 target-net-b3_33" />
+  <line x1="712" y1="118" x2="732" y2="118" class="wire source-net-y3_33 target-net-a2_33" />
+  <line x1="732" y1="118" x2="732" y2="258" class="wire source-net-y3_33 target-net-a2_33" />
+  <line x1="732" y1="258" x2="622" y2="258" class="wire source-net-y3_33 target-net-a2_33" />
+  <line x1="622" y1="258" x2="622" y2="201.63636363636374" class="wire source-net-y3_33 target-net-a2_33" />
+  <line x1="622" y1="201.63636363636374" x2="642" y2="201.63636363636365" class="wire source-net-y3_33 target-net-a2_33" />
+  <line x1="506.61538461538464" y1="1292.5454545454545" x2="582" y2="1292.5454545454545" class="wire source-net-y0_27 target-net-b2_33" />
+  <line x1="582" y1="1292.5454545454545" x2="582" y2="147.090909090909" class="wire source-net-y0_27 target-net-b2_33" />
+  <line x1="582" y1="147.090909090909" x2="642" y2="147.0909090909091" class="wire source-net-y0_27 target-net-b2_33" />
+  <line x1="122" y1="1428.828282828283" x2="132" y2="1428.828282828283" class="wire source-net-pins5_2 target-net-a1_33" />
+  <line x1="132" y1="1428.828282828283" x2="132" y2="88.72727272727275" class="wire source-net-pins5_2 target-net-a1_33" />
+  <line x1="132" y1="88.72727272727275" x2="532" y2="88.72727272727275" class="wire source-net-pins5_2 target-net-a1_33" />
+  <line x1="532" y1="88.72727272727275" x2="532" y2="74.36363636363626" class="wire source-net-pins5_2 target-net-a1_33" />
+  <line x1="532" y1="74.36363636363626" x2="642" y2="74.36363636363636" class="wire source-net-pins5_2 target-net-a1_33" />
+  <line x1="122" y1="1632.6565656565658" x2="162" y2="1632.6565656565658" class="wire source-net-pins5_3 target-net-b1_33" />
+  <line x1="162" y1="1632.6565656565658" x2="162" y2="287" class="wire source-net-pins5_3 target-net-b1_33" />
+  <line x1="162" y1="287" x2="532" y2="287" class="wire source-net-pins5_3 target-net-b1_33" />
+  <line x1="532" y1="287" x2="532" y2="128.909090909091" class="wire source-net-pins5_3 target-net-b1_33" />
+  <line x1="532" y1="128.909090909091" x2="642" y2="128.9090909090909" class="wire source-net-pins5_3 target-net-b1_33" />
+  <line x1="712" y1="78" x2="722" y2="78" class="wire source-net-y1_33 target-net-a0_33" />
+  <line x1="722" y1="78" x2="722" y2="248" class="wire source-net-y1_33 target-net-a0_33" />
+  <line x1="722" y1="248" x2="632" y2="248" class="wire source-net-y1_33 target-net-a0_33" />
+  <line x1="632" y1="248" x2="632" y2="219.81818181818176" class="wire source-net-y1_33 target-net-a0_33" />
+  <line x1="632" y1="219.81818181818176" x2="642" y2="219.81818181818184" class="wire source-net-y1_33 target-net-a0_33" />
+  <line x1="1032" y1="279.90909090909076" x2="1042" y2="279.90909090909076" class="wire source-net-y3_53 target-net-b0_33" />
+  <line x1="1042" y1="279.90909090909076" x2="1042" y2="23" class="wire source-net-y3_53 target-net-b0_33" />
+  <line x1="1042" y1="23" x2="612" y2="23" class="wire source-net-y3_53 target-net-b0_33" />
+  <line x1="612" y1="23" x2="612" y2="56.181818181818244" class="wire source-net-y3_53 target-net-b0_33" />
+  <line x1="612" y1="56.181818181818244" x2="642" y2="56.18181818181818" class="wire source-net-y3_53 target-net-b0_33" />
+  <line x1="122" y1="1482.1616161616162" x2="182" y2="1482.1616161616162" class="wire source-net-pins6_2 target-net-a3_38" />
+  <line x1="182" y1="1482.1616161616162" x2="182" y2="660.5454545454545" class="wire source-net-pins6_2 target-net-a3_38" />
+  <line x1="182" y1="660.5454545454545" x2="602" y2="660.5454545454545" class="wire source-net-pins6_2 target-net-a3_38" />
+  <line x1="602" y1="660.5454545454545" x2="602" y2="653.3636363636363" class="wire source-net-pins6_2 target-net-a3_38" />
+  <line x1="602" y1="653.3636363636363" x2="642" y2="653.3636363636364" class="wire source-net-pins6_2 target-net-a3_38" />
+  <circle cx="182" cy="660.5454545454545" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1668.2121212121212" x2="202" y2="1668.2121212121212" class="wire source-net-pins6_3 target-net-b3_38" />
+  <line x1="202" y1="1668.2121212121212" x2="202" y2="857" class="wire source-net-pins6_3 target-net-b3_38" />
+  <line x1="202" y1="857" x2="532" y2="857" class="wire source-net-pins6_3 target-net-b3_38" />
+  <line x1="532" y1="857" x2="532" y2="689.7272727272727" class="wire source-net-pins6_3 target-net-b3_38" />
+  <line x1="532" y1="689.7272727272727" x2="642" y2="689.7272727272727" class="wire source-net-pins6_3 target-net-b3_38" />
+  <circle cx="202" cy="857" r="2" fill="white" class="junction" />
+  <line x1="712" y1="777" x2="732" y2="777" class="wire source-net-y3_38 target-net-a2_38" />
+  <line x1="732" y1="777" x2="732" y2="837" class="wire source-net-y3_38 target-net-a2_38" />
+  <line x1="732" y1="837" x2="622" y2="837" class="wire source-net-y3_38 target-net-a2_38" />
+  <line x1="622" y1="837" x2="622" y2="780.6363636363636" class="wire source-net-y3_38 target-net-a2_38" />
+  <line x1="622" y1="780.6363636363636" x2="642" y2="780.6363636363636" class="wire source-net-y3_38 target-net-a2_38" />
+  <line x1="1032" y1="359.90909090909076" x2="1052" y2="359.90909090909076" class="wire source-net-y2_53 target-net-b2_38" />
+  <line x1="1052" y1="359.90909090909076" x2="1052" y2="858" class="wire source-net-y2_53 target-net-b2_38" />
+  <line x1="1052" y1="858" x2="602" y2="858" class="wire source-net-y2_53 target-net-b2_38" />
+  <line x1="602" y1="858" x2="602" y2="707.909090909091" class="wire source-net-y2_53 target-net-b2_38" />
+  <line x1="602" y1="707.909090909091" x2="642" y2="707.9090909090909" class="wire source-net-y2_53 target-net-b2_38" />
+  <line x1="122" y1="1464.3838383838383" x2="172" y2="1464.3838383838383" class="wire source-net-pins7_2 target-net-a1_38" />
+  <line x1="172" y1="1464.3838383838383" x2="172" y2="649.5454545454545" class="wire source-net-pins7_2 target-net-a1_38" />
+  <line x1="172" y1="649.5454545454545" x2="532" y2="649.5454545454545" class="wire source-net-pins7_2 target-net-a1_38" />
+  <line x1="532" y1="649.5454545454545" x2="532" y2="635.1818181818182" class="wire source-net-pins7_2 target-net-a1_38" />
+  <line x1="532" y1="635.1818181818182" x2="642" y2="635.1818181818181" class="wire source-net-pins7_2 target-net-a1_38" />
+  <circle cx="172" cy="649.5454545454545" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1650.4343434343434" x2="192" y2="1650.4343434343434" class="wire source-net-pins7_3 target-net-b1_38" />
+  <line x1="192" y1="1650.4343434343434" x2="192" y2="671.5454545454545" class="wire source-net-pins7_3 target-net-b1_38" />
+  <line x1="192" y1="671.5454545454545" x2="642" y2="671.5454545454545" class="wire source-net-pins7_3 target-net-b1_38" />
+  <circle cx="192" cy="671.5454545454545" r="2" fill="white" class="junction" />
+  <line x1="712" y1="737" x2="722" y2="737" class="wire source-net-y1_38 target-net-a0_38" />
+  <line x1="722" y1="737" x2="722" y2="827" class="wire source-net-y1_38 target-net-a0_38" />
+  <line x1="722" y1="827" x2="632" y2="827" class="wire source-net-y1_38 target-net-a0_38" />
+  <line x1="632" y1="827" x2="632" y2="798.8181818181819" class="wire source-net-y1_38 target-net-a0_38" />
+  <line x1="632" y1="798.8181818181819" x2="642" y2="798.8181818181819" class="wire source-net-y1_38 target-net-a0_38" />
+  <line x1="1032" y1="399.90909090909076" x2="1042" y2="399.90909090909076" class="wire source-net-y1_53 target-net-b0_38" />
+  <line x1="1042" y1="399.90909090909076" x2="1042" y2="847" class="wire source-net-y1_53 target-net-b0_38" />
+  <line x1="1042" y1="847" x2="612" y2="847" class="wire source-net-y1_53 target-net-b0_38" />
+  <line x1="612" y1="847" x2="612" y2="726.090909090909" class="wire source-net-y1_53 target-net-b0_38" />
+  <line x1="612" y1="726.090909090909" x2="642" y2="726.0909090909091" class="wire source-net-y1_53 target-net-b0_38" />
+  <line x1="712" y1="118" x2="782" y2="118" class="wire source-net-y3_33 target-net-a3_43" />
+  <line x1="782" y1="118" x2="782" y2="272.6363636363635" class="wire source-net-y3_33 target-net-a3_43" />
+  <line x1="782" y1="272.6363636363635" x2="812" y2="272.63636363636357" class="wire source-net-y3_33 target-net-a3_43" />
+  <line x1="506.61538461538464" y1="1292.5454545454545" x2="582" y2="1292.5454545454545" class="wire source-net-y0_27 target-net-b3_43" />
+  <line x1="582" y1="1292.5454545454545" x2="582" y2="331" class="wire source-net-y0_27 target-net-b3_43" />
+  <line x1="582" y1="331" x2="782" y2="331" class="wire source-net-y0_27 target-net-b3_43" />
+  <line x1="782" y1="331" x2="782" y2="345.36363636363626" class="wire source-net-y0_27 target-net-b3_43" />
+  <line x1="782" y1="345.36363636363626" x2="812" y2="345.36363636363626" class="wire source-net-y0_27 target-net-b3_43" />
+  <circle cx="582" cy="331" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1446.6060606060607" x2="142" y2="1446.6060606060605" class="wire source-net-pins4_2 target-net-a2_43" />
+  <line x1="142" y1="1446.6060606060605" x2="142" y2="309" class="wire source-net-pins4_2 target-net-a2_43" />
+  <line x1="142" y1="309" x2="812" y2="308.9999999999999" class="wire source-net-pins4_2 target-net-a2_43" />
+  <circle cx="142" cy="309" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1614.878787878788" x2="152" y2="1614.878787878788" class="wire source-net-pins4_3 target-net-b2_43" />
+  <line x1="152" y1="1614.878787878788" x2="152" y2="320" class="wire source-net-pins4_3 target-net-b2_43" />
+  <line x1="152" y1="320" x2="792" y2="320" class="wire source-net-pins4_3 target-net-b2_43" />
+  <line x1="792" y1="320" x2="792" y2="327.181818181818" class="wire source-net-pins4_3 target-net-b2_43" />
+  <line x1="792" y1="327.181818181818" x2="812" y2="327.18181818181813" class="wire source-net-pins4_3 target-net-b2_43" />
+  <circle cx="152" cy="320" r="2" fill="white" class="junction" />
+  <line x1="712" y1="78" x2="792" y2="78" class="wire source-net-y1_33 target-net-a1_43" />
+  <line x1="792" y1="78" x2="792" y2="254.45454545454527" class="wire source-net-y1_33 target-net-a1_43" />
+  <line x1="792" y1="254.45454545454527" x2="812" y2="254.45454545454538" class="wire source-net-y1_33 target-net-a1_43" />
+  <line x1="1032" y1="279.90909090909076" x2="1042" y2="279.90909090909076" class="wire source-net-y3_53 target-net-b1_43" />
+  <line x1="1042" y1="279.90909090909076" x2="1042" y2="23" class="wire source-net-y3_53 target-net-b1_43" />
+  <line x1="1042" y1="23" x2="802" y2="23" class="wire source-net-y3_53 target-net-b1_43" />
+  <line x1="802" y1="23" x2="802" y2="236.27272727272725" class="wire source-net-y3_53 target-net-b1_43" />
+  <line x1="802" y1="236.27272727272725" x2="812" y2="236.2727272727272" class="wire source-net-y3_53 target-net-b1_43" />
+  <circle cx="802" cy="23" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1428.828282828283" x2="132" y2="1428.828282828283" class="wire source-net-pins5_2 target-net-a0_43" />
+  <line x1="132" y1="1428.828282828283" x2="132" y2="298" class="wire source-net-pins5_2 target-net-a0_43" />
+  <line x1="132" y1="298" x2="782" y2="298" class="wire source-net-pins5_2 target-net-a0_43" />
+  <line x1="782" y1="298" x2="782" y2="290.81818181818176" class="wire source-net-pins5_2 target-net-a0_43" />
+  <line x1="782" y1="290.81818181818176" x2="812" y2="290.81818181818176" class="wire source-net-pins5_2 target-net-a0_43" />
+  <circle cx="132" cy="298" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1632.6565656565658" x2="162" y2="1632.6565656565658" class="wire source-net-pins5_3 target-net-b0_43" />
+  <line x1="162" y1="1632.6565656565658" x2="162" y2="342" class="wire source-net-pins5_3 target-net-b0_43" />
+  <line x1="162" y1="342" x2="742" y2="342" class="wire source-net-pins5_3 target-net-b0_43" />
+  <line x1="742" y1="342" x2="742" y2="363.5454545454545" class="wire source-net-pins5_3 target-net-b0_43" />
+  <line x1="742" y1="363.5454545454545" x2="812" y2="363.5454545454545" class="wire source-net-pins5_3 target-net-b0_43" />
+  <circle cx="162" cy="342" r="2" fill="white" class="junction" />
+  <line x1="712" y1="777" x2="792" y2="777" class="wire source-net-y3_38 target-net-a3_48" />
+  <line x1="792" y1="777" x2="792" y2="617.3636363636363" class="wire source-net-y3_38 target-net-a3_48" />
+  <line x1="792" y1="617.3636363636363" x2="812" y2="617.3636363636363" class="wire source-net-y3_38 target-net-a3_48" />
+  <line x1="1032" y1="359.90909090909076" x2="1052" y2="359.90909090909076" class="wire source-net-y2_53 target-net-b3_48" />
+  <line x1="1052" y1="359.90909090909076" x2="1052" y2="700.090909090909" class="wire source-net-y2_53 target-net-b3_48" />
+  <line x1="1052" y1="700.090909090909" x2="802" y2="700.090909090909" class="wire source-net-y2_53 target-net-b3_48" />
+  <line x1="802" y1="700.090909090909" x2="802" y2="635.5454545454545" class="wire source-net-y2_53 target-net-b3_48" />
+  <line x1="802" y1="635.5454545454545" x2="812" y2="635.5454545454545" class="wire source-net-y2_53 target-net-b3_48" />
+  <circle cx="1052" cy="700.090909090909" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1482.1616161616162" x2="182" y2="1482.1616161616162" class="wire source-net-pins6_2 target-net-a2_48" />
+  <line x1="182" y1="1482.1616161616162" x2="182" y2="559" class="wire source-net-pins6_2 target-net-a2_48" />
+  <line x1="182" y1="559" x2="782" y2="559" class="wire source-net-pins6_2 target-net-a2_48" />
+  <line x1="782" y1="559" x2="782" y2="544.6363636363635" class="wire source-net-pins6_2 target-net-a2_48" />
+  <line x1="782" y1="544.6363636363635" x2="812" y2="544.6363636363635" class="wire source-net-pins6_2 target-net-a2_48" />
+  <line x1="122" y1="1668.2121212121212" x2="202" y2="1668.2121212121212" class="wire source-net-pins6_3 target-net-b2_48" />
+  <line x1="202" y1="1668.2121212121212" x2="202" y2="581" class="wire source-net-pins6_3 target-net-b2_48" />
+  <line x1="202" y1="581" x2="812" y2="580.9999999999999" class="wire source-net-pins6_3 target-net-b2_48" />
+  <line x1="712" y1="737" x2="782" y2="737" class="wire source-net-y1_38 target-net-a1_48" />
+  <line x1="782" y1="737" x2="782" y2="599.181818181818" class="wire source-net-y1_38 target-net-a1_48" />
+  <line x1="782" y1="599.181818181818" x2="812" y2="599.1818181818181" class="wire source-net-y1_38 target-net-a1_48" />
+  <line x1="1032" y1="399.90909090909076" x2="1042" y2="399.90909090909076" class="wire source-net-y1_53 target-net-b1_48" />
+  <line x1="1042" y1="399.90909090909076" x2="1042" y2="475.090909090909" class="wire source-net-y1_53 target-net-b1_48" />
+  <line x1="1042" y1="475.090909090909" x2="802" y2="475.090909090909" class="wire source-net-y1_53 target-net-b1_48" />
+  <line x1="802" y1="475.090909090909" x2="802" y2="508.27272727272725" class="wire source-net-y1_53 target-net-b1_48" />
+  <line x1="802" y1="508.27272727272725" x2="812" y2="508.2727272727272" class="wire source-net-y1_53 target-net-b1_48" />
+  <circle cx="1042" cy="475.090909090909" r="2" fill="white" class="junction" />
+  <line x1="122" y1="1464.3838383838383" x2="172" y2="1464.3838383838383" class="wire source-net-pins7_2 target-net-a0_48" />
+  <line x1="172" y1="1464.3838383838383" x2="172" y2="548" class="wire source-net-pins7_2 target-net-a0_48" />
+  <line x1="172" y1="548" x2="742" y2="548" class="wire source-net-pins7_2 target-net-a0_48" />
+  <line x1="742" y1="548" x2="742" y2="526.4545454545453" class="wire source-net-pins7_2 target-net-a0_48" />
+  <line x1="742" y1="526.4545454545453" x2="812" y2="526.4545454545454" class="wire source-net-pins7_2 target-net-a0_48" />
+  <line x1="122" y1="1650.4343434343434" x2="192" y2="1650.4343434343434" class="wire source-net-pins7_3 target-net-b0_48" />
+  <line x1="192" y1="1650.4343434343434" x2="192" y2="570" class="wire source-net-pins7_3 target-net-b0_48" />
+  <line x1="192" y1="570" x2="792" y2="570" class="wire source-net-pins7_3 target-net-b0_48" />
+  <line x1="792" y1="570" x2="792" y2="562.8181818181818" class="wire source-net-pins7_3 target-net-b0_48" />
+  <line x1="792" y1="562.8181818181818" x2="812" y2="562.8181818181818" class="wire source-net-pins7_3 target-net-b0_48" />
+  <line x1="882" y1="338.090909090909" x2="902" y2="338.090909090909" class="wire source-net-y3_43 target-net-a3_53" />
+  <line x1="902" y1="338.090909090909" x2="902" y2="294.45454545454527" class="wire source-net-y3_43 target-net-a3_53" />
+  <line x1="902" y1="294.45454545454527" x2="962" y2="294.4545454545453" class="wire source-net-y3_43 target-net-a3_53" />
+  <line x1="882" y1="258.090909090909" x2="962" y2="258.09090909090895" class="wire source-net-y2_43 target-net-b3_53" />
+  <line x1="882" y1="298.090909090909" x2="892" y2="298.090909090909" class="wire source-net-y1_43 target-net-a2_53" />
+  <line x1="892" y1="298.090909090909" x2="892" y2="276.272727272727" class="wire source-net-y1_43 target-net-a2_53" />
+  <line x1="892" y1="276.272727272727" x2="962" y2="276.27272727272714" class="wire source-net-y1_43 target-net-a2_53" />
+  <line x1="882" y1="378.090909090909" x2="912" y2="378.090909090909" class="wire source-net-y0_43 target-net-b2_53" />
+  <line x1="912" y1="378.090909090909" x2="912" y2="312.6363636363635" class="wire source-net-y0_43 target-net-b2_53" />
+  <line x1="912" y1="312.6363636363635" x2="962" y2="312.6363636363635" class="wire source-net-y0_43 target-net-b2_53" />
+  <line x1="882" y1="570.090909090909" x2="932" y2="570.090909090909" class="wire source-net-y3_48 target-net-a1_53" />
+  <line x1="932" y1="570.090909090909" x2="932" y2="348.9999999999998" class="wire source-net-y3_48 target-net-a1_53" />
+  <line x1="932" y1="348.9999999999998" x2="962" y2="348.9999999999999" class="wire source-net-y3_48 target-net-a1_53" />
+  <line x1="882" y1="650.090909090909" x2="952" y2="650.090909090909" class="wire source-net-y2_48 target-net-b1_53" />
+  <line x1="952" y1="650.090909090909" x2="952" y2="385.36363636363626" class="wire source-net-y2_48 target-net-b1_53" />
+  <line x1="952" y1="385.36363636363626" x2="962" y2="385.36363636363626" class="wire source-net-y2_48 target-net-b1_53" />
+  <line x1="882" y1="530.090909090909" x2="922" y2="530.090909090909" class="wire source-net-y1_48 target-net-a0_53" />
+  <line x1="922" y1="530.090909090909" x2="922" y2="330.81818181818176" class="wire source-net-y1_48 target-net-a0_53" />
+  <line x1="922" y1="330.81818181818176" x2="962" y2="330.81818181818164" class="wire source-net-y1_48 target-net-a0_53" />
+  <line x1="882" y1="610.090909090909" x2="942" y2="610.090909090909" class="wire source-net-y0_48 target-net-b0_53" />
+  <line x1="942" y1="610.090909090909" x2="942" y2="367.181818181818" class="wire source-net-y0_48 target-net-b0_53" />
+  <line x1="942" y1="367.181818181818" x2="962" y2="367.181818181818" class="wire source-net-y0_48 target-net-b0_53" />
 </svg>

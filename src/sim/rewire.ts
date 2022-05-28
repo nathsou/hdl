@@ -11,7 +11,7 @@ const sourceNets = (circ: Circuit, nets: string[], keep: (node: ModuleNode) => b
     }
 
     if (inp.length === 0) {
-      return []; 
+      return [];
     }
 
     return aux(circ, inp[0]);
@@ -30,7 +30,7 @@ const targetNets = (circ: Circuit, nets: string[], keep: (node: ModuleNode) => b
     }
 
     if (out.length === 0) {
-      return []; 
+      return [];
     }
 
     return aux(circ, out[0]);
@@ -43,11 +43,11 @@ const filterOutputs = (circuit: Circuit, nets: string[], keep: (node: ModuleNode
   const aux = (circ: Circuit, net: string): ModuleId[] => {
     const { id, out } = circ.nets.get(net)!;
     const node = circ.modules.get(id)!;
-  
+
     if (keep(node)) {
       return [id];
     }
-  
+
     return filterOutputs(circ, out, keep);
   };
 
