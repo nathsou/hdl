@@ -307,7 +307,6 @@ export const ElkRenderer = {
 
     traverseNode(rootNode, { x: 0, y: 0 });
 
-    // ignore the top module
     return { shapes: shapes, dims: { width, height } };
   },
   renderSvg,

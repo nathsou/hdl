@@ -11,28 +11,22 @@ export type SymbolOccurence = KiCadConfig<any, any> & {
 };
 
 export type KiCadLibraries = {
-  symbols: Set<string>,
-  footprints: Set<string>,
   querySymbol: (lib: string, part: string) => Promise<SymbolDef>,
   queryFootprint: (lib: string, part: string) => Promise<void>,
 };
 
 const scanLibraries = async (libReader: KiCadLibReader): Promise<KiCadLibraries> => {
-  const symbolLibs = new Set(await libReader.listSymbolLibs());
-  const footprintLibs = new Set(await libReader.listFootprintLibs());
   const symbolsCache = createCache<string, Map<string, SymbolDef>>();
 
   return {
-    symbols: symbolLibs,
-    footprints: footprintLibs,
     async querySymbol(lib, part): Promise<SymbolDef> {
-      if (!symbolLibs.has(lib)) {
-        throw new Error(`Symbol library '${lib}.kicad_sym' not found`);
-      }
-
       const libParts = await symbolsCache.keyAsync(lib, async () => {
-        const contents = await libReader.readSymbolLibraryFile(lib);
-        return parseSymbolLibrary(contents);
+        try {
+          const contents = await libReader.readSymbolLibraryFile(lib);
+          return parseSymbolLibrary(contents);
+        } catch (e) {
+          throw new Error(`Could not find symbol library '${lib}', ${e}`);
+        }
       });
 
       if (libParts.has(part)) {
@@ -42,10 +36,6 @@ const scanLibraries = async (libReader: KiCadLibReader): Promise<KiCadLibraries>
       }
     },
     async queryFootprint(lib, part): Promise<void> {
-      if (!footprintLibs.has(lib)) {
-        throw new Error(`Footprint library '${lib}.pretty' not found`);
-      }
-
       try {
         await libReader.readFootprintFile(lib, part);
       } catch (e) {
