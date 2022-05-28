@@ -3,7 +3,7 @@ import { Rewire } from '../../sim/rewire';
 import { createCache, Iter, occurences } from "../../utils";
 import { parseSymbolLibrary, SymbolDef, SymbolPin } from './parse';
 import { SExpr } from './s-expr';
-import { FileSystem } from '../fs/fs';
+import { KiCadLibReader } from './libReader';
 
 export type SymbolOccurence = KiCadConfig<any, any> & {
   node: ModuleNode,
@@ -17,17 +17,10 @@ export type KiCadLibraries = {
   queryFootprint: (lib: string, part: string) => Promise<void>,
 };
 
-const findByExt = (files: string[], ext: string): string[] => {
-  return files.filter(f => f.endsWith(ext)).map(f => f.replace(ext, ''));
-};
-
-const scanLibraries = async (libsDir: string, fs: FileSystem): Promise<KiCadLibraries> => {
-  const symbolsDir = fs.joinPaths(libsDir, 'symbols');
-  const footprintsDir = fs.joinPaths(libsDir, 'footprints');
-  const symbolLibs = new Set(findByExt(await fs.readDir(symbolsDir), '.kicad_sym'));
-  const footprintLibs = new Set(findByExt(await fs.readDir(footprintsDir), '.pretty'));
+const scanLibraries = async (libReader: KiCadLibReader): Promise<KiCadLibraries> => {
+  const symbolLibs = new Set(await libReader.listSymbolLibs());
+  const footprintLibs = new Set(await libReader.listFootprintLibs());
   const symbolsCache = createCache<string, Map<string, SymbolDef>>();
-  const footprintsCache = createCache<string, Set<string>>();
 
   return {
     symbols: symbolLibs,
@@ -38,8 +31,7 @@ const scanLibraries = async (libsDir: string, fs: FileSystem): Promise<KiCadLibr
       }
 
       const libParts = await symbolsCache.keyAsync(lib, async () => {
-        const libFile = fs.joinPaths(symbolsDir, `${lib}.kicad_sym`);
-        const contents = await fs.readFile(libFile);
+        const contents = await libReader.readSymbolLibraryFile(lib);
         return parseSymbolLibrary(contents);
       });
 
@@ -54,13 +46,10 @@ const scanLibraries = async (libsDir: string, fs: FileSystem): Promise<KiCadLibr
         throw new Error(`Footprint library '${lib}.pretty' not found`);
       }
 
-      const parts = await footprintsCache.keyAsync(lib, async () => {
-        const libDir = fs.joinPaths(footprintsDir, `${lib}.pretty`);
-        return new Set(findByExt(await fs.readDir(libDir), '.kicad_mod'));
-      });
-
-      if (!parts.has(part)) {
-        throw new Error(`Footprint '${part}' not found in footprint library '${lib}', available footprints:\n${[...parts].join(', ')}`);
+      try {
+        await libReader.readFootprintFile(lib, part);
+      } catch (e) {
+        throw new Error(`Footprint '${part}' not found in footprint library '${lib}', ${e}.`);
       }
     },
   };
@@ -223,13 +212,12 @@ const collectNets = (circuit: Circuit): Map<Net, Set<Net>> => {
 
 type NetListOptions = {
   topModule: Module<{}, {}>,
-  librariesLocation: string,
   power: KiCadConfig<{}, { gnd: 1, vcc: 1 }>,
-  fs: FileSystem,
+  libReader: KiCadLibReader,
 };
 
-const generateNetlist = async ({ topModule: top, librariesLocation: libsDir, power: powerModuleKiCadConfig, fs }: NetListOptions): Promise<SExpr> => {
-  const libs = await scanLibraries(libsDir, fs);
+const generateNetlist = async ({ topModule: top, power: powerModuleKiCadConfig, libReader }: NetListOptions): Promise<SExpr> => {
+  const libs = await scanLibraries(libReader);
   metadata(top).circuit.signatures.get(POWER_MODULE_NAME)!.kicad = powerModuleKiCadConfig;
   const symbols = await collectKiCadSymbols(top, libs);
   const { num, str, sym, list } = SExpr;
@@ -244,7 +232,7 @@ const generateNetlist = async ({ topModule: top, librariesLocation: libsDir, pow
     list(sym('version'), str('E')),
     list(
       sym('design'),
-      list(sym('source'), str(fs.joinPaths(__dirname, __filename))),
+      list(sym('source'), str(__dirname + '/' + __filename)),
       list(sym('date'), str(new Date().toISOString())),
       list(sym('tool'), str('nathsou_hdl (0.0.1)')),
     ),

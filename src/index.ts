@@ -1,9 +1,11 @@
 export * from './core';
 export * from './export/elk/elk';
 export * from './export/elk/renderer';
-export * from './export/fs/fs';
 export * from './export/graphviz/graphviz';
+export * from './export/kicad/gitlabLibReader';
 export * from './export/kicad/kicad';
+export * from './export/kicad/libReader';
+export * from './export/kicad/nodeLibReader';
 export * from './export/kicad/parse';
 export * from './export/kicad/s-expr';
 export * from './modules/74xx';
@@ -21,3 +23,4 @@ export * from './sim/level-sim';
 export * from './sim/rewire';
 export * from './sim/sim';
 export * from './utils';
+

@@ -1,10 +1,8 @@
 import { writeFile } from 'fs/promises';
 import { defineModule, IO, KiCad, led, resistor, SExpr, Tuple } from '../src';
-import { nodeFileSystem } from '../src/export/fs/nodeFileSystem';
+import { createGitlabKiCadLibReader } from '../src/export/kicad/gitlabLibReader';
 import { binaryAdder74x283 } from '../src/modules/74xx';
 import { dipSwitch8 } from '../src/modules/switch';
-
-const KICAD_LIBS_DIR = '/mnt/c/Program Files/KiCad/6.0/share/kicad';
 
 const top = defineModule({
   name: 'top',
@@ -44,8 +42,7 @@ const top = defineModule({
 const main = async () => {
   const netlist = await KiCad.generateNetlist({
     topModule: top,
-    librariesLocation: KICAD_LIBS_DIR,
-    fs: nodeFileSystem,
+    libReader: createGitlabKiCadLibReader({ logRequests: true }),
     power: {
       symbol: 'Connector_Generic:Conn_01x02',
       footprint: 'Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical',

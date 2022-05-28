@@ -2,11 +2,9 @@ import ELK from 'elkjs';
 import { writeFile } from 'fs/promises';
 import { defineModule, KiCad, metadata, Rewire, SExpr, Tuple } from '../src';
 import { Elk } from '../src/export/elk/elk';
-import { nodeFileSystem } from '../src/export/fs/nodeFileSystem';
+import { createNodeKicadLibReader } from '../src/export/kicad/nodeLibReader';
 import { isolateGates, u74x08, u74x32, u74x86 } from '../src/modules/74xx';
 import { pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
-
-const KICAD_LIBS_DIR = '/mnt/c/Program Files/KiCad/6.0/share/kicad';
 
 const adder4 = defineModule({
   name: '74xx.full_adder4',
@@ -84,8 +82,10 @@ const main = async () => {
   const svg = await Elk.renderSvg(new ELK(), Rewire.keepKiCadModules(circuit));
   const netlist = await KiCad.generateNetlist({
     topModule: top,
-    librariesLocation: KICAD_LIBS_DIR,
-    fs: nodeFileSystem,
+    libReader: createNodeKicadLibReader({
+      symbolsDir: '/mnt/c/Program Files/KiCad/6.0/share/kicad/symbols/',
+      footprintsDir: '/mnt/c/Program Files/KiCad/6.0/share/kicad/footprints/',
+    }),
     power: {
       symbol: 'Connector_Generic:Conn_01x02',
       footprint: 'Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical',

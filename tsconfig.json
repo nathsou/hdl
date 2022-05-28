@@ -2,7 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "module": "esnext",
-    "target": "ES2017",
+    "target": "es2021",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "strict": true,
