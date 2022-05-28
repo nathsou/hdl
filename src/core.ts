@@ -353,7 +353,7 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: C
   };
 };
 
-const _createModule = <
+const _defineModule = <
   In extends Record<string, Num>,
   Out extends Record<string, Num>,
   State extends {}
@@ -383,10 +383,19 @@ const _createModule = <
     }
   }
 
+  const pins: ModuleNode['pins'] = { in: {}, out: {} };
+  const mergedPins = { ...mod.inputs, ...mod.outputs };
+  const linearizedPins = IO.linearizePinout(mergedPins);
+
+  // ensure pin names are valid
+  Object.keys(mergedPins).forEach(pinName => {
+    if (pinName.includes(':')) {
+      throw new Error(`Invalid pin name: '${pinName}' in module '${mod.name}', ':' is forbidden`);
+    }
+  });
+
   return () => {
     const id = nextId();
-    const pins: ModuleNode['pins'] = { in: {}, out: {} };
-    const linearizedPins = IO.linearizePinout({ ...mod.inputs, ...mod.outputs });
 
     for (const pin of linearizedPins) {
       circuit.nets.set(`${pin}:${id}`, { in: [], out: [], id });
@@ -449,13 +458,13 @@ export const defineSimulatedModule = <
 >(
   def: Omit<SimulatedModuleDef<In, Out, State>, 'type'>
 ): (() => Module<In, Out>) => {
-  return _createModule({ ...def, type: 'simulated' });
+  return _defineModule({ ...def, type: 'simulated' });
 };
 
 export const defineModule = <In extends Record<string, Num>, Out extends Record<string, Num>>(
   def: Omit<CompoundModuleDef<In, Out>, 'type'>
 ): (() => Module<In, Out>) => {
-  return _createModule({ ...def, type: 'compound' });
+  return _defineModule({ ...def, type: 'compound' });
 };
 
 export const POWER_MODULE_ID: ModuleId = 0;
