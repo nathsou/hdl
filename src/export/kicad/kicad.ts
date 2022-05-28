@@ -91,7 +91,7 @@ const pinReverseMapping = (
 /**
  * gather all kicad symbols used in the circuit and perform basic checks
  */
-const collectKiCadSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): Promise<SymbolOccurence[]> => {
+const collectKiCadSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries, includePower: boolean): Promise<SymbolOccurence[]> => {
   const { circuit, id } = metadata(top);
   const mod = circuit.modules.get(id)!;
   const topSig = circuit.signatures.get(mod.name)!;
@@ -165,8 +165,10 @@ const collectKiCadSymbols = async (top: Module<{}, {}>, libs: KiCadLibraries): P
     }
   };
 
-  // include the power module
-  await aux(circuit.modules.get(0)!);
+  if (includePower) {
+    await aux(circuit.modules.get(POWER_MODULE_ID)!);
+  }
+
   await aux(mod);
 
   return kicadSymbols;
@@ -202,20 +204,28 @@ const collectNets = (circuit: Circuit): Map<Net, Set<Net>> => {
 
 type NetListOptions = {
   topModule: Module<{}, {}>,
-  power: KiCadConfig<{}, { gnd: 1, vcc: 1 }>,
   libReader: KiCadLibReader,
+  power?: KiCadConfig<{}, { gnd: 1, vcc: 1 }>,
 };
 
-const generateNetlist = async ({ topModule: top, power: powerModuleKiCadConfig, libReader }: NetListOptions): Promise<SExpr> => {
+const generateNetlist = async ({ topModule: top, power: powerConfig, libReader }: NetListOptions): Promise<SExpr> => {
   const libs = await scanLibraries(libReader);
-  metadata(top).circuit.signatures.get(POWER_MODULE_NAME)!.kicad = powerModuleKiCadConfig;
-  const symbols = await collectKiCadSymbols(top, libs);
-  const { num, str, sym, list } = SExpr;
-
+  metadata(top).circuit.signatures.get(POWER_MODULE_NAME)!.kicad = powerConfig;
+  const symbols = await collectKiCadSymbols(top, libs, powerConfig !== undefined);
   const kicadModuleIds = new Set([POWER_MODULE_ID, ...symbols.map(s => s.node.id)]);
   const circuit = Rewire.keepModules(metadata(top).circuit, node => kicadModuleIds.has(node.id));
   const reverseMappings = createCache<string, Record<string, number>>();
   const netlist = collectNets(circuit);
+  const { num, str, sym, list } = SExpr;
+
+  const powerNets = [
+    ...(netlist.get(`gnd:${POWER_MODULE_ID}`) ?? new Set()),
+    ...(netlist.get(`vcc:${POWER_MODULE_ID}`) ?? new Set()),
+  ];
+
+  if (powerNets.length > 0 && powerConfig === undefined) {
+    throw new Error(`Missing KiCad mapping for the power module`);
+  }
 
   return list(
     sym('export'),
