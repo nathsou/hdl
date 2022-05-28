@@ -1,4 +1,4 @@
-import { ElkEdge, ElkLabel, ElkNode, ElkPort, ElkPrimitiveEdge, ElkExtendedEdge } from 'elkjs';
+import type { ElkEdge, ElkLabel, ElkNode, ElkPort, ElkPrimitiveEdge, ElkExtendedEdge } from 'elkjs';
 
 type Rect = {
   type: 'rect',

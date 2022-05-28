@@ -1,8 +1,9 @@
-import { KiCadLibReader } from "./libReader";
-import { readFile, access } from 'fs/promises';
 import { join } from 'path';
+import { KiCadLibReader } from "./libReader";
 
 const exists = async (path: string): Promise<boolean> => {
+  const { access } = await import('fs/promises');
+
   try {
     await access(path);
     return true;
@@ -12,6 +13,8 @@ const exists = async (path: string): Promise<boolean> => {
 };
 
 const readFileWithExistenceCheck = async (path: string): Promise<string> => {
+  const { readFile } = await import('fs/promises');
+
   if (!(await exists(path))) {
     throw new Error(`File '${path} does not exist'`);
   }
@@ -19,7 +22,7 @@ const readFileWithExistenceCheck = async (path: string): Promise<string> => {
   return (await readFile(path, 'utf-8')).toString();
 };
 
-export const createNodeKicadLibReader = (paths: { symbolsDir: string, footprintsDir: string }): KiCadLibReader => ({
+export const createFileSystemKicadLibReader = (paths: { symbolsDir: string, footprintsDir: string }): KiCadLibReader => ({
   async readSymbolLibraryFile(symbolName: string) {
     const path = join(paths.symbolsDir, `${symbolName}.kicad_sym`);
     return await readFileWithExistenceCheck(path);

@@ -5,7 +5,6 @@ export * from './export/graphviz/graphviz';
 export * from './export/kicad/gitlabLibReader';
 export * from './export/kicad/kicad';
 export * from './export/kicad/libReader';
-export * from './export/kicad/nodeLibReader';
 export * from './export/kicad/parse';
 export * from './export/kicad/s-expr';
 export * from './modules/74xx';

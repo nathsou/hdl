@@ -1,4 +1,4 @@
-import { ELK, ElkExtendedEdge, ElkNode, ElkPort } from 'elkjs/lib/elk-api';
+import type { ELK, ElkExtendedEdge, ElkNode, ElkPort } from 'elkjs/lib/elk-api';
 import { Circuit, IO, ModuleNode, RawConnection } from "../../core";
 import { ElkRenderer, RendererStyle } from './renderer';
 

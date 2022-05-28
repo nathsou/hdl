@@ -232,7 +232,6 @@ const generateNetlist = async ({ topModule: top, power: powerConfig, libReader }
     list(sym('version'), str('E')),
     list(
       sym('design'),
-      list(sym('source'), str(__dirname + '/' + __filename)),
       list(sym('date'), str(new Date().toISOString())),
       list(sym('tool'), str('nathsou_hdl (0.0.1)')),
     ),

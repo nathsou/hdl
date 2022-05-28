@@ -2,7 +2,7 @@ import ELK from 'elkjs';
 import { writeFile } from 'fs/promises';
 import { defineModule, KiCad, metadata, Rewire, SExpr, Tuple } from '../src';
 import { Elk } from '../src/export/elk/elk';
-import { createNodeKicadLibReader } from '../src/export/kicad/nodeLibReader';
+import { createFileSystemKicadLibReader } from '../src/export/kicad/nodeLibReader';
 import { isolateGates, u74x08, u74x32, u74x86 } from '../src/modules/74xx';
 import { pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
 
@@ -82,7 +82,7 @@ const main = async () => {
   const svg = await Elk.renderSvg(new ELK(), Rewire.keepKiCadModules(circuit));
   const netlist = await KiCad.generateNetlist({
     topModule: top,
-    libReader: createNodeKicadLibReader({
+    libReader: createFileSystemKicadLibReader({
       symbolsDir: '/mnt/c/Program Files/KiCad/6.0/share/kicad/symbols/',
       footprintsDir: '/mnt/c/Program Files/KiCad/6.0/share/kicad/footprints/',
     }),

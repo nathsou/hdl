@@ -11,7 +11,7 @@
   "scripts": {
     "test": "jest",
     "typeCheck": "tsc --noEmit",
-    "esbuild": "esbuild examples/kicad.ts --sourcemap --bundle --outfile=dist/kicad.js --platform=node",
+    "esbuild": "esbuild examples/adder74xx283.ts --sourcemap --bundle --outfile=dist/adder74xx283.js --platform=browser",
     "build": "tsc",
     "watch": "esbuild examples/adder74xx283.ts --sourcemap --bundle --outfile=dist/adder74xx283.js --platform=node --watch"
   },
@@ -31,8 +31,7 @@
     "mnemonist": "^0.39.0",
     "ts-jest": "^27.1.3",
     "typescript": "^4.6.2",
-    "web-worker": "^1.2.0",
-    "node-fetch": "^3.2.4"
+    "web-worker": "^1.2.0"
   },
   "repository": {
     "type": "git",

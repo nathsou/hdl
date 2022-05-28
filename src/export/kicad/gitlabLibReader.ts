@@ -1,5 +1,4 @@
 import { KiCadLibReader } from "./libReader";
-import fetch, { Response } from 'node-fetch';
 import { createCache } from "../../utils";
 
 const projectIds = {
@@ -7,14 +6,25 @@ const projectIds = {
   footprints: 21601606, // https://gitlab.com/kicad/libraries/kicad-footprints
 };
 
-const logFetch = async (log: boolean, uri: string): Promise<Response> => {
+type ResponseLike = {
+  status: number,
+  json: () => Promise<any>,
+};
+
+type FetchFnLike = (uri: string) => Promise<ResponseLike>;
+
+const logFetch = async (log: boolean, uri: string, fetchImpl: FetchFnLike): Promise<ResponseLike> => {
+  if (typeof fetchImpl === 'undefined') {
+    throw new Error(`Fetch API not found, you can provide a custom implementation to 'createGitLabKiCadLibReader'`);
+  }
+
   const t1 = Date.now();
 
   if (log) {
     console.log(`fetching ${uri}`);
   }
 
-  const res = await fetch(uri);
+  const res = await fetchImpl(uri);
 
   if (log) {
     console.log(`took ${Date.now() - t1}ms`);
@@ -23,21 +33,28 @@ const logFetch = async (log: boolean, uri: string): Promise<Response> => {
   return res;
 };
 
-export const createGitlabKiCadLibReader = ({ logRequests }: { logRequests: boolean }): KiCadLibReader => {
+export type GitLabKicadLibReaderOptions = {
+  logRequests?: boolean,
+  fetch?: FetchFnLike, // custom fetch impl (node-fetch on node for instance)
+};
+
+export const createGitLabKiCadLibReader = ({
+  logRequests = false,
+  fetch: fetchImpl = 'fetch' in globalThis ? fetch : undefined as any as typeof fetch
+}: GitLabKicadLibReaderOptions): KiCadLibReader => {
   const fileCache = createCache<string, string>();
 
   const readFileContents = async (projectId: number, path: string, log: boolean): Promise<string> => {
     const uri = `https://gitlab.com/api/v4/projects/${projectId}/repository/files/${encodeURIComponent(path)}?ref=master`;
 
     return fileCache.keyAsync(uri, async () => {
-      const res = await logFetch(log, uri);
+      const res = await logFetch(log, uri, fetchImpl);
 
       if (res.status === 404) {
         throw new Error(`File not found in GitLab repository ${projectId}: '${path}'`);
       }
 
-      const contents = Buffer.from((await res.json() as any).content, 'base64').toString();
-      return contents;
+      return atob((await res.json() as any).content);
     });
   };
 
