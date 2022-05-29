@@ -8,9 +8,9 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/examples/adder74xx283.ts",
+      "program": "${workspaceFolder}/examples/bus.ts",
       "outFiles": [
-        "${workspaceFolder}/dist/adder74xx283.js"
+        "${workspaceFolder}/dist/bus.js"
       ]
     }
   ]

@@ -64,7 +64,7 @@ const pinReverseMapping = (
   const pinMappingEntries = Object.entries(pinMapping);
 
   const findPinNumber = (name: string) => {
-    const pin = pinMappingEntries.find(([_, pin]) => pin.toLowerCase() === name);
+    const pin = pinMappingEntries.find(([_, pin]) => pin.toLowerCase() === name.toLowerCase());
     if (pin === undefined) {
       throw new Error(`Unmapped pin number for '${name}' in module '${moduleName}'`);
     }

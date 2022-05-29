@@ -28,11 +28,14 @@ export type ModuleWithMetadata<In extends Record<string, number>, Out extends Re
   },
 };
 
-export type State = 0 | 1;
+// tri-state
+// https://en.wikipedia.org/wiki/Three-state_logic
+export type State = 0 | 1 | 'x';
 
 export const State = {
   zero: 0 as State,
   one: 1 as State,
+  x: 'x' as State,
   from: (b: boolean): State => b ? 1 : 0,
   gen: <N extends number>(count: N, factory: (n: number) => Connection): N extends 1 ? State : Tuple<State, N> => {
     if (count === 1) {
@@ -169,7 +172,8 @@ export type ModuleNode = {
 
 export type NodeStateConst = { type: 'const', value: State, initialized: boolean };
 export type NodeStateRef = { type: 'ref', ref: Net };
-export type NodeState = NodeStateConst | NodeStateRef;
+export type NodeStateMultiRef = { type: 'refs', refs: Net[] };
+export type NodeState = NodeStateConst | NodeStateRef | NodeStateMultiRef;
 export type Net = string;
 export type CircuitState = Record<string, NodeState>;
 
@@ -231,40 +235,47 @@ export const isNodeState = (x: any): x is NodeState => {
   if (x.type !== 'const' && x.type !== 'ref') { return false; }
 
   if (x.type === 'const') {
-    return x.value === 0 || x.value === 1;
+    return x.value === 0 || x.value === 1 || x.value === 'x';
   }
 
   return typeof x.ref === 'string';
 };
 
 export const CoreUtils = {
-  rawFrom: (v: Connection): RawConnection =>
-    v === 0 ? { pin: 'gnd', modId: 0 } :
-      v === 1 ? { pin: 'vcc', modId: 0 } :
-        v,
+  rawFrom: (v: Connection): RawConnection => {
+    if (v === 'x') {
+      throw new Error(`Called rawFrom with 'x'`);
+    }
+
+    return v === 0 ? { pin: 'gnd', modId: POWER_MODULE_ID } :
+      v === 1 ? { pin: 'vcc', modId: POWER_MODULE_ID } :
+        v;
+  },
   connect: (circuit: Circuit, modId: ModuleId, dir: 'in' | 'out', pin: string, target: Connection) => {
-    target = CoreUtils.rawFrom(target);
+    if (target !== 'x') {
+      target = CoreUtils.rawFrom(target);
 
-    if (!isRawConnection(target)) {
-      const mod = circuit.modules.get(modId);
-      throw new Error(`Invalid connection for ${mod?.name}.${pin}`);
+      if (!isRawConnection(target)) {
+        const mod = circuit.modules.get(modId);
+        throw new Error(`Invalid connection for ${mod?.name}.${pin}`);
+      }
+
+      const net = `${pin}:${modId}`;
+      const targetNet = `${target.pin}:${target.modId}`;
+
+      pushRecord(circuit.modules.get(modId)!.pins[dir], pin, target);
+
+      if (!circuit.nets.has(net)) {
+        circuit.nets.set(net, { in: [], out: [], id: modId });
+      }
+
+      if (!circuit.nets.has(targetNet)) {
+        circuit.nets.set(targetNet, { in: [], out: [], id: target.modId });
+      }
+
+      circuit.nets.get(net)!.in.push(targetNet);
+      circuit.nets.get(targetNet)!.out.push(net);
     }
-
-    const net = `${pin}:${modId}`;
-    const targetNet = `${target.pin}:${target.modId}`;
-
-    pushRecord(circuit.modules.get(modId)!.pins[dir], pin, target);
-
-    if (!circuit.nets.has(net)) {
-      circuit.nets.set(net, { in: [], out: [], id: modId });
-    }
-
-    if (!circuit.nets.has(targetNet)) {
-      circuit.nets.set(targetNet, { in: [], out: [], id: target.modId });
-    }
-
-    circuit.nets.get(net)!.in.push(targetNet);
-    circuit.nets.get(targetNet)!.out.push(net);
   },
   pinDirection: (circuit: Circuit, modId: ModuleId, pin: string): 'in' | 'out' => {
     const module = circuit.modules.get(modId)!;
@@ -383,12 +394,8 @@ const _defineModule = <
     }
   }
 
-  const pins: ModuleNode['pins'] = { in: {}, out: {} };
-  const mergedPins = { ...mod.inputs, ...mod.outputs };
-  const linearizedPins = IO.linearizePinout(mergedPins);
-
   // ensure pin names are valid
-  Object.keys(mergedPins).forEach(pinName => {
+  Object.keys({ ...mod.inputs, ...mod.outputs }).forEach(pinName => {
     if (pinName.includes(':')) {
       throw new Error(`Invalid pin name: '${pinName}' in module '${mod.name}', ':' is forbidden`);
     }
@@ -396,6 +403,9 @@ const _defineModule = <
 
   return () => {
     const id = nextId();
+    const pins: ModuleNode['pins'] = { in: {}, out: {} };
+    const mergedPins = { ...mod.inputs, ...mod.outputs };
+    const linearizedPins = IO.linearizePinout(mergedPins);
 
     for (const pin of linearizedPins) {
       circuit.nets.set(`${pin}:${id}`, { in: [], out: [], id });
@@ -467,8 +477,15 @@ export const defineModule = <In extends Record<string, Num>, Out extends Record<
   return _defineModule({ ...def, type: 'compound' });
 };
 
-export const POWER_MODULE_ID: ModuleId = 0;
+export const metadata = <
+  In extends Record<string, number>,
+  Out extends Record<string, number>
+>(mod: Module<In, Out>): ModuleWithMetadata<In, Out>['meta'] => {
+  return (mod as ModuleWithMetadata<In, Out>).meta;
+};
+
 export const POWER_MODULE_NAME: string = '_power_';
+export const POWER_MODULE_ID: ModuleId = 0;
 
 const createPowerModule = defineSimulatedModule({
   name: POWER_MODULE_NAME,
@@ -510,13 +527,6 @@ export const checkConnections = (topMod: Module<{}, {}>): void => {
       }
     });
   }
-};
-
-export const metadata = <
-  In extends Record<string, number>,
-  Out extends Record<string, number>
->(mod: Module<In, Out>): ModuleWithMetadata<In, Out>['meta'] => {
-  return (mod as ModuleWithMetadata<In, Out>).meta;
 };
 
 type LinearizePins<Pins extends Record<string, Num>> = {

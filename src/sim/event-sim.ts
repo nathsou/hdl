@@ -1,6 +1,6 @@
 import CircularBuffer from 'mnemonist/circular-buffer';
 import Queue from 'mnemonist/queue';
-import { MapStates, metadata, Module, ModuleId, Net, NodeStateConst, State } from "../core";
+import { MapStates, metadata, Module, ModuleId, Net, NodeStateConst, POWER_MODULE_ID, State } from "../core";
 import { Iter, uniq } from "../utils";
 import { Rewire } from './rewire';
 import { createState, SimulationData, simulationHandler, Simulator } from './sim';
@@ -52,8 +52,8 @@ export const createEventDrivenSimulator = <
 
   // add constants to the initial event queue as their output in not initialized
   // and it would never be added to the event queue otherwise since they have no inputs
-  eventQueue.enqueue({ net: 'vcc:0', newState: 1 });
-  eventQueue.enqueue({ net: 'gnd:0', newState: 0 });
+  eventQueue.enqueue({ net: `vcc:${POWER_MODULE_ID}`, newState: 1 });
+  eventQueue.enqueue({ net: `gnd:${POWER_MODULE_ID}`, newState: 0 });
 
   const input = (input: MapStates<In>): void => {
     const inputNets: [Net, State][] = [];

@@ -1,4 +1,4 @@
-import { checkConnections, Circuit, CircuitState, Connection, MapStates, Module, ModuleNode, Net, NodeStateConst, POWER_MODULE_NAME, State } from "../core";
+import { checkConnections, Circuit, CircuitState, Connection, MapStates, Module, ModuleNode, Net, NodeStateConst, POWER_MODULE_ID, State } from "../core";
 import { deepEqualObject, Iter, Tuple } from "../utils";
 import { createEventDrivenSimulator } from "./event-sim";
 import { createLevelizedSimulator } from "./level-sim";
@@ -7,22 +7,44 @@ import { connectionToNet } from "./rewire";
 const deref = (state: CircuitState, net: Net): State => {
   const s = state[net];
 
-  if (s.type === 'const') {
-    return s.value;
-  }
+  switch (s.type) {
+    case 'const':
+      return s.value;
+    case 'ref':
+      return deref(state, s.ref);
+    case 'refs':
+      const states = s.refs.map(ref => deref(state, ref));
+      let returnState: State = 'x';
+      for (const s of states) {
+        if (s !== 'x') {
+          if (returnState !== 'x') {
+            throw new Error(`Conflicting states in incoming nets for '${net}'`);
+          }
 
-  return deref(state, s.ref);
+          returnState = s;
+        }
+      }
+
+      return returnState;
+  }
 };
 
 const writeDeref = (state: CircuitState, net: Net, newState: State): void => {
   const s = state[net];
 
-  if (s.type === 'const') {
-    s.value = newState;
-    return;
+  switch (s.type) {
+    case 'const':
+      s.value = newState;
+      break;
+    case 'ref':
+      writeDeref(state, s.ref, newState);
+      break;
+    case 'refs':
+      for (const ref of s.refs) {
+        writeDeref(state, ref, newState);
+      }
+      break;
   }
-
-  writeDeref(state, s.ref, newState);
 };
 
 export const initState = (circuit: Circuit): CircuitState => {
@@ -44,8 +66,9 @@ export const initState = (circuit: Circuit): CircuitState => {
 
   for (const [id, node] of circuit.modules.entries()) {
     for (const [pin, connections] of Iter.join(Object.entries(node.pins.in), Object.entries(node.pins.out))) {
-      for (const conn of connections) {
-        if (circuit.modules.get(conn.modId)!.name === POWER_MODULE_NAME) {
+      if (connections.length === 1) {
+        const [conn] = connections;
+        if (conn.modId === POWER_MODULE_ID) {
           state[`${pin}:${id}`] = {
             type: 'const',
             value: conn.pin === 'vcc' ? 1 : 0,
@@ -57,6 +80,11 @@ export const initState = (circuit: Circuit): CircuitState => {
             ref: `${conn.pin}:${conn.modId}`,
           };
         }
+      } else {
+        state[`${pin}:${id}`] = {
+          type: 'refs',
+          refs: connections.map(conn => `${conn.pin}:${conn.modId}`),
+        };
       }
     }
   }
@@ -82,10 +110,10 @@ type StateReaderRet<C extends Tuple<Connection, number> | Connection> =
 
 const createStateReader = (state: CircuitState) => <C extends Connection[] | Connection>(connection: C): StateReaderRet<C> => {
   if (Array.isArray(connection)) {
-    return connection.map(c => c === 0 ? 0 : c === 1 ? 1 : deref(state, connectionToNet(c))) as StateReaderRet<C>;
+    return connection.map(c => c === 0 ? 0 : c === 1 ? 1 : c === 'x' ? 'x' : deref(state, connectionToNet(c))) as StateReaderRet<C>;
   }
 
-  return (connection === 0 ? 0 : connection === 1 ? 1 : deref(state, connectionToNet(connection))) as StateReaderRet<C>;
+  return (connection === 0 ? 0 : connection === 1 ? 1 : connection === 'x' ? 'x' : deref(state, connectionToNet(connection))) as StateReaderRet<C>;
 };
 
 export type Simulator<In extends Record<string, number>> = {
@@ -160,10 +188,10 @@ const createStateUpdater = (onStateChange?: (net: Net, newState: State) => void)
       const node = state[net] as NodeStateConst;
 
       if (!node.initialized) {
-        node.value = newState;
         node.initialized = true;
+        node.value = newState;
         onStateChange(net, newState);
-      } else if (node.value !== newState) {
+      } else if (newState !== 'x' && node.value !== newState) {
         onStateChange(net, newState);
       }
     };
@@ -225,14 +253,14 @@ export const simulationHandler = (
         throw new Error(`Incorrect pin width for ${data.mod.name}.${prefix}.${pin}, expected ${expectedWidth}, got ${outputWidth}`);
       }
 
-      if (value === 0 || value === 1) {
+      if (value === 0 || value === 1 || value === 'x') {
         updateState(state, `${pin}:${data.mod.id}`, value);
         return true;
       }
 
       if (Array.isArray(value)) {
         value.forEach((v, n) => {
-          if (v === 0 || v === 1) {
+          if (v === 0 || v === 1 || v === 'x') {
             updateState(state, `${pin}${expectedWidth - n - 1}:${data.mod.id}`, v);
           } else {
             throw new Error(`Invalid node state for ${data.mod.name}:${data.mod.id}.${prefix}.${pin}`);

@@ -1,11 +1,6 @@
 import { KiCadLibReader } from "./libReader";
 import { createCache } from "../../utils";
 
-const projectIds = {
-  symbols: 21545491, // https://gitlab.com/kicad/libraries/kicad-symbols
-  footprints: 21601606, // https://gitlab.com/kicad/libraries/kicad-footprints
-};
-
 type ResponseLike = {
   status: number,
   json: () => Promise<any>,
@@ -13,7 +8,7 @@ type ResponseLike = {
 
 type FetchFnLike = (uri: string) => Promise<ResponseLike>;
 
-const logFetch = async (log: boolean, uri: string, fetchImpl: FetchFnLike): Promise<ResponseLike> => {
+const logFetch = async (log: boolean, uri: string, fetchImpl: FetchFnLike | undefined): Promise<ResponseLike> => {
   if (typeof fetchImpl === 'undefined') {
     throw new Error(`Fetch API not found, you can provide a custom implementation to 'createGitLabKiCadLibReader'`);
   }
@@ -35,12 +30,20 @@ const logFetch = async (log: boolean, uri: string, fetchImpl: FetchFnLike): Prom
 
 export type GitLabKicadLibReaderOptions = {
   logRequests?: boolean,
-  fetch?: FetchFnLike, // custom fetch impl (node-fetch on node for instance)
+  fetch?: FetchFnLike | undefined, // custom fetch impl (node-fetch on node for instance)
+  projectIds?: {
+    symbols: number
+    footprints: number,
+  },
 };
 
 export const createGitLabKiCadLibReader = ({
   logRequests = false,
-  fetch: fetchImpl = 'fetch' in globalThis ? fetch : undefined as any as typeof fetch
+  fetch: fetchImpl = 'fetch' in globalThis ? fetch : undefined,
+  projectIds = {
+    symbols: 21545491, // https://gitlab.com/kicad/libraries/kicad-symbols
+    footprints: 21601606, // https://gitlab.com/kicad/libraries/kicad-footprints
+  },
 }: GitLabKicadLibReaderOptions): KiCadLibReader => {
   const fileCache = createCache<string, string>();
 

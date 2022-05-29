@@ -53,7 +53,7 @@ export const raw = {
     name: `counter_sim${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
-    state: { bits: State.gen(N, () => State.zero), last_clk: 0 },
+    state: { bits: State.gen(N, () => State.zero), last_clk: State.zero },
     simulate(inp, out, state) {
       const rising = state.last_clk === 0 && inp.clk;
       if (inp.count_enable && rising) {
@@ -74,7 +74,7 @@ export const raw = {
     name: `reg${N}`,
     inputs: { d: N, load: 1, clk: 1 },
     outputs: { q: N },
-    state: { data: initialData, last_clk: 0 },
+    state: { data: initialData, last_clk: State.zero },
     simulate(inp, out, state) {
       const rising = inp.clk && !state.last_clk;
 
