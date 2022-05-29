@@ -181,23 +181,6 @@ export const Tuple = {
       .split('')
       .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
   },
-  proxify: <N extends Num>(circuit: Circuit, connections: Tuple<Connection, N>): Tuple<Connection, N> => {
-    return new Proxy(connections, {
-      set(_, index, value) {
-        const connection = CoreUtils.rawFrom(value);
-        const target = connections[Number(index)];
-        const dir = CoreUtils.pinDirection(circuit, connection.modId, connection.pin);
-
-        if (isRawConnection(target)) {
-          CoreUtils.connect(circuit, target.modId, dir, target.pin, connection);
-        } else {
-          throw new Error(`A constant state connection is not assignable`);
-        }
-
-        return true;
-      },
-    });
-  },
 };
 
 export type Range<A extends number, B extends number, Acc = never> = A extends B ? Acc : Range<Successor<A>, B, A | Acc>;

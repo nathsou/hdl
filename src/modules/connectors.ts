@@ -1,9 +1,9 @@
-import { defineSimulatedModule, Num } from "../core";
+import { defineModule, Num } from "../core";
 import { Range } from "../utils";
 
 const definePinHeaders = <N extends Num>(cols: N) => {
   const nPadded = cols.toString().padStart(2, '0');
-  return (orientation: 'Vertical' | 'Horizontal' = 'Vertical') => defineSimulatedModule({
+  return (orientation: 'Vertical' | 'Horizontal' = 'Vertical') => defineModule({
     name: `pin_header_1x${cols}`,
     inputs: {},
     outputs: { pins: cols },

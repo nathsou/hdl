@@ -1,11 +1,11 @@
-import { defineSimulatedModule } from "../core";
+import { defineModule } from "../core";
 
 type ResistorOptions = {
   value: number | `${number}k`, // ohms
   footprint?: string,
 };
 
-export const resistor = (options: ResistorOptions) => defineSimulatedModule({
+export const resistor = (options: ResistorOptions) => defineModule({
   name: `R${options.value}`,
   inputs: { lhs: 1 },
   outputs: { rhs: 1 },
@@ -24,7 +24,7 @@ type LedOptions = {
   footprint?: string,
 };
 
-export const led = (options: LedOptions) => defineSimulatedModule({
+export const led = (options: LedOptions) => defineModule({
   name: `LED_${options.value}`,
   inputs: { lhs: 1 },
   outputs: { rhs: 1 },

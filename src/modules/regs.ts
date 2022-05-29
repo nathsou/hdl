@@ -1,7 +1,7 @@
-import { defineModule, defineSimulatedModule, IO, Multi, State } from "../core";
+import { defineModule, IO, Multi, State } from "../core";
 import { Tuple } from "../utils";
-import { and } from "./gates";
 import * as arith from "./arith";
+import { and } from "./gates";
 import { leaderFollowerJKFlipFlop } from "./mem";
 
 export const raw = {
@@ -49,7 +49,7 @@ export const raw = {
       out.q = count.out.q;
     },
   }),
-  counterSim: <N extends Multi>(N: N) => defineSimulatedModule({
+  counterSim: <N extends Multi>(N: N) => defineModule({
     name: `counter_sim${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
@@ -70,7 +70,7 @@ export const raw = {
   }),
   reg: <N extends Multi>(
     N: N
-  ) => (initialData = State.gen(N, () => State.zero)) => defineSimulatedModule({
+  ) => (initialData = State.gen(N, () => State.zero)) => defineModule({
     name: `reg${N}`,
     inputs: { d: N, load: 1, clk: 1 },
     outputs: { q: N },

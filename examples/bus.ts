@@ -1,6 +1,6 @@
-import { createSimulator, defineModule, defineSimulatedModule, demux16, IO, Num, Range, Tuple } from "../src";
+import { createSimulator, defineModule, demux16, IO, Num, Range, Tuple } from "../src";
 
-const triStateBuffer = defineSimulatedModule({
+const triStateBuffer = defineModule({
   name: 'tristate_buffer',
   inputs: { d: 1, enable: 1 },
   outputs: { q: 1 },
@@ -10,12 +10,12 @@ const triStateBuffer = defineSimulatedModule({
 });
 
 export const createBus = <N extends Num>(name: string, width: N) => {
-  const busModule = defineSimulatedModule({
+  const busModule = defineModule({
     name,
     inputs: { d: width },
     outputs: { q: width },
-    simulate(inp, out) {
-      out.q = inp.d;
+    connect({ d }, out) {
+      out.q = d;
     }
   })();
 

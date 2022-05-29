@@ -110,9 +110,6 @@ export const IO = {
   asTuple: <InpOut extends IO<Num>>(io: InpOut): Tuple<Connection, InpOut extends any[] ? InpOut['length'] : 1> => {
     return (Array.isArray(io) ? io : [io]) as any;
   },
-  proxify: <N extends Num>(circuit: Circuit, connections: IO<N>): IO<N> => {
-    return (Array.isArray(connections) ? Tuple.proxify(circuit, connections as Tuple<Connection, N>) : connections) as IO<N>;
-  },
   linearizePinout: (pins: Record<string, Num>, startIndexAtOne = false): string[] => {
     const linearized: string[] = [];
     const notLinearized: string[] = [];
@@ -364,118 +361,137 @@ const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: C
   };
 };
 
-const _defineModule = <
+const isCompoundModuleDef = <
+  In extends Record<string, Num>,
+  Out extends Record<string, Num>
+>(def: BaseModuleDef<In, Out>): def is CompoundModuleDef<In, Out> => {
+  return 'connect' in def;
+};
+
+const isSimulatedModuleDef = <
+  In extends Record<string, Num>,
+  Out extends Record<string, Num>
+>(def: BaseModuleDef<In, Out>): def is SimulatedModuleDef<In, Out, any> => {
+  return 'simulate' in def;
+};
+
+export function defineModule<
+  In extends Record<string, Num>,
+  Out extends Record<string, Num>
+>(def: Omit<CompoundModuleDef<In, Out>, 'type'>): (() => Module<In, Out>);
+export function defineModule<
   In extends Record<string, Num>,
   Out extends Record<string, Num>,
   State extends {}
->(
-  mod: ModuleDef<In, Out, State>
-): (() => Module<In, Out>) => {
-  const { circuit } = globalState;
-  const duplicatePin = Object.keys(mod.inputs).find(pin => mod.outputs[pin] !== undefined);
+>(def: Omit<SimulatedModuleDef<In, Out, State>, 'type'>): (() => Module<In, Out>);
+export function defineModule<In extends Record<string, Num>, Out extends Record<string, Num>, State extends {}>(
+  def: Omit<CompoundModuleDef<In, Out> | SimulatedModuleDef<In, Out, State>, 'type'>
+): (() => Module<In, Out>) {
+  const _defineModule = <
+    In extends Record<string, Num>,
+    Out extends Record<string, Num>,
+    State extends {}
+  >(
+    mod: ModuleDef<In, Out, State>
+  ): (() => Module<In, Out>) => {
+    const { circuit } = globalState;
+    const duplicatePin = Object.keys(mod.inputs).find(pin => mod.outputs[pin] !== undefined);
 
-  if (duplicatePin != undefined) {
-    throw new Error(`Duplicate pin '${duplicatePin}' in module '${mod.name}'`);
-  }
+    if (duplicatePin != undefined) {
+      throw new Error(`Duplicate pin '${duplicatePin}' in module '${mod.name}'`);
+    }
 
-  if (!circuit.signatures.has(mod.name)) {
-    circuit.signatures.set(mod.name, {
-      inputs: mod.inputs,
-      outputs: mod.outputs,
-      kicad: mod.kicad,
+    if (!circuit.signatures.has(mod.name)) {
+      circuit.signatures.set(mod.name, {
+        inputs: mod.inputs,
+        outputs: mod.outputs,
+        kicad: mod.kicad,
+      });
+    } else {
+      const prevSig = circuit.signatures.get(mod.name)!;
+      const sameInputs = shallowEqualObject(mod.inputs, prevSig.inputs);
+      const sameOutputs = shallowEqualObject(mod.outputs, prevSig.outputs);
+
+      if (!sameInputs || !sameOutputs) {
+        throw new Error(`Duplicate module definition with mismatching signature for '${mod.name}'`);
+      }
+    }
+
+    // ensure pin names are valid
+    Object.keys({ ...mod.inputs, ...mod.outputs }).forEach(pinName => {
+      if (pinName.includes(':')) {
+        throw new Error(`Invalid pin name: '${pinName}' in module '${mod.name}', ':' is forbidden`);
+      }
     });
-  } else {
-    const prevSig = circuit.signatures.get(mod.name)!;
-    const sameInputs = shallowEqualObject(mod.inputs, prevSig.inputs);
-    const sameOutputs = shallowEqualObject(mod.outputs, prevSig.outputs);
 
-    if (!sameInputs || !sameOutputs) {
-      throw new Error(`Duplicate module definition with mismatching signature for '${mod.name}'`);
-    }
-  }
+    return () => {
+      const id = nextId();
+      const pins: ModuleNode['pins'] = { in: {}, out: {} };
+      const mergedPins = { ...mod.inputs, ...mod.outputs };
+      const linearizedPins = IO.linearizePinout(mergedPins);
 
-  // ensure pin names are valid
-  Object.keys({ ...mod.inputs, ...mod.outputs }).forEach(pinName => {
-    if (pinName.includes(':')) {
-      throw new Error(`Invalid pin name: '${pinName}' in module '${mod.name}', ':' is forbidden`);
-    }
-  });
+      for (const pin of linearizedPins) {
+        circuit.nets.set(`${pin}:${id}`, { in: [], out: [], id });
+      }
 
-  return () => {
-    const id = nextId();
-    const pins: ModuleNode['pins'] = { in: {}, out: {} };
-    const mergedPins = { ...mod.inputs, ...mod.outputs };
-    const linearizedPins = IO.linearizePinout(mergedPins);
+      const node: ModuleNode = {
+        id,
+        name: mod.name,
+        pins,
+        subModules: [],
+      };
 
-    for (const pin of linearizedPins) {
-      circuit.nets.set(`${pin}:${id}`, { in: [], out: [], id });
-    }
+      circuit.modules.set(id, node);
 
-    const node: ModuleNode = {
-      id,
-      name: mod.name,
-      pins,
-      subModules: [],
-    };
+      const inputs = new Proxy({}, connectionHandler(id, mod, circuit, true));
+      const outputs = new Proxy({}, connectionHandler(id, mod, circuit, false));
 
-    circuit.modules.set(id, node);
+      last(globalState.subModulesStack)?.push(node);
 
-    const inputs = new Proxy({}, connectionHandler(id, mod, circuit, true));
-    const outputs = new Proxy({}, connectionHandler(id, mod, circuit, false));
+      // register connections
+      if (mod.type === 'compound') {
+        globalState.subModulesStack.push(node.subModules);
+        mod.connect(inputs, outputs);
+        globalState.subModulesStack.pop();
 
-    last(globalState.subModulesStack)?.push(node);
-
-    // register connections
-    if (mod.type === 'compound') {
-      globalState.subModulesStack.push(node.subModules);
-      mod.connect(inputs, outputs);
-      globalState.subModulesStack.pop();
-
-      for (const [pin, width] of Object.entries(mod.outputs)) {
-        if (width === 1) {
-          if (pins.out[pin] === undefined) {
-            throw new Error(`Unconnected output pin '${pin}' in module '${mod.name}'`);
-          }
-        } else {
-          for (let n = 0; n < width; n++) {
-            const key = `${pin}${width - n - 1}`;
-            if (pins.out[key] === undefined) {
-              throw new Error(`Unconnected output pin '${key}' in module '${mod.name}'`);
+        for (const [pin, width] of Object.entries(mod.outputs)) {
+          if (width === 1) {
+            if (pins.out[pin] === undefined) {
+              throw new Error(`Unconnected output pin '${pin}' in module '${mod.name}'`);
+            }
+          } else {
+            for (let n = 0; n < width; n++) {
+              const key = `${pin}${width - n - 1}`;
+              if (pins.out[key] === undefined) {
+                throw new Error(`Unconnected output pin '${key}' in module '${mod.name}'`);
+              }
             }
           }
         }
       }
-    }
 
-    if (mod.type === 'simulated') {
-      /// @ts-ignore
-      node.simulate = mod.simulate;
-      node.state = mod.state;
-    }
+      if (mod.type === 'simulated') {
+        /// @ts-ignore
+        node.simulate = mod.simulate;
+        node.state = mod.state;
+      }
 
-    return {
-      in: inputs,
-      out: outputs,
-      meta: { id, circuit },
+      return {
+        in: inputs,
+        out: outputs,
+        meta: { id, circuit },
+      };
     };
   };
-};
 
-export const defineSimulatedModule = <
-  In extends Record<string, Num>,
-  Out extends Record<string, Num>,
-  State extends {}
->(
-  def: Omit<SimulatedModuleDef<In, Out, State>, 'type'>
-): (() => Module<In, Out>) => {
-  return _defineModule({ ...def, type: 'simulated' });
-};
+  if (isCompoundModuleDef(def)) {
+    return _defineModule({ ...def, type: 'compound' });
+  } else if (isSimulatedModuleDef(def)) {
+    return _defineModule({ ...def, type: 'simulated' });
+  }
 
-export const defineModule = <In extends Record<string, Num>, Out extends Record<string, Num>>(
-  def: Omit<CompoundModuleDef<In, Out>, 'type'>
-): (() => Module<In, Out>) => {
-  return _defineModule({ ...def, type: 'compound' });
-};
+  throw new Error(`Invalid module definition: ${JSON.stringify(def)}`);
+}
 
 export const metadata = <
   In extends Record<string, number>,
@@ -484,10 +500,9 @@ export const metadata = <
   return (mod as ModuleWithMetadata<In, Out>).meta;
 };
 
-export const POWER_MODULE_NAME: string = '_power_';
-export const POWER_MODULE_ID: ModuleId = 0;
+export const POWER_MODULE_NAME = 'power';
 
-const createPowerModule = defineSimulatedModule({
+const createPowerModule = defineModule({
   name: POWER_MODULE_NAME,
   inputs: {},
   outputs: { vcc: 1, gnd: 1 },
@@ -498,12 +513,14 @@ const createPowerModule = defineSimulatedModule({
 });
 
 // initialize gnd and vcc
-createPowerModule();
+const powerMod = createPowerModule();
+
+export const POWER_MODULE_ID: ModuleId = metadata(powerMod).id;
 
 // ensure that all pins (exepted the primary inputs/outputs) are connected
 export const checkConnections = (topMod: Module<{}, {}>): void => {
   const { circuit, id: topModId } = metadata(topMod);
-  // do notLinearized: string[] = []; check connections for the top module and primitive modules
+  // check connections for the top module and primitive modules
   for (const mod of Iter.filter(circuit.modules.values(), m => m.id !== topModId && m.simulate == null)) {
     const sig = circuit.signatures.get(mod.name)!;
     [true, false].forEach(isInput => {
