@@ -70,11 +70,11 @@ export const raw = {
   }),
   reg: <N extends Multi>(
     N: N
-  ) => (initialData = State.gen(N, () => State.zero)) => defineModule({
+  ) => () => defineModule({
     name: `reg${N}`,
     inputs: { d: N, load: 1, clk: 1 },
     outputs: { q: N },
-    state: { data: initialData, last_clk: State.zero },
+    state: { data: State.gen(N, () => State.zero), last_clk: State.zero },
     simulate(inp, out, state) {
       const rising = inp.clk && !state.last_clk;
 
@@ -96,4 +96,4 @@ export const reg2 = raw.reg(2);
 export const reg4 = raw.reg(4);
 export const reg8 = raw.reg(8);
 export const reg16 = raw.reg(16);
-export const reg = <N extends Multi>(N: N, initialData?: N extends 1 ? State : Tuple<State, N>) => raw.reg(N)(initialData);
+export const reg = <N extends Multi>(N: N) => raw.reg(N)();

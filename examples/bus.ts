@@ -1,69 +1,28 @@
-import { createSimulator, defineModule, demux16, IO, Num, Range, Tuple } from "../src";
-
-const triStateBuffer = defineModule({
-  name: 'tristate_buffer',
-  inputs: { d: 1, enable: 1 },
-  outputs: { q: 1 },
-  simulate({ d, enable }, out) {
-    out.q = enable === 1 ? d : 'x';
-  }
-});
-
-export const createBus = <N extends Num>(name: string, width: N) => {
-  const busModule = defineModule({
-    name,
-    inputs: { d: width },
-    outputs: { q: width },
-    connect({ d }, out) {
-      out.q = d;
-    }
-  })();
-
-  return busModule;
-};
-
-const triStateBuffer8 = defineModule({
-  name: 'tristate_buffer8',
-  inputs: { d: 8, enable: 1 },
-  outputs: { q: 8 },
-  connect({ d, enable }, out) {
-    const buffers = Tuple.gen(8, triStateBuffer);
-    IO.forward({ enable }, buffers);
-
-    Tuple.forEach(buffers, (buffer, index) => {
-      buffer.in.d = d[index];
-    });
-
-    out.q = Tuple.gen(8, n => buffers[n].out.q);
-  }
-});
+import { createBus, createSimulator, defineModule, IO, Tuple } from "../src";
+import { reg8 } from "../src/modules/regs";
+import { withTriStateOutput } from "../src/modules/tristate";
 
 const top = defineModule({
   name: 'top',
-  inputs: { sel: 4 },
+  inputs: { clk: 1 },
   outputs: { leds: 8 },
-  connect({ sel }, out) {
+  connect({ clk }, out) {
     const bus = createBus('data_bus', 8);
-    const buffers = Tuple.gen(16, triStateBuffer8);
+    const reg1 = withTriStateOutput(reg8(), ['q']);
+    const reg2 = withTriStateOutput(reg8(), ['q']);
+    reg1.in.d = Tuple.bin(17, 8);
+    reg2.in.d = Tuple.bin(23, 8);
 
-    buffers.forEach((buffer, index) => {
-      buffer.in.d = Tuple.bin(index, 8);
-    });
+    IO.forward({ clk, load: 1 }, [reg1, reg2]);
 
-    const dem = demux16(1);
+    reg1.in.outputEnable = 1;
+    reg2.in.outputEnable = 0;
 
-    dem.in.sel = sel;
-    dem.in.d = 1;
+    reg1.in.d = bus.read();
 
-    Range.iter(0, 16, n => {
-      buffers[n].in.enable = dem.out[`q${n}`];
-    });
+    bus.connect(reg1.out.q, reg2.out.q);
 
-    buffers.forEach(buffer => {
-      bus.in.d = buffer.out.q;
-    });
-
-    out.leds = bus.out.q;
+    out.leds = bus.read();
   }
 })();
 
@@ -73,7 +32,8 @@ const main = () => {
     checkConnections: true,
   });
 
-  sim.input({ sel: Tuple.bin(11, 4) });
+  sim.input({ clk: 0 });
+  sim.input({ clk: 1 });
 
   const out = sim.state.read(top.out.leds).join('');
   console.log(parseInt(out, 2), out);
