@@ -295,6 +295,28 @@ export const createModuleGroup = <T>(name: string, f: () => T): T => {
   return f();
 };
 
+export const createBus = <N extends Num>(name: string, width: N) => {
+  const busModule = defineModule({
+    name,
+    inputs: { d: width },
+    outputs: { q: width },
+    connect({ d }, out) {
+      out.q = d;
+    }
+  })();
+
+  return {
+    read(): IO<N> {
+      return busModule.out.q;
+    },
+    connect(...ds: IO<N>[]): void {
+      ds.forEach(d => {
+        busModule.in.d = d;
+      });
+    },
+  };
+};
+
 const connectionHandler = (id: number, mod: ModuleDef<any, any, any>, circuit: Circuit, isInput: boolean): ProxyHandler<any> => {
   const sig = mod[isInput ? 'inputs' : 'outputs'];
   const prefix = isInput ? 'in' : 'out';
