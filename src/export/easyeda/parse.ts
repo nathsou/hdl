@@ -2,15 +2,15 @@
 // https://docs.easyeda.com/en/DocumentFormat/2-EasyEDA-Schematic-File-Format/index.html
 
 const DOC_TYPE = {
-	SCH: 1,
-	SCHLIB: 2,
-	PCB: 3,
-	PCBLIB: 4,
-	PRJ: 5,
-	SUBPART: 6,
-	SPICESYMBOL: 7,
-	SUBCKT: 8,
-	WAVEFORM: 10,
+  SCH: 1,
+  SCHLIB: 2,
+  PCB: 3,
+  PCBLIB: 4,
+  PRJ: 5,
+  SUBPART: 6,
+  SPICESYMBOL: 7,
+  SUBCKT: 8,
+  WAVEFORM: 10,
 };
 
 const STROKE_STYLE = {
@@ -462,7 +462,7 @@ const Schematic = {
             p.number.fontSize,
           ]),
           joinProps([
-            p.dot.visible ? 1: 0,
+            p.dot.visible ? 1 : 0,
             p.dot.x,
             p.dot.y,
           ]),
