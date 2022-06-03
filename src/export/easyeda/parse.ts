@@ -31,7 +31,7 @@ type Rotation = null | number;
 
 type TextAnchor = 'start' | 'middle' | 'end';
 
-type Schematic = {
+export type Schematic = {
   Canvas: {
     command: 'CA',
     viewboxWidth: number,
@@ -57,10 +57,14 @@ type Schematic = {
     rotation: Rotation,
     importFlag: any,
     id: string,
+    packageUuid: string,
+    datastrid: string,
+    updateTime: string,
+    packageDetailDatastrid: string,
     shapes: Shape[],
   },
   Shape: {
-    ANY: Schematic['Shape']['Polyline' | 'Rectangle' | 'Text' | 'Pin'],
+    ANY: Schematic['Shape']['Polyline' | 'Rectangle' | 'Text' | 'Pin' | 'Ellipse'],
     Rectangle: {
       command: 'R',
       x: number,
@@ -146,6 +150,18 @@ type Schematic = {
         path: string,
       },
     },
+    Ellipse: {
+      command: 'E',
+      x: number,
+      y: number,
+      rx: number,
+      ry: number,
+      strokeColor: string,
+      strokeWidth: number,
+      strokeStyle: StrokeStyle,
+      fillColor: string,
+      id: string,
+    },
   },
 };
 
@@ -216,44 +232,25 @@ const Schematic = {
   Symbol: {
     command: 'LIB',
     show(s: Schematic['Symbol']): string {
+      // ~0~0~1f423f14388b4b17afc87646625a53f6~a4ce78e6a258429187ccbe197596c384~0~yes~yes~e9cd9604d99b40fe934ebec0c6263cf4~1641817626~db86d00e82bb44d39c3b185c464c1770~~1f423f14388b4b17afc87646625a53f6
       return [
         Schematic.Symbol.command,
         s.x,
         s.y,
         Object.entries(s.attributes).map(([attr, value]) => attr + '`' + value + '`').join(''),
         s.rotation,
-        s.shapes.map(Schematic.Shape.show).join('#@$'),
-      ].join('~');
-    },
-    parse(str: string): Schematic['Symbol'] {
-      const [config, ...shapes] = str.split('#@$');
-
-      const [
-        _LIB, x, y, attributes, rotation,
-        importFlag, id,
-      ] = config.split('~');
-
-      const parseAttributes = (attrs: string) => {
-        const entries = attrs.split('`').filter(prop => prop.length > 0);
-        const result: Record<string, string> = {};
-
-        for (let i = 0; i < entries.length; i += 2) {
-          result[entries[i]] = entries[i + 1];
-        }
-
-        return result;
-      }
-
-      return {
-        command: 'LIB',
-        x: Number(x),
-        y: Number(y),
-        attributes: parseAttributes(attributes),
-        rotation: rotation === null ? null : Number(rotation),
-        importFlag,
-        id,
-        shapes: shapes.map(Schematic.Shape.parse),
-      };
+        0,
+        s.packageUuid,
+        s.packageUuid,
+        0,
+        'yes',
+        'yes',
+        s.datastrid,
+        s.updateTime,
+        s.packageDetailDatastrid,
+        '',
+        s.packageUuid,
+      ].join('~') + s.shapes.map(Schematic.Shape.show).join('#@$');
     },
   },
   Shape: {
@@ -263,6 +260,7 @@ const Schematic = {
         PL: Schematic.Shape.Polyline.show,
         T: Schematic.Shape.Text.show,
         P: Schematic.Shape.Pin.show,
+        E: Schematic.Shape.Ellipse.show,
       };
 
       return mapping[shape.command](shape);
@@ -273,6 +271,7 @@ const Schematic = {
         PL: Schematic.Shape.Polyline.parse,
         T: Schematic.Shape.Text.parse,
         P: Schematic.Shape.Pin.parse,
+        E: Schematic.Shape.Ellipse.parse,
       };
 
       const commands = [
@@ -280,6 +279,7 @@ const Schematic = {
         Schematic.Shape.Polyline.command,
         Schematic.Shape.Text.command,
         Schematic.Shape.Pin.command,
+        Schematic.Shape.Ellipse.command,
       ];
 
       const command = str.split('~')[0];
@@ -479,7 +479,7 @@ const Schematic = {
         ] = str.split('^^');
 
         const [
-          display, electric, pinNumber,
+          _P, display, electric, pinNumber,
           x, y, rotation, id,
         ] = config.split('~');
 
@@ -546,6 +546,42 @@ const Schematic = {
             visible: clockVisible === '1',
             path: clockPath,
           },
+        };
+      },
+    },
+    Ellipse: {
+      command: 'E',
+      show(el: Schematic['Shape']['Ellipse']): string {
+        return joinProps([
+          el.command,
+          el.x,
+          el.y,
+          el.rx,
+          el.ry,
+          el.strokeColor,
+          el.strokeWidth,
+          STROKE_STYLE[el.strokeStyle],
+          el.fillColor,
+          el.id,
+        ]);
+      },
+      parse(str: string): Schematic['Shape']['Ellipse'] {
+        const [
+          _E, x, y, rx, ry, strokeColor, strokeWidth,
+          strokeStyle, fillColor, id,
+        ] = str.split('~');
+
+        return {
+          command: 'E',
+          x: Number(x),
+          y: Number(y),
+          rx: Number(rx),
+          ry: Number(ry),
+          strokeColor,
+          strokeWidth: Number(strokeWidth),
+          strokeStyle: REVERSE_STROKE_STYLE[strokeStyle],
+          fillColor,
+          id,
         };
       },
     },
