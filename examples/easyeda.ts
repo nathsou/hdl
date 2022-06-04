@@ -8,7 +8,7 @@ const fetchPart = async (lcsc: string) => {
 const getSymbol = async (lcsc: string): Promise<string> => {
   const part = await fetchPart(lcsc);
 
-  const symb = EasyEDA.Schematic.Symbol.show({
+  const symb = EasyEDA.Schematic.Symbol.moveTo({
     command: 'LIB',
     x: part.dataStr.head.x,
     y: part.dataStr.head.y,
@@ -19,15 +19,13 @@ const getSymbol = async (lcsc: string): Promise<string> => {
     datastrid: part.datastrid,
     updateTime: part.updateTime,
     packageDetailDatastrid: part.packageDetail.datastrid,
-    shapes: [], // part.shape.map(EasyEDA.Schematic.Shape.parse) 
+    shapes: part.dataStr.shape.map(EasyEDA.Schematic.Shape.parse),
     id: 'nath00',
-  });
+  }, 0, 0);
 
   const pins = new Map(
-    part.dataStr.shape
-      .map(EasyEDA.Schematic.Shape.parse)
-      .filter((s: Schematic['Shape']['ANY']) => s.command === 'P')
-      .map((pin: Schematic['Shape']['Pin']) => [
+    (symb.shapes.filter((s: Schematic['Shape']['ANY']) => s.command === 'P') as Schematic['Shape']['Pin'][])
+      .map(pin => [
         pin.pinNumber,
         {
           name: pin.name.text,
@@ -39,9 +37,12 @@ const getSymbol = async (lcsc: string): Promise<string> => {
 
   console.log(pins);
 
-  return [symb, ...part.dataStr.shape].join('#@$');
+  return [
+    EasyEDA.Schematic.Symbol.show(symb),
+    ...symb.shapes.map(EasyEDA.Schematic.Shape.show),
+  ].join('#@$');
 };
 
 (async () => {
-  console.log(await getSymbol('C352964'));
+  console.log(await getSymbol('C1523472'));
 })();

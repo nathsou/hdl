@@ -165,6 +165,81 @@ export type Schematic = {
   },
 };
 
+type SvgPath = {
+  MoveTo: { command: 'M', x: number, y: number },
+  LineTo: { command: 'L', x: number, y: number },
+  horizontalLine: { command: 'h', dx: number },
+  Command: SvgPath['MoveTo'] | SvgPath['LineTo'] | SvgPath['horizontalLine'],
+};
+
+const SvgPath = {
+  SUPPORTED_COMMANDS: new Set(['M', 'L', 'h']),
+  show(c: SvgPath['Command']): string {
+    switch (c.command) {
+      case 'M':
+        return `M ${c.x} ${c.y}`;
+      case 'L':
+        return `L ${c.x} ${c.y}`;
+      case 'h':
+        return `h ${c.dx}`;
+    }
+  },
+  parse(path: string): SvgPath['Command'][] {
+    const parts = path.replaceAll(',', ' ').replaceAll(/([MLh])/g, ' $1 ').trim().split(/\s+/);
+    const commands: SvgPath['Command'][] = [];
+    let pos = 0;
+
+    while (pos < parts.length) {
+      const command = parts[pos];
+
+      if (!SvgPath.SUPPORTED_COMMANDS.has(command)) {
+        throw new Error(`Unsupport SVG path command: '${command}' in '${path}'`);
+      }
+
+      switch (command) {
+        case 'M':
+          commands.push({
+            command: 'M',
+            x: Number(parts[pos + 1]),
+            y: Number(parts[pos + 2]),
+          });
+
+          pos += 3;
+          break;
+        case 'L':
+          commands.push({
+            command: 'L',
+            x: Number(parts[pos + 1]),
+            y: Number(parts[pos + 2]),
+          });
+
+          pos += 3;
+          break;
+        case 'h':
+          commands.push({
+            command: 'h',
+            dx: Number(parts[pos + 1]),
+          });
+
+          pos += 2;
+          break;
+      }
+    }
+
+    return commands;
+  },
+  translate(c: SvgPath['Command'], deltaX: number, deltaY: number): SvgPath['Command'] {
+    switch (c.command) {
+      case 'M':
+        return { ...c, x: c.x + deltaX, y: c.y + deltaY };
+      case 'L':
+        return { ...c, x: c.x + deltaX, y: c.y + deltaY };
+      case 'h':
+        return { ...c };
+    }
+  },
+};
+
 type Shape = Schematic['Shape']['ANY'];
 
 const joinProps = (props: (string | number | null)[]) => props.map(p => p === null ? '' : p).join('~');
@@ -232,7 +307,6 @@ const Schematic = {
   Symbol: {
     command: 'LIB',
     show(s: Schematic['Symbol']): string {
-      // ~0~0~1f423f14388b4b17afc87646625a53f6~a4ce78e6a258429187ccbe197596c384~0~yes~yes~e9cd9604d99b40fe934ebec0c6263cf4~1641817626~db86d00e82bb44d39c3b185c464c1770~~1f423f14388b4b17afc87646625a53f6
       return [
         Schematic.Symbol.command,
         s.x,
@@ -251,6 +325,17 @@ const Schematic = {
         '',
         s.packageUuid,
       ].join('~') + s.shapes.map(Schematic.Shape.show).join('#@$');
+    },
+    moveTo(s: Schematic['Symbol'], x: number, y: number): Schematic['Symbol'] {
+      const deltaX = x - s.x;
+      const deltaY = y - s.y;
+
+      return {
+        ...s,
+        x,
+        y,
+        shapes: s.shapes.map(shape => Schematic.Shape.translate(shape, deltaX, deltaY)),
+      };
     },
   },
   Shape: {
@@ -289,6 +374,41 @@ const Schematic = {
       }
 
       return mapping[command as Shape['command']](str);
+    },
+    translate<S extends Shape>(shape: S, deltaX: number, deltaY: number): S {
+      switch (shape.command) {
+        case 'R':
+        case 'E':
+        case 'T':
+          return {
+            ...shape,
+            x: shape.x + deltaX,
+            y: shape.y + deltaY,
+          };
+        case 'PL':
+          return {
+            ...shape,
+            points: shape.points.map(p => ({ x: p.x + deltaX, y: p.y + deltaY })),
+          };
+        case 'P':
+          return {
+            ...shape,
+            x: shape.x + deltaX,
+            y: shape.y + deltaY,
+            dot: { ...shape.dot, x: shape.dot.x + deltaX, y: shape.dot.y + deltaY },
+            pinDot: { ...shape.pinDot, x: shape.pinDot.x + deltaX, y: shape.pinDot.y + deltaY },
+            name: { ...shape.name, x: shape.name.x + deltaX, y: shape.name.y + deltaY },
+            number: { ...shape.number, x: shape.number.x + deltaX, y: shape.number.y + deltaY },
+            pinPath: {
+              ...shape.pinPath,
+              path: SvgPath.parse(shape.pinPath.path).map(c => SvgPath.translate(c, deltaX, deltaY)).map(SvgPath.show).join(' '),
+            },
+            clock: {
+              ...shape.clock,
+              path: SvgPath.parse(shape.clock.path).map(c => SvgPath.translate(c, deltaX, deltaY)).map(SvgPath.show).join(' '),
+            },
+          };
+      }
     },
     Rectangle: {
       command: 'R',
