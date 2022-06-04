@@ -113,9 +113,14 @@ const keepKiCadModules = (circ: Circuit): Circuit => {
   return keepModules(circ, node => circ.signatures.get(node.name)!.kicad != null);
 };
 
+const keepLCSCModules = (circ: Circuit): Circuit => {
+  return keepModules(circ, node => circ.signatures.get(node.name)!.lcsc != null);
+};
+
 export const Rewire = {
   keepModules,
   keepPrimitiveModules,
   keepKiCadModules,
+  keepLCSCModules,
   filterOutputs,
 };

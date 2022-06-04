@@ -62,6 +62,7 @@ export type Schematic = {
     updateTime: string,
     packageDetailDatastrid: string,
     shapes: Shape[],
+    designator: string,
   },
   Shape: {
     ANY: Schematic['Shape']['Polyline' | 'Rectangle' | 'Text' | 'Pin' | 'Ellipse'],
@@ -244,7 +245,7 @@ type Shape = Schematic['Shape']['ANY'];
 
 const joinProps = (props: (string | number | null)[]) => props.map(p => p === null ? '' : p).join('~');
 
-const Schematic = {
+export const Schematic = {
   Canvas: {
     command: 'CA',
     show(cnv: Schematic['Canvas']): string {
@@ -307,6 +308,25 @@ const Schematic = {
   Symbol: {
     command: 'LIB',
     show(s: Schematic['Symbol']): string {
+      const designator: Schematic['Shape']['Text'] = {
+        command: 'T',
+        mark: 'P',
+        x: s.x,
+        y: s.y,
+        rotation: s.rotation,
+        fillColor: '#000000',
+        fontFamily: 'Arial',
+        fontSize: '7pt',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        dominantBaseline: null,
+        textType: 'comment',
+        text: s.designator,
+        visible: true,
+        textAnchor: 'start',
+        id: s.id + '_designator',
+      };
+
       return [
         Schematic.Symbol.command,
         s.x,
@@ -324,7 +344,7 @@ const Schematic = {
         s.packageDetailDatastrid,
         '',
         s.packageUuid,
-      ].join('~') + s.shapes.map(Schematic.Shape.show).join('#@$');
+      ].join('~') + '#@$' + [designator, ...s.shapes].map(Schematic.Shape.show).join('#@$');
     },
     moveTo(s: Schematic['Symbol'], x: number, y: number): Schematic['Symbol'] {
       const deltaX = x - s.x;
@@ -706,8 +726,4 @@ const Schematic = {
       },
     },
   },
-};
-
-export const EasyEDA = {
-  Schematic,
 };

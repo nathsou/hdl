@@ -12,6 +12,7 @@ export type CircuitSignatures = Map<string, {
   inputs: Record<string, Num>,
   outputs: Record<string, Num>,
   kicad?: KiCadConfig<any, any>,
+  lcsc?: LCSCConfig<any, any>,
 }>;
 
 export type CircuitModules = Map<ModuleId, ModuleNode>;
@@ -428,6 +429,7 @@ export function defineModule<In extends Record<string, Num>, Out extends Record<
         inputs: mod.inputs,
         outputs: mod.outputs,
         kicad: mod.kicad,
+        lcsc: mod.lcsc,
       });
     } else {
       const prevSig = circuit.signatures.get(mod.name)!;
@@ -578,11 +580,19 @@ export type KiCadConfig<In extends Record<string, Num>, Out extends Record<strin
   pins?: Record<number, LinearizePins<In & Out>>,
 };
 
+export type LCSCPartNumber = `C${number}`;
+
+export type LCSCConfig<In extends Record<string, Num>, Out extends Record<string, Num>> = {
+  partNumber: LCSCPartNumber,
+  pins?: Record<number, LinearizePins<In & Out>>,
+};
+
 type BaseModuleDef<In extends Record<string, Num>, Out extends Record<string, Num>> = {
   name: string,
   inputs: In,
   outputs: Out,
   kicad?: KiCadConfig<In, Out>,
+  lcsc?: LCSCConfig<In, Out>,
 };
 
 export type SimulatedModuleDef<

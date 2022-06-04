@@ -310,3 +310,60 @@ export const createCache = <K, V>() => {
     },
   };
 };
+
+export const reversePinMapping = (
+  moduleName: string,
+  pinWidths: Record<string, Num>,
+  pinMapping: Record<number, string>
+): Record<string, number> => {
+  const reversePinMapping: Record<string, number> = {};
+  const pinMappingEntries = Object.entries(pinMapping);
+
+  const findPinNumber = (name: string, num?: number) => {
+    const nameLower = name.toLowerCase();
+    const pin = pinMappingEntries.find(([_, pin]) => {
+      const pinLower = pin.toLowerCase();
+
+      if (num != null) {
+        return [`${nameLower}${num}`, `${num}${nameLower}`].includes(pinLower);
+      }
+
+      return pinLower === nameLower;
+    });
+
+    if (pin === undefined) {
+      debugger;
+      throw new Error(`Unmapped pin number for '${name}${num != null ? num : ''}' in module '${moduleName}'`);
+    }
+
+    return Number(pin[0]);
+  };
+
+  for (const [name, width] of Object.entries(pinWidths)) {
+    const lowerName = name.toLowerCase();
+    debugger;
+    if (width === 1) {
+      reversePinMapping[lowerName] = findPinNumber(lowerName);
+    } else {
+      for (let i = 0; i < width; i++) {
+        // add 1 in the rhs since pin numbers usually start at 1 in datasheets,
+        // but not internally
+        reversePinMapping[`${lowerName}${i}`] = findPinNumber(lowerName, i + 1);
+      }
+    }
+  }
+
+  return reversePinMapping;
+};
+
+export const pinMapping = (
+  moduleName: string,
+  pinWidths: Record<string, Num>,
+  pinMapping: Record<number, string>
+): Record<number, string> => {
+  const mapping = reversePinMapping(moduleName, pinWidths, pinMapping);
+
+  return Object.fromEntries(
+    Object.entries(mapping).map(([key, val]) => [val, key])
+  );
+};

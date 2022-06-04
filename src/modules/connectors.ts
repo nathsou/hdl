@@ -1,8 +1,10 @@
 import { defineModule, Num } from "../core";
+import { LCSCPartNumber } from "../export/easyeda/api";
 import { Range } from "../utils";
 
-const definePinHeaders = <N extends Num>(cols: N) => {
+const definePinHeaders = <N extends Num>(cols: N, lcsc?: LCSCPartNumber) => {
   const nPadded = cols.toString().padStart(2, '0');
+  const pinsMapping = Object.fromEntries(Range.map(1, (cols + 1) as Num, n => [n, `pins${n}`]));
   return (orientation: 'Vertical' | 'Horizontal' = 'Vertical') => defineModule({
     name: `pin_header_1x${cols}`,
     inputs: {},
@@ -10,20 +12,24 @@ const definePinHeaders = <N extends Num>(cols: N) => {
     kicad: {
       symbol: `Connector_Generic:Conn_01x${nPadded}`,
       footprint: `Connector_PinHeader_2.54mm:PinHeader_1x${nPadded}_P2.54mm_${orientation}`,
-      pins: Object.fromEntries(Range.map(1, (cols + 1) as Num, n => [n, `pins${n}`])),
+      pins: pinsMapping,
     },
+    lcsc: lcsc ? {
+      partNumber: lcsc,
+      pins: pinsMapping,
+    } : undefined,
     simulate() { }
   })();
 };
 
 export const pinHeaders1x1 = definePinHeaders(1);
-export const pinHeaders1x2 = definePinHeaders(2);
+export const pinHeaders1x2 = definePinHeaders(2, 'C358684');
 export const pinHeaders1x3 = definePinHeaders(3);
-export const pinHeaders1x4 = definePinHeaders(4);
+export const pinHeaders1x4 = definePinHeaders(4, 'C124378');
 export const pinHeaders1x5 = definePinHeaders(5);
 export const pinHeaders1x6 = definePinHeaders(6);
 export const pinHeaders1x7 = definePinHeaders(7);
-export const pinHeaders1x8 = definePinHeaders(8);
+export const pinHeaders1x8 = definePinHeaders(8, 'C190820');
 export const pinHeaders1x9 = definePinHeaders(9);
 export const pinHeaders1x10 = definePinHeaders(10);
 export const pinHeaders1x11 = definePinHeaders(11);

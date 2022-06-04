@@ -1,6 +1,6 @@
 import { Circuit, IO, KiCadConfig, metadata, Module, ModuleNode, Net, Num, POWER_MODULE_ID, POWER_MODULE_NAME } from "../../core";
 import { Rewire } from '../../sim/rewire';
-import { createCache, Iter, occurences } from "../../utils";
+import { createCache, Iter, occurences, reversePinMapping } from "../../utils";
 import { parseSymbolLibrary, SymbolDef, SymbolPin } from './parse';
 import { SExpr } from './s-expr';
 import { KiCadLibReader } from './libReader';
@@ -53,39 +53,6 @@ const renameSymbolPins = (pins: SymbolPin[]): Record<number, string> => {
   }
 
   return pinsObj;
-};
-
-const pinReverseMapping = (
-  moduleName: string,
-  pinWidths: Record<string, Num>,
-  pinMapping: Record<number, string>
-): Record<string, number> => {
-  const reversePinMapping: Record<string, number> = {};
-  const pinMappingEntries = Object.entries(pinMapping);
-
-  const findPinNumber = (name: string) => {
-    const pin = pinMappingEntries.find(([_, pin]) => pin.toLowerCase() === name.toLowerCase());
-    if (pin === undefined) {
-      throw new Error(`Unmapped pin number for '${name}' in module '${moduleName}'`);
-    }
-
-    return Number(pin[0]);
-  };
-
-  for (const [name, width] of Object.entries(pinWidths)) {
-    const lowerName = name.toLowerCase();
-    if (width === 1) {
-      reversePinMapping[lowerName] = findPinNumber(lowerName);
-    } else {
-      for (let i = 0; i < width; i++) {
-        // add 1 in the rhs since pin numbers usually start at 1 in datasheets,
-        // but not internally
-        reversePinMapping[`${lowerName}${i}`] = findPinNumber(`${lowerName}${i + 1}`);
-      }
-    }
-  }
-
-  return reversePinMapping;
 };
 
 /**
@@ -263,7 +230,7 @@ const generateNetlist = async ({ topModule: top, power: powerConfig, libReader }
             const mod = circuit.modules.get(modId)!;
             const sig = circuit.signatures.get(mod.name)!;
             const reverseMapping = reverseMappings.key(mod.name, () => {
-              return pinReverseMapping(
+              return reversePinMapping(
                 mod.name,
                 { ...sig.inputs, ...sig.outputs },
                 sig.kicad!.pins!,
