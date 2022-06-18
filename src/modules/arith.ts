@@ -117,12 +117,12 @@ export const isEqual = <N extends Num>(a: IO<N>, b: IO<N>): Connection => {
   return logicalAnd(...IO.asArray(xnor<N>(a, b)));
 };
 
-export const add = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
+export const add = <N extends Multi>(a: IO<N>, b: IO<N>, carryIn: Connection = State.zero): IO<N> => {
   const sum = arith.adder(a.length as N)();
 
   sum.in.a = a;
   sum.in.b = b;
-  sum.in.carryIn = 0;
+  sum.in.carryIn = carryIn;
 
   return sum.out.sum;
 };

@@ -13,7 +13,7 @@
     "typeCheck": "tsc --noEmit",
     "esbuild": "esbuild examples/cpu.ts --bundle --outfile=dist/cpu.js --platform=node",
     "build": "tsc",
-    "watch": "esbuild examples/bus.ts --sourcemap --bundle --outfile=dist/bus.js --platform=node --watch"
+    "watch": "esbuild examples/cpu.ts --sourcemap --bundle --outfile=dist/cpu.js --platform=node --watch"
   },
   "keywords": [
     "hardware-description",

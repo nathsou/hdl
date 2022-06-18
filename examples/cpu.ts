@@ -1,170 +1,210 @@
-import { Connection, defineModule, IO, State } from "../src/core";
-import { add, adder, isEqual, isEqualConst, shiftLeft, shiftRight, subtract, compare8 } from "../src/modules/arith";
-import { and, not, or, xor } from "../src/modules/gates";
-import { demux16, match1, match8, matchN } from "../src/modules/mux";
-import { reg8 } from "../src/modules/regs";
+import { adder, and, isEqualConst, logicalOr, or, xor } from "../src";
+import { defineModule, IO, Multi, State } from "../src/core";
+import { decoder, match16 } from "../src/modules/mux";
+import { reg16 } from "../src/modules/regs";
+import { triStateBuffer } from "../src/modules/tristate";
 import { createSimulator } from '../src/sim/sim';
 import { Range, Tuple } from "../src/utils";
 
 const { bin } = Tuple;
 
-// Based on the basic CPU architecture from https://alchitry.com/basic-cpu-mojo
-const Inst = {
-  NOOP: 0x0,
-  LOAD: 0x1,
-  STORE: 0x2,
-  SET: 0x3,
-  LT: 0x4,
-  EQ: 0x5,
-  BEQ: 0x6,
-  BNEQ: 0x7,
-  ADD: 0x8,
-  SUB: 0x9,
-  SHL: 0xa,
-  SHR: 0xb,
-  AND: 0xc,
-  OR: 0xd,
-  INV: 0xe,
-  XOR: 0xf,
-} as const;
+export enum Inst {
+  ctrl = 0, // sel: 00 -> halt
+  load, // r[dst] = mem[r[addr] + offset]
+  store, // mem[r[addr] + offset] = r[src]
+  set, // r[dst] = <const> (10 bits)
+  arith, // r[dst] = r[op1] (op) r[op2] (sel: 00 -> add, 01 -> sub, 10 -> adc, 11 -> sbc)
+  cond, // r[dst] = r[op1] (op) r[op2] (sel: 00 -> add, 01 -> sub, 10 -> adc, 11 -> sbc) (00xx -> if z, 01xx -> if not z, 10xx -> if c, 11xx -> if not c)
+  logic, // r[dst] = r[op1] (op) (r[op2] or shift amount) (sel: 00 -> and, 01 -> or, 10 -> nand, 11 -> xor)
+  shift, // r[dst] = r[op1] (op) amount (sel: 0 -> left, 1 -> right)
+}
 
 const createROM = defineModule({
   name: 'instructions_rom',
-  inputs: { address: 8 },
+  inputs: { address: 16 },
   outputs: { inst: 16 },
   connect({ address }, out) {
-    out.inst = matchN(16)(address, {
-      0: [...bin(Inst.SET, 4), ...bin(2, 4), ...bin(0, 8)],
-      // loop
-      1: [...bin(Inst.SET, 4), ...bin(1, 4), ...bin(128, 8)],
-      2: [...bin(Inst.STORE, 4), ...bin(2, 4), ...bin(1, 4), ...bin(0, 4)],
-      3: [...bin(Inst.SET, 4), ...bin(1, 4), ...bin(1, 8)],
-      4: [...bin(Inst.ADD, 4), ...bin(2, 4), ...bin(2, 4), ...bin(1, 4)],
-      5: [...bin(Inst.SET, 4), ...bin(15, 4), ...bin(1, 8)],
-      6: [...bin(Inst.SET, 4), ...bin(0, 4), ...bin(7, 8)],
-      // delay
-      7: [...bin(Inst.SET, 4), ...bin(11, 4), ...bin(0, 8)],
-      8: [...bin(Inst.SET, 4), ...bin(1, 4), ...bin(1, 8)],
-      // delay_loop
-      9: [...bin(Inst.ADD, 4), ...bin(11, 4), ...bin(11, 4), ...bin(1, 4)],
-      10: [...bin(Inst.BEQ, 4), ...bin(11, 4), ...bin(0, 8)],
-      11: [...bin(Inst.SET, 4), ...bin(0, 4), ...bin(9, 8)],
-      12: [...bin(Inst.SET, 4), ...bin(1, 4), ...bin(0, 8)],
-      13: [...bin(Inst.ADD, 4), ...bin(0, 4), ...bin(15, 4), ...bin(1, 4)],
-      _: Tuple.repeat(16, 0),
+    out.inst = match16(address, {
+      0: bin(0x6417, 16),
+      1: bin(0x6823, 16),
+      2: bin(0x84a0, 16),
+      5: bin(0x0000, 16),
+      _: bin(0, 16),
     });
   }
 });
 
-const top = defineModule({
-  name: 'top',
-  inputs: { din: 8, clk: 1 },
-  outputs: { read: 1, write: 1, address: 8, dout: 8 },
+const createProgramCounter = <N extends Multi>(N: N) => {
+  const zero = State.gen(N, () => State.zero);
+
+  return defineModule({
+    name: `counter_reg${N}`,
+    inputs: { d: N, load: 1, countEnable: 1, clk: 1, rst: 1 },
+    outputs: { q: N },
+    state: { bits: State.gen(N, () => State.zero), last_clk: State.zero },
+    simulate(inp, out, state) {
+      const rising = state.last_clk === 0 && inp.clk;
+
+      if (inp.rst === 1) {
+        state.bits = zero;
+      } else if (rising) {
+        if (inp.load) {
+          state.bits = inp.d;
+        }
+
+        if (inp.countEnable) {
+          for (let i = N - 1; i >= 0; i--) {
+            const prev = state.bits[i];
+            state.bits[i] = prev === 0 ? 1 : 0;
+            if (prev !== 1) { break; }
+          }
+        }
+      }
+
+      state.last_clk = inp.clk;
+      out.q = state.bits;
+    },
+  })();
+};
+
+const createRegisters = defineModule({
+  name: 'registers',
+  inputs: { d: 16, clk: 1, rst: 1, dest: 3, src1: 3, src2: 3 },
+  outputs: { a: 16, b: 16, pc: 16 },
   connect(inp, out) {
-    const regs = Tuple.gen(16, i => reg8(bin(i, 8)));
+    const pc = createProgramCounter(16);
+    const regs = [...Tuple.gen(7, reg16), pc];
+    const buffersA = Tuple.gen(8, () => triStateBuffer(16));
+    const buffersB = Tuple.gen(8, () => triStateBuffer(16));
+    const selDst = decoder(8, inp.dest);
+    const selA = decoder(8, inp.src1);
+    const selB = decoder(8, inp.src2);
+
+    IO.forward({ clk: inp.clk, rst: inp.rst }, regs.slice(1));
+
+    // rz is always 0
+    regs[0].in.rst = 1;
+    // always increment the program counter
+    pc.in.countEnable = 1;
+
+    Range.iter(0, 8, n => {
+      buffersA[n].in.d = regs[n].out.q;
+      buffersB[n].in.d = regs[n].out.q;
+      regs[n].in.d = inp.d;
+      regs[n].in.load = selDst[n];
+      buffersA[n].in.enable = selA[n];
+      buffersB[n].in.enable = selB[n];
+
+      out.a = buffersA[n].out.q;
+      out.b = buffersB[n].out.q;
+    });
+
+    out.pc = pc.out.q;
+  }
+});
+
+const createALU = defineModule({
+  name: 'alu',
+  inputs: { a: 16, b: 16, op: 2, isLogic: 1, carryIn: 1, outputEnable: 1 },
+  outputs: { q: 16, isZero: 1, carryOut: 1 },
+  connect(inp, out) {
+    const adders = adder(16);
+    const outputBuffer = triStateBuffer(16);
+
+    const [
+      isAdd, isSub, isAdc, isSbc,
+      isAnd, isOr, isNand, isXor,
+    ] = decoder(8, [inp.isLogic, ...inp.op]);
+
+    const subtract = or<1>(isSub, isSbc);
+
+    adders.in.a = inp.a;
+    adders.in.b = xor<16>(inp.b, Tuple.repeat(16, subtract));
+    adders.in.carryIn = or<1>(isSub, and<1>(or<1>(isAdc, isSbc), inp.carryIn));
+
+    outputBuffer.in.d = adders.out.sum;
+    outputBuffer.in.enable = inp.outputEnable;
+
+    out.q = outputBuffer.out.q;
+    out.carryOut = adders.out.carryOut;
+    out.isZero = isEqualConst(bin(0, 16), adders.out.sum);
+  }
+});
+
+const createCPU = defineModule({
+  name: 'cpu',
+  inputs: { clk: 1, rst: 1 },
+  outputs: { aluOut: 16, a: 16, b: 16, pc: 16, inst: 16 },
+  connect(inp, out) {
     const rom = createROM();
+    const regs = createRegisters();
+    const alu = createALU();
+    const setBuffer = triStateBuffer(16);
 
-    IO.forward({ clk: inp.clk }, regs);
-
-    const programCounter = regs[0].out.q;
-    rom.in.address = programCounter;
-
+    rom.in.address = regs.out.pc;
     const inst = rom.out.inst;
-    const opcode = Tuple.slice(0, 4, inst);
-    const dest = Tuple.slice(4, 8, inst);
-    const arg1 = Tuple.slice(8, 12, inst);
-    const arg2 = Tuple.slice(12, 16, inst);
-    const constant = Tuple.slice(8, 16, inst);
+    const opcode = Tuple.slice(0, 3, inst);
+    const dest = Tuple.slice(3, 6, inst);
+    const src1 = Tuple.slice(6, 9, inst);
+    const src2 = Tuple.slice(9, 12, inst);
+    const sel = Tuple.slice(12, 16, inst);
 
-    const registersMapping = Object.fromEntries(
-      regs.map((r, i) => [i, r.out.q])
-    ) as Record<Range<0, 16>, Tuple<Connection, 8>>;
+    IO.forward({
+      clk: inp.clk, rst: inp.rst,
+      dest, src1, src2,
+    }, [regs]);
 
-    const destRegOut = match8(dest, registersMapping);
-    const arg1RegOut = match8(arg1, registersMapping);
-    const arg2RegOut = match8(arg2, registersMapping);
+    const [
+      isCtrl, isLoad, isStore, isSet,
+      isArith, isCond, isLogic, isShift
+    ] = decoder(8, opcode);
 
-    const argsComp = compare8(arg1RegOut, arg2RegOut);
+    alu.in.op = Tuple.slice(2, 4, sel);
+    alu.in.isLogic = isLogic;
+    alu.in.a = regs.out.a;
+    alu.in.b = regs.out.b;
+    alu.in.carryIn = 0;
+    alu.in.outputEnable = logicalOr(isArith, isLogic, isShift, isCond);
 
-    const inputDemux = demux16(8);
-    inputDemux.in.sel = dest;
+    setBuffer.in.enable = isSet;
+    setBuffer.in.d = [0, 0, 0, 0, 0, 0, ...Tuple.slice(6, 16, inst)];
 
-    inputDemux.in.d = match8(opcode, {
-      [Inst.LOAD]: inp.din,
-      [Inst.SET]: constant,
-      [Inst.LT]: Tuple.repeat(8, argsComp.lss),
-      [Inst.EQ]: Tuple.repeat(8, argsComp.equ),
-      [Inst.ADD]: add<8>(arg1RegOut, arg2RegOut),
-      [Inst.SUB]: subtract<8>(arg1RegOut, arg2RegOut),
-      [Inst.SHL]: shiftLeft<8>(arg1RegOut, Tuple.low(3, arg2RegOut)),
-      [Inst.SHR]: shiftRight<8>(arg1RegOut, Tuple.low(3, arg2RegOut)),
-      [Inst.AND]: and<8>(arg1RegOut, arg2RegOut),
-      [Inst.OR]: or<8>(arg1RegOut, arg2RegOut),
-      [Inst.INV]: not<8>(arg1RegOut),
-      [Inst.XOR]: xor<8>(arg1RegOut, arg2RegOut),
-      _: Tuple.repeat(8, State.zero),
-    });
+    // // registers input
+    regs.in.d = alu.out.q;
+    regs.in.d = setBuffer.out.q;
 
-    const isDestZero = isEqualConst<4>(bin(0, 4), dest);
-    const isStoreInst = isEqualConst<4>(bin(Inst.STORE, 4), opcode);
-    const isLoadInst = isEqualConst<4>(bin(Inst.LOAD, 4), opcode);
-    const isBeqInst = isEqualConst<4>(bin(Inst.BEQ, 4), opcode);
-    const isBneqInst = isEqualConst<4>(bin(Inst.BNEQ, 4), opcode);
-    const destOutEqualsConstant = isEqual<8>(destRegOut, constant);
+    out.a = regs.out.a;
+    out.b = regs.out.b;
+    out.aluOut = alu.out.q;
+    out.pc = regs.out.pc;
+    out.inst = inst;
+  }
+});
 
-    out.address = add<8>(arg1RegOut, [0, 0, 0, 0, ...arg2]);
-    out.dout = destRegOut;
-    out.read = isLoadInst;
-    out.write = isStoreInst;
+const main = async () => {
+  const cpu = createCPU();
 
-    const pcIncrementer = adder(8);
-    pcIncrementer.in.carryIn = 0;
-    pcIncrementer.in.a = programCounter;
+  const sim = createSimulator(cpu, {
+    approach: 'event-driven',
+    checkConnections: true,
+  });
 
-    const branch = or(
-      and(destOutEqualsConstant, isBeqInst),
-      and(not(destOutEqualsConstant), isBneqInst)
-    );
-    pcIncrementer.in.b = match8(branch, {
-      0: Tuple.bin(1, 8),
-      1: Tuple.bin(2, 8),
-    });
+  const logState = () => {
+    const a = sim.state.read(cpu.out.a);
+    const b = sim.state.read(cpu.out.b);
+    const pc = sim.state.read(cpu.out.pc);
+    const aluOut = sim.state.read(cpu.out.aluOut);
+    const inst = sim.state.read(cpu.out.inst);
 
-    regs[0].in.load = 1;
-    regs[0].in.d = match8(isDestZero, {
-      0: pcIncrementer.out.sum,
-      1: inputDemux.out.q0,
-    });
+    const fmt = (n: State[]) => n.includes('x') ? 'xxxx' : parseInt(n.join(''), 2).toString(16).padStart(4, '0');
+    const values = { a, b, alu: aluOut, pc, inst };
+    console.log(Object.entries(values).map(([k, v]) => `${k}: ${fmt(v)}`).join(', '));
+  };
 
-    const loadDemux = demux16(1);
-    loadDemux.in.sel = dest;
-    loadDemux.in.d = match1(opcode, {
-      [Inst.NOOP]: 0,
-      [Inst.STORE]: 0,
-      [Inst.BEQ]: 0,
-      [Inst.BNEQ]: 0,
-      _: 1,
-    });
-
-    Range.iter(1, 16, n => {
-      regs[n].in.load = loadDemux.out[`q${n}`];
-      regs[n].in.d = inputDemux.out[`q${n}`];
-    });
-  },
-})();
-
-const main = () => {
-  const sim = createSimulator(top);
-  const din = Tuple.repeat(8, State.zero);
-
-  for (let i = 0; i < 198914; i++) {
-    sim.input({ din, clk: 0 });
-    if (sim.state.read(top.out.write) === 1) {
-      console.log({
-        dout: sim.state.read(top.out.dout).join(''),
-      });
-    }
-    sim.input({ din, clk: 1 });
+  for (let i = 0; i < 3; i++) {
+    sim.input({ clk: 1, rst: 0 });
+    sim.input({ clk: 0, rst: 0 });
+    logState();
   }
 };
 

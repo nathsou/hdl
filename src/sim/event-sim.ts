@@ -82,6 +82,7 @@ export const createEventDrivenSimulator = <
   const processEvents = () => {
     while (eventQueue.size > 0) {
       const event = eventQueue.dequeue()!;
+
       const sta = state.raw[event.net] as NodeStateConst;
       sta.value = event.newState;
 

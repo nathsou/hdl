@@ -68,24 +68,28 @@ export const raw = {
       out.q = state.bits;
     },
   }),
-  reg: <N extends Multi>(
-    N: N
-  ) => () => defineModule({
-    name: `reg${N}`,
-    inputs: { d: N, load: 1, clk: 1 },
-    outputs: { q: N },
-    state: { data: State.gen(N, () => State.zero), last_clk: State.zero },
-    simulate(inp, out, state) {
-      const rising = inp.clk && !state.last_clk;
+  reg: <N extends Multi>(N: N) => () => {
+    const zero = State.gen(N, () => State.zero);
 
-      if (rising && inp.load) {
-        state.data = inp.d;
-      }
+    return defineModule({
+      name: `reg${N}`,
+      inputs: { d: N, load: 1, clk: 1, rst: 1 },
+      outputs: { q: N },
+      state: { data: zero, last_clk: State.zero },
+      simulate(inp, out, state) {
+        const rising = inp.clk && !state.last_clk;
 
-      state.last_clk = inp.clk;
-      out.q = state.data;
-    },
-  })(),
+        if (inp.rst === 1) {
+          state.data = zero;
+        } else if (rising && inp.load) {
+          state.data = inp.d;
+        }
+
+        state.last_clk = inp.clk;
+        out.q = state.data;
+      },
+    })()
+  },
 };
 
 

@@ -1,7 +1,7 @@
 import { defineModule, IO, metadata, Module, Num } from "../core";
 import { Tuple } from "../utils";
 
-const triStateBuffer1 = defineModule({
+export const triStateBuffer1 = defineModule({
   name: 'tristate_buffer',
   inputs: { d: 1, enable: 1 },
   outputs: { q: 1 },
@@ -17,13 +17,13 @@ export const triStateBuffer = <N extends Num>(N: N) => defineModule({
   connect({ d, enable }, out) {
     const N = IO.width(d);
     const buffers = Tuple.gen(N, triStateBuffer1);
-    
-      IO.forward({ enable }, buffers);
-  
-      buffers.forEach((buffer, index) => {
-        buffer.in.d = Array.isArray(d) ? d[index] : d;
-      });
-  
+
+    IO.forward({ enable }, buffers);
+
+    buffers.forEach((buffer, index) => {
+      buffer.in.d = Array.isArray(d) ? d[index] : d;
+    });
+
     out.q = IO.gen(N, n => buffers[n].out.q);
   }
 })();

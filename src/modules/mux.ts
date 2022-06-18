@@ -244,6 +244,7 @@ export const raw = {
 };
 
 type Pow2 = { 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128 } & Record<number, number>;
+type Log2 = { 2: 1, 4: 2, 8: 3, 16: 4, 32: 5, 64: 6, 128: 7 };
 
 type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, IO<N>>;
 type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: IO<N> });
@@ -285,15 +286,31 @@ const match = <N extends Num>(N: N) => <T extends IO<Num>>(
   return IO.gen(N, i => logicalOr(...ors.map(o => o[i])));
 });
 
-export const binaryDecoder2 = defineModule({
-  name: 'binary_decoder_2',
-  inputs: { d: 4 },
-  outputs: { q: 2 },
-  connect({ d }, out) {
-    const [y3, y2, y1, _y0] = d;
-    out.q = [or<1>(y3, y2), or<1>(y3, y1)];
-  }
-});
+// export const decoder = <N extends 2 | 4 | 8 | 16 | 32>(N: N, sel: IO<Log2[N]>): IO<N> => {
+//   const demux = raw[`demux${N}`](1)();
+//   demux.in.d = 1;
+//   demux.in.sel = sel;
+
+//   /// @ts-ignore
+//   return Range.map(0, N, n => demux.out[`q${n}`]);
+// };
+
+export const decoder = <N extends 2 | 4 | 8 | 16 | 32>(N: N, sel: IO<Log2[N]>): IO<N> => {
+  const d = defineModule({
+    name: `decoder_sim_${N}`,
+    inputs: { sel: IO.width(sel) },
+    outputs: { q: N },
+    simulate(inp, out) {
+      const n = parseInt(IO.asArray(inp.sel).join(''), 2);
+      /// @ts-ignore
+      out.q = Range.map(0, N, i => i === n ? 1 : 0);
+    }
+  })();
+
+  d.in.sel = sel;
+
+  return d.out.q;
+};
 
 export const mux2 = <N extends Num>(N: N) => raw.mux2(N)();
 export const mux4 = <N extends Num>(N: N) => raw.mux4(N)();
@@ -314,3 +331,4 @@ export const match5 = match(5);
 export const match6 = match(6);
 export const match7 = match(7);
 export const match8 = match(8);
+export const match16 = match(16);

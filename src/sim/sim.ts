@@ -191,7 +191,7 @@ const createStateUpdater = (onStateChange?: (net: Net, newState: State) => void)
         node.initialized = true;
         node.value = newState;
         onStateChange(net, newState);
-      } else if (newState !== 'x' && node.value !== newState) {
+      } else if (node.value !== newState) {
         onStateChange(net, newState);
       }
     };
