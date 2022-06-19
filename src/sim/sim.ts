@@ -55,10 +55,10 @@ export const initState = (circuit: Circuit): CircuitState => {
 
     for (const [pin, width] of Iter.join(Object.entries(sig.inputs), Object.entries(sig.outputs))) {
       if (width === 1) {
-        state[`${pin}:${id}`] = { type: 'const', value: 0, initialized: false };
+        state[`${pin}:${id}`] = { type: 'const', value: 'x', initialized: false };
       } else {
         for (let n = 0; n < width; n++) {
-          state[`${pin}${width - n - 1}:${id}`] = { type: 'const', value: 0, initialized: false };
+          state[`${pin}${width - n - 1}:${id}`] = { type: 'const', value: 'x', initialized: false };
         }
       }
     }
@@ -204,6 +204,7 @@ const createStateUpdater = (onStateChange?: (net: Net, newState: State) => void)
   ) => {
     const node = state[net] as NodeStateConst;
     node.value = newState;
+    node.initialized = true;
   };
 };
 

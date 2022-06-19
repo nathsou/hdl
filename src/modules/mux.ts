@@ -2,7 +2,7 @@ import { Connection, defineModule, createModuleGroup, IO, Num } from "../core";
 import { Range, Tuple } from "../utils";
 import { and, logicalAnd, logicalOr, not, or } from "./gates";
 
-export const raw = {
+export const mux = {
   mux2: <N extends Num>(N: N) => defineModule({
     name: `mux2_${N}`,
     inputs: { d0: N, d1: N, sel: 1 },
@@ -10,7 +10,7 @@ export const raw = {
     connect({ sel, d0, d1 }, out) {
       out.q = or(
         and(d0, IO.repeat(N, not<1>(sel))),
-        and(IO.repeat(N, sel), d1)
+        and(d1, IO.repeat(N, sel))
       );
     }
   }),
@@ -19,7 +19,7 @@ export const raw = {
     inputs: { d0: N, d1: N, d2: N, d3: N, sel: 2 },
     outputs: { q: N },
     connect({ sel, d0, d1, d2, d3 }, out) {
-      const createMux2 = raw.mux2(N);
+      const createMux2 = mux.mux2(N);
       const m1 = createMux2();
       const m2 = createMux2();
       const m3 = createMux2();
@@ -43,10 +43,10 @@ export const raw = {
     inputs: { d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N, sel: 3 },
     outputs: { q: N },
     connect({ sel, d0, d1, d2, d3, d4, d5, d6, d7 }, out) {
-      const createMux4 = raw.mux4(N);
+      const createMux4 = mux.mux4(N);
       const m1 = createMux4();
       const m2 = createMux4();
-      const m3 = raw.mux2(N)();
+      const m3 = mux.mux2(N)();
 
       m1.in.d0 = d0;
       m1.in.d1 = d1;
@@ -77,10 +77,10 @@ export const raw = {
     },
     outputs: { q: N },
     connect(inp, out) {
-      const createMux8 = raw.mux8(N);
+      const createMux8 = mux.mux8(N);
       const m1 = createMux8();
       const m2 = createMux8();
-      const m3 = raw.mux2(N)();
+      const m3 = mux.mux2(N)();
 
       Range.iter(0, 8, i => {
         m1.in[`d${i}`] = inp[`d${i}`];
@@ -110,10 +110,10 @@ export const raw = {
     },
     outputs: { q: N },
     connect(inp, out) {
-      const createMux16 = raw.mux16(N);
+      const createMux16 = mux.mux16(N);
       const m1 = createMux16();
       const m2 = createMux16();
-      const m3 = raw.mux2(N)();
+      const m3 = mux.mux2(N)();
 
       Range.iter(0, 16, i => {
         m1.in[`d${i}`] = inp[`d${i}`];
@@ -146,7 +146,7 @@ export const raw = {
     inputs: { d: N, sel: 2 },
     outputs: { q0: N, q1: N, q2: N, q3: N },
     connect(inp, out) {
-      const createDemux2 = raw.demux2(N);
+      const createDemux2 = mux.demux2(N);
       const m1 = createDemux2();
       const m2 = createDemux2();
       const m3 = createDemux2();
@@ -171,10 +171,10 @@ export const raw = {
     inputs: { d: N, sel: 3 },
     outputs: Object.fromEntries(Range.map(0, 8, i => [`q${i}`, N])) as Record<`q${Range<0, 8>}`, N>,
     connect(inp, out) {
-      const createDemux4 = raw.demux4(N);
+      const createDemux4 = mux.demux4(N);
       const m1 = createDemux4();
       const m2 = createDemux4();
-      const m3 = raw.demux2(N)();
+      const m3 = mux.demux2(N)();
 
       m3.in.d = inp.d;
       m3.in.sel = inp.sel[0];
@@ -196,10 +196,10 @@ export const raw = {
     inputs: { d: N, sel: 4 },
     outputs: Object.fromEntries(Range.map(0, 16, i => [`q${i}`, N])) as Record<`q${Range<0, 16>}`, N>,
     connect(inp, out) {
-      const createDemux8 = raw.demux8(N);
+      const createDemux8 = mux.demux8(N);
       const m1 = createDemux8();
       const m2 = createDemux8();
-      const m3 = raw.demux2(N)();
+      const m3 = mux.demux2(N)();
 
       m3.in.d = inp.d;
       m3.in.sel = inp.sel[0];
@@ -221,10 +221,10 @@ export const raw = {
     inputs: { d: N, sel: 5 },
     outputs: Object.fromEntries(Range.map(0, 32, i => [`q${i}`, N])) as Record<`q${Range<0, 32>}`, N>,
     connect(inp, out) {
-      const createDemux16 = raw.demux16(N);
+      const createDemux16 = mux.demux16(N);
       const m1 = createDemux16();
       const m2 = createDemux16();
-      const m3 = raw.demux2(N)();
+      const m3 = mux.demux2(N)();
 
       m3.in.d = inp.d;
       m3.in.sel = inp.sel[0];
@@ -312,16 +312,16 @@ export const decoder = <N extends 2 | 4 | 8 | 16 | 32>(N: N, sel: IO<Log2[N]>): 
   return d.out.q;
 };
 
-export const mux2 = <N extends Num>(N: N) => raw.mux2(N)();
-export const mux4 = <N extends Num>(N: N) => raw.mux4(N)();
-export const mux8 = <N extends Num>(N: N) => raw.mux8(N)();
-export const mux16 = <N extends Num>(N: N) => raw.mux16(N)();
-export const mux32 = <N extends Num>(N: N) => raw.mux32(N)();
-export const demux2 = <N extends Num>(N: N) => raw.demux2(N)();
-export const demux4 = <N extends Num>(N: N) => raw.demux4(N)();
-export const demux8 = <N extends Num>(N: N) => raw.demux8(N)();
-export const demux16 = <N extends Num>(N: N) => raw.demux16(N)();
-export const demux32 = <N extends Num>(N: N) => raw.demux32(N)();
+export const mux2 = <N extends Num>(N: N) => mux.mux2(N)();
+export const mux4 = <N extends Num>(N: N) => mux.mux4(N)();
+export const mux8 = <N extends Num>(N: N) => mux.mux8(N)();
+export const mux16 = <N extends Num>(N: N) => mux.mux16(N)();
+export const mux32 = <N extends Num>(N: N) => mux.mux32(N)();
+export const demux2 = <N extends Num>(N: N) => mux.demux2(N)();
+export const demux4 = <N extends Num>(N: N) => mux.demux4(N)();
+export const demux8 = <N extends Num>(N: N) => mux.demux8(N)();
+export const demux16 = <N extends Num>(N: N) => mux.demux16(N)();
+export const demux32 = <N extends Num>(N: N) => mux.demux32(N)();
 export const matchN = match;
 export const match1 = match(1);
 export const match2 = match(2);

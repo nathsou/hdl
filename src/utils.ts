@@ -161,6 +161,9 @@ export const Tuple = {
 
     return result as Tuple<T, N>;
   },
+  mapObject: <K extends string | number | symbol, N extends number, T>(entries: Tuple<[K, T], N>): Record<K, T> => {
+    return Object.fromEntries(entries) as Record<K, T>;
+  },
   repeat: <T, N extends number>(count: N, c: T): Tuple<T, N> => {
     return Tuple.gen(count, () => c);
   },
