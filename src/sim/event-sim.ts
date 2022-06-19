@@ -76,6 +76,12 @@ export const createEventDrivenSimulator = <
       }
     }
 
+    // if the top module is not compound, add it to the module queue
+    // otherwise, the fanout is empty so the module queue is also empty
+    if (circuit.modules.get(topId)?.simulate != null) {
+      moduleQueue.unshift(topId);
+    }
+
     loop();
   };
 

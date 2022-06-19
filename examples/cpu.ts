@@ -1,10 +1,10 @@
-import { adder, and, isEqualConst, logicalOr, or, xor } from "../src";
+import { adder, and, isEqualConst, logicalAnd, logicalOr, nand, or, xor } from "../src";
 import { defineModule, IO, Multi, State } from "../src/core";
-import { decoder, match16 } from "../src/modules/mux";
+import { decoder, match16, mux2, mux8 } from "../src/modules/mux";
 import { reg16 } from "../src/modules/regs";
 import { triStateBuffer } from "../src/modules/tristate";
 import { createSimulator } from '../src/sim/sim';
-import { Range, Tuple } from "../src/utils";
+import { last, Range, Tuple } from "../src/utils";
 
 const { bin } = Tuple;
 
@@ -15,8 +15,16 @@ export enum Inst {
   set, // r[dst] = <const> (10 bits)
   arith, // r[dst] = r[op1] (op) r[op2] (sel: 00 -> add, 01 -> sub, 10 -> adc, 11 -> sbc)
   cond, // r[dst] = r[op1] (op) r[op2] (sel: 00 -> add, 01 -> sub, 10 -> adc, 11 -> sbc) (00xx -> if z, 01xx -> if not z, 10xx -> if c, 11xx -> if not c)
-  logic, // r[dst] = r[op1] (op) (r[op2] or shift amount) (sel: 00 -> and, 01 -> or, 10 -> nand, 11 -> xor)
-  shift, // r[dst] = r[op1] (op) amount (sel: 0 -> left, 1 -> right)
+  logic, // r[dst] = r[op1] (op) r[op2] (sel: 000 -> and, 001 -> or, 010 -> nand, 011 -> xor, 100 -> shl, 101 -> shr)
+}
+
+export enum LogicOp {
+  and = 0,
+  or,
+  nand,
+  xor,
+  shl,
+  shr,
 }
 
 const createROM = defineModule({
@@ -26,9 +34,9 @@ const createROM = defineModule({
   connect({ address }, out) {
     out.inst = match16(address, {
       0: bin(0x6417, 16),
-      1: bin(0x6823, 16),
-      2: bin(0x84a0, 16),
-      5: bin(0x0000, 16),
+      1: bin(0x6803, 16),
+      2: bin(0xc4a4, 16),
+      3: bin(0x0000, 16),
       _: bin(0, 16),
     });
   }
@@ -103,31 +111,67 @@ const createRegisters = defineModule({
   }
 });
 
+const createShifter = defineModule({
+  name: 'shifter',
+  inputs: { n: 16, amount: 4, dir: 1 },
+  outputs: { q: 16 },
+  simulate(inp, out) {
+    const n = parseInt(inp.n.join(''), 2);
+    const amount = parseInt(inp.amount.join(''), 2);
+
+    if (inp.dir === 0) {
+      out.q = bin(n << amount, 16);
+    } else {
+      out.q = bin(n >>> amount, 16);
+    }
+  }
+});
+
 const createALU = defineModule({
   name: 'alu',
-  inputs: { a: 16, b: 16, op: 2, isLogic: 1, carryIn: 1, outputEnable: 1 },
+  inputs: { a: 16, b: 16, op: 3, isLogic: 1, carryIn: 1, outputEnable: 1 },
   outputs: { q: 16, isZero: 1, carryOut: 1 },
-  connect(inp, out) {
+  connect({ a, b, op, isLogic, carryIn, outputEnable }, out) {
     const adders = adder(16);
     const outputBuffer = triStateBuffer(16);
+    const outputMux = mux2(16);
+    const shifter = createShifter();
 
-    const [
-      isAdd, isSub, isAdc, isSbc,
-      isAnd, isOr, isNand, isXor,
-    ] = decoder(8, [inp.isLogic, ...inp.op]);
+    // arithmetic unit
+    const [_isAdd, isSub, isAdc, isSbc] = decoder(4, Tuple.slice(1, 3, op));
+    const subtract = logicalOr(isSub, isSbc);
+    const useCarry = logicalOr(isAdc, isSbc);
+    adders.in.a = a;
+    adders.in.b = xor<16>(b, Tuple.repeat(16, subtract));
+    adders.in.carryIn = logicalOr(isSub, logicalAnd(useCarry, carryIn));
 
-    const subtract = or<1>(isSub, isSbc);
+    // logic unit
+    shifter.in.n = a;
+    shifter.in.amount = Tuple.slice(12, 16, b);
+    shifter.in.dir = last(op);
 
-    adders.in.a = inp.a;
-    adders.in.b = xor<16>(inp.b, Tuple.repeat(16, subtract));
-    adders.in.carryIn = or<1>(isSub, and<1>(or<1>(isAdc, isSbc), inp.carryIn));
+    const logicOutput = match16(op, {
+      [LogicOp.and]: and<16>(a, b),
+      [LogicOp.or]: or<16>(a, b),
+      [LogicOp.nand]: nand<16>(a, b),
+      [LogicOp.xor]: xor<16>(a, b),
+      [LogicOp.shl]: shifter.out.q,
+      [LogicOp.shr]: shifter.out.q,
+      // [LogicOp.shl]: shiftLeft<16>(a, Tuple.slice(12, 16, b)),
+      // [LogicOp.shr]: shiftRight<16>(a, Tuple.slice(12, 16, b)),
+      _: Tuple.repeat(16, 0),
+    });
 
-    outputBuffer.in.d = adders.out.sum;
-    outputBuffer.in.enable = inp.outputEnable;
+    outputMux.in.d0 = adders.out.sum;
+    outputMux.in.d1 = logicOutput;
+    outputMux.in.sel = isLogic;
+
+    outputBuffer.in.d = outputMux.out.q;
+    outputBuffer.in.enable = outputEnable;
 
     out.q = outputBuffer.out.q;
     out.carryOut = adders.out.carryOut;
-    out.isZero = isEqualConst(bin(0, 16), adders.out.sum);
+    out.isZero = isEqualConst(bin(0, 16), outputMux.out.q);
   }
 });
 
@@ -156,15 +200,15 @@ const createCPU = defineModule({
 
     const [
       isCtrl, isLoad, isStore, isSet,
-      isArith, isCond, isLogic, isShift
+      isArith, isCond, isLogic
     ] = decoder(8, opcode);
 
-    alu.in.op = Tuple.slice(2, 4, sel);
+    alu.in.op = Tuple.slice(1, 4, sel);
     alu.in.isLogic = isLogic;
     alu.in.a = regs.out.a;
     alu.in.b = regs.out.b;
     alu.in.carryIn = 0;
-    alu.in.outputEnable = logicalOr(isArith, isLogic, isShift, isCond);
+    alu.in.outputEnable = logicalOr(isArith, isCond, isLogic);
 
     setBuffer.in.enable = isSet;
     setBuffer.in.d = [0, 0, 0, 0, 0, 0, ...Tuple.slice(6, 16, inst)];
@@ -186,7 +230,7 @@ const main = async () => {
 
   const sim = createSimulator(cpu, {
     approach: 'event-driven',
-    checkConnections: true,
+    checkConnections: false,
   });
 
   const logState = () => {
@@ -202,8 +246,9 @@ const main = async () => {
   };
 
   for (let i = 0; i < 3; i++) {
-    sim.input({ clk: 1, rst: 0 });
     sim.input({ clk: 0, rst: 0 });
+    logState();
+    sim.input({ clk: 1, rst: 0 });
     logState();
   }
 };

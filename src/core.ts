@@ -204,16 +204,15 @@ const globalState: GlobalState = {
   subModulesStack: [],
 };
 
-const GlobalState = {
+export const GlobalState = {
   state: globalState,
   reset: () => {
     globalState.nextId = 0;
     globalState.subModulesStack = [];
-    globalState.circuit = {
-      modules: new Map(),
-      nets: new Map(),
-      signatures: new Map(),
-    };
+    globalState.circuit.modules.clear();
+    globalState.circuit.nets.clear();
+
+    createPowerModule();
   },
 };
 

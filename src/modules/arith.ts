@@ -83,7 +83,7 @@ export const arith = {
       out.q = IO.gen(N, n => muxes[n].out.q);
     }
   }),
-  leftShifer: <N extends keyof Log2>(N: N) => defineModule({
+  leftShifter: <N extends keyof Log2>(N: N) => defineModule({
     name: `left_shifter${N}`,
     inputs: { d: N, amount: log2[N] },
     outputs: { q: N },
@@ -139,7 +139,7 @@ export const subtract = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
 
 export const shiftLeft = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>): IO<N> => {
   const N = IO.width(d);
-  const shifter = arith.leftShifer(N)();
+  const shifter = arith.leftShifter(N)();
   shifter.in.d = d;
   shifter.in.amount = amount;
 
@@ -289,4 +289,4 @@ export const compare8 = (a: IO<8>, b: IO<8>) => {
 export const adder = <N extends Multi>(N: N) => arith.adder(N)();
 export const adderSubtractor = <N extends Multi>(N: N) => arith.adderSubtractor(N)();
 export const rightShifter = <N extends keyof Log2>(N: N) => arith.rightShifter(N)();
-export const leftShifer = <N extends keyof Log2>(N: N) => arith.leftShifer(N)();
+export const leftShifer = <N extends keyof Log2>(N: N) => arith.leftShifter(N)();

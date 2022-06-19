@@ -2,63 +2,40 @@ import { Connection, createModuleGroup, defineModule, IO, Module, Num } from "..
 import { assert } from "../utils";
 import { extendN } from "./meta";
 
+const binaryGate = (name: string, op: (a: boolean, b: boolean) => boolean) => {
+  return defineModule({
+    name,
+    inputs: { a: 1, b: 1 },
+    outputs: { q: 1 },
+    simulate({ a, b }, out) {
+      if (a === 'x' || b === 'x') {
+        out.q = 'x';
+      } else {
+        out.q = op(a === 1, b === 1) ? 1 : 0;
+      }
+    },
+  });
+};
+
 export const gates = {
   not: defineModule({
     name: 'not',
     inputs: { d: 1 },
     outputs: { q: 1 },
-    simulate(inp, out) {
-      out.q = inp.d === 0 ? 1 : 0;
+    simulate({ d }, out) {
+      if (d === 'x') {
+        out.q = 'x';
+      } else {
+        out.q = d === 0 ? 1 : 0;
+      }
     },
   }),
-  and: defineModule({
-    name: 'and',
-    inputs: { a: 1, b: 1 },
-    outputs: { q: 1 },
-    simulate(inp, out) {
-      out.q = (inp.a && inp.b) ? 1 : 0;
-    },
-  }),
-  nand: defineModule({
-    name: 'nand',
-    inputs: { a: 1, b: 1 },
-    outputs: { q: 1 },
-    simulate(inp, out) {
-      out.q = (inp.a && inp.b) ? 0 : 1;
-    },
-  }),
-  or: defineModule({
-    name: 'or',
-    inputs: { a: 1, b: 1 },
-    outputs: { q: 1 },
-    simulate(inp, out) {
-      out.q = (inp.a || inp.b) ? 1 : 0;
-    },
-  }),
-  nor: defineModule({
-    name: 'nor',
-    inputs: { a: 1, b: 1 },
-    outputs: { q: 1 },
-    simulate(inp, out) {
-      out.q = (inp.a || inp.b) ? 0 : 1;
-    },
-  }),
-  xor: defineModule({
-    name: 'xor',
-    inputs: { a: 1, b: 1 },
-    outputs: { q: 1 },
-    simulate(inp, out) {
-      out.q = (inp.a || inp.b) && !(inp.a && inp.b) ? 1 : 0;
-    },
-  }),
-  xnor: defineModule({
-    name: 'xnor',
-    inputs: { a: 1, b: 1 },
-    outputs: { q: 1 },
-    simulate(inp, out) {
-      out.q = (inp.a || inp.b) && !(inp.a && inp.b) ? 0 : 1;
-    },
-  }),
+  and: binaryGate('and', (a, b) => a && b),
+  nand: binaryGate('nand', (a, b) => !(a && b)),
+  or: binaryGate('or', (a, b) => a || b),
+  nor: binaryGate('nor', (a, b) => !(a || b)),
+  xor: binaryGate('xor', (a, b) => (a || b) && !(a && b)),
+  xnor: binaryGate('xnor', (a, b) => (!a && !b) || (a && b)),
 };
 
 const logicalBinaryGateShorthand = (name: string, gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>) => {
