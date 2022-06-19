@@ -7,16 +7,14 @@ describe('mem', () => {
     GlobalState.reset();
   });
 
-  test.only('srLatch', () => {
+  test('srLatch', () => {
     const sr = createSimulator(srLatch());
 
-    // undefined behavior
-    // sr.expect({ s: 0, r: 0 }, { q: 0, qbar: 1 });
+    sr.expect({ s: 0, r: 0 }, { q: 0, qbar: 1 });
     sr.expect({ s: 1, r: 0 }, { q: 1, qbar: 0 });
-    // sr.expect({ s: 0, r: 0 }, { q: 1, qbar: 0 });
-    // sr.expect({ s: 0, r: 1 }, { q: 0, qbar: 1 });
-    // // undefined behavior
-    // sr.expect({ s: 1, r: 1 }, { q: 0, qbar: 0 });
+    sr.expect({ s: 0, r: 0 }, { q: 1, qbar: 0 });
+    sr.expect({ s: 0, r: 1 }, { q: 0, qbar: 1 });
+    sr.expect({ s: 1, r: 1 }, { q: 'x', qbar: 'x' });
   });
 
   test('srLatchWithEnable', () => {
@@ -41,13 +39,13 @@ describe('mem', () => {
   test('leaderFollowerJKFlipFlop', () => {
     const jk = createSimulator(leaderFollowerJKFlipFlop());
 
-    jk.expect({ j: 1, k: 0, clk: 0 }, { q: 0, qbar: 1 });
-    jk.expect({ j: 1, k: 0, clk: 1 }, { q: 0, qbar: 1 });
+    jk.expect({ j: 1, k: 0, clk: 0 }, { q: 1, qbar: 0 });
+    jk.expect({ j: 1, k: 0, clk: 1 }, { q: 1, qbar: 0 });
     jk.expect({ j: 0, k: 1, clk: 0 }, { q: 1, qbar: 0 });
-    jk.expect({ j: 0, k: 1, clk: 1 }, { q: 1, qbar: 0 });
+    jk.expect({ j: 0, k: 1, clk: 1 }, { q: 0, qbar: 1 });
     jk.expect({ j: 1, k: 1, clk: 0 }, { q: 0, qbar: 1 });
-    jk.expect({ j: 1, k: 1, clk: 1 }, { q: 0, qbar: 1 });
-    jk.expect({ j: 1, k: 1, clk: 0 }, { q: 1, qbar: 0 });
+    jk.expect({ j: 1, k: 1, clk: 1 }, { q: 1, qbar: 0 });
+    jk.expect({ j: 1, k: 1, clk: 0 }, { q: 0, qbar: 1 });
     jk.expect({ j: 1, k: 1, clk: 1 }, { q: 1, qbar: 0 });
     jk.expect({ j: 0, k: 0, clk: 0 }, { q: 0, qbar: 1 });
   });

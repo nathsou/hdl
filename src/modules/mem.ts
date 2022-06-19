@@ -1,22 +1,22 @@
-import { defineModule } from "../core";
-import { and, not, gates } from "./gates";
+import { defineModule, State } from "../core";
+import { and, not } from "./gates";
 
 export const srLatch = defineModule({
   name: 'sr_latch',
   inputs: { s: 1, r: 1 },
   outputs: { q: 1, qbar: 1 },
-  connect(inp, out) {
-    const top = gates.nor();
-    const bot = gates.nor();
+  state: { q: State.zero },
+  simulate({ s, r }, out, state) {
+    if (s === 1 && r === 1) {
+      state.q = 'x';
+    } else if (s === 1) {
+      state.q = 1;
+    } else if (r === 1) {
+      state.q = 0;
+    }
 
-    top.in.a = inp.s;
-    top.in.b = bot.out.q;
-
-    bot.in.a = top.out.q;
-    bot.in.b = inp.r;
-
-    out.q = bot.out.q;
-    out.qbar = top.out.q;
+    out.q = state.q;
+    out.qbar = state.q === 'x' ? 'x' : (state.q === 1 ? 0 : 1);
   },
 });
 
@@ -42,12 +42,12 @@ export const dLatch = defineModule({
   connect(inp, out) {
     const sr = srLatchWithEnable();
 
-    sr.in.s = inp.d;
-    sr.in.r = not<1>(inp.d);
+    sr.in.s = not<1>(inp.d);
+    sr.in.r = inp.d;
     sr.in.enable = inp.enable;
 
-    out.q = sr.out.q;
-    out.qbar = sr.out.qbar;
+    out.q = sr.out.qbar;
+    out.qbar = sr.out.q;
   },
 });
 

@@ -8,13 +8,10 @@ describe('mux', () => {
     GlobalState.reset();
   });
 
-  test.only('mux2', () => {
+  test('mux2', () => {
     const m = createSimulator(mux2(1));
 
-    console.log(m.state.raw);
-
     m.expect({ d0: 0, d1: 1, sel: 0 }, { q: 0 });
-    console.log(m.state.raw);
     m.expect({ d0: 0, d1: 1, sel: 1 }, { q: 1 });
   });
 
