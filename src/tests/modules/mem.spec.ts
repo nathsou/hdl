@@ -20,6 +20,7 @@ describe('mem', () => {
   test('srLatchWithEnable', () => {
     const sr = createSimulator(srLatchWithEnable());
 
+    sr.expect({ s: 0, r: 0, enable: 1 }, { q: 0, qbar: 1 });
     sr.expect({ s: 1, r: 0, enable: 1 }, { q: 1, qbar: 0 });
     sr.expect({ s: 0, r: 1, enable: 0 }, { q: 1, qbar: 0 });
     sr.expect({ s: 0, r: 1, enable: 1 }, { q: 0, qbar: 1 });

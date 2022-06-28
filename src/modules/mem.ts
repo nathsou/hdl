@@ -42,12 +42,12 @@ export const dLatch = defineModule({
   connect(inp, out) {
     const sr = srLatchWithEnable();
 
-    sr.in.s = not<1>(inp.d);
-    sr.in.r = inp.d;
+    sr.in.s = inp.d;
+    sr.in.r = not<1>(inp.d);
     sr.in.enable = inp.enable;
 
-    out.q = sr.out.qbar;
-    out.qbar = sr.out.q;
+    out.q = sr.out.q;
+    out.qbar = sr.out.qbar;
   },
 });
 
