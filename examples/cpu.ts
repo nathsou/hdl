@@ -1,9 +1,8 @@
 import { defineModule, IO, Module, Multi, State } from "../src/core";
 import { adder, isEqualConst, shiftLeft, shiftRight } from "../src/modules/arith";
 import { and, logicalAnd, logicalNot, logicalOr, nand, or, xor } from "../src/modules/gates";
-import { dLatch, srLatchWithEnable } from "../src/modules/mem";
 import { decoder, match1, match16, mux2 } from "../src/modules/mux";
-import { reg16, reg2 } from "../src/modules/regs";
+import { reg16, reg } from "../src/modules/regs";
 import { triStateBuffer } from "../src/modules/tristate";
 import { createSimulator } from '../src/sim/sim';
 import { Range, Tuple } from "../src/utils";
@@ -135,10 +134,9 @@ const createRegisters = defineModule({
 
 const createALU = defineModule({
   name: 'alu',
-  inputs: { clk: 1, a: 16, b: 16, op: 3, isLogic: 1, carryIn: 1, outputEnable: 1 },
-  outputs: { q: 16, zeroFlag: 1, carryFlag: 1 },
-  connect({ clk, a, b, op, isLogic, carryIn, outputEnable }, out) {
-    const flags = reg2();
+  inputs: { a: 16, b: 16, op: 3, isLogic: 1, carryIn: 1, outputEnable: 1 },
+  outputs: { q: 16, isZero: 1, carryOut: 1 },
+  connect({ a, b, op, isLogic, carryIn, outputEnable }, out) {
     const adders = adder(16);
     const outputBuffer = triStateBuffer(16);
     const outputMux = mux2(16);
@@ -168,15 +166,9 @@ const createALU = defineModule({
     outputBuffer.in.d = outputMux.out.q;
     outputBuffer.in.enable = outputEnable;
 
-    flags.in.load = logicalAnd(outputEnable, logicalNot(isLogic));
-    flags.in.clk = clk;
-
-    flags.in.d[0] = adders.out.carryOut;
-    flags.in.d[1] = isEqualConst(bin(0, 16), outputMux.out.q);
-
     out.q = outputBuffer.out.q;
-    out.zeroFlag = flags.out.q[0];
-    out.carryFlag = flags.out.q[1];
+    out.isZero = isEqualConst(bin(0, 16), outputMux.out.q);
+    out.carryOut = adders.out.carryOut;
   }
 });
 
@@ -185,11 +177,11 @@ const createCPU = defineModule({
   inputs: { clk: 1, rst: 1 },
   outputs: { z: 1, c: 1, inst: 16, halted: 1 },
   connect(inp, out) {
+    const flags = reg(3);
     const rom = createROM();
     const regs = createRegisters();
     const alu = createALU();
     const setBuffer = triStateBuffer(16);
-    // const halted = srLatchWithEnable();
 
     rom.in.address = regs.out.pc;
     const inst = rom.out.inst;
@@ -209,18 +201,17 @@ const createCPU = defineModule({
       isArith, isCond, isLogic
     ] = decoder(8, opcode);
 
-    // halted.in.s = isCtrl;
-    // halted.in.r = inp.rst;
-    // halted.in.enable = inp.clk;
+    const zeroFlag = flags.out.q[0];
+    const carryFlag = flags.out.q[1];
+    const haltedFlag = flags.out.q[2];
 
     const shouldBranch = match1(Tuple.slice(0, 2, sel), {
-      [Cond.ifZeroSet]: alu.out.zeroFlag,
-      [Cond.ifZeroNotSet]: logicalNot(alu.out.zeroFlag),
-      [Cond.ifCarrySet]: alu.out.carryFlag,
-      [Cond.ifCarryNotSet]: logicalNot(alu.out.carryFlag),
+      [Cond.ifZeroSet]: zeroFlag,
+      [Cond.ifZeroNotSet]: logicalNot(zeroFlag),
+      [Cond.ifCarrySet]: carryFlag,
+      [Cond.ifCarryNotSet]: logicalNot(carryFlag),
     });
 
-    alu.in.clk = inp.clk;
     alu.in.op = Tuple.slice(1, 4, sel);
     alu.in.isLogic = isLogic;
     alu.in.a = regs.out.a;
@@ -235,12 +226,21 @@ const createCPU = defineModule({
     regs.in.d = alu.out.q;
     regs.in.d = setBuffer.out.q;
 
-    regs.in.load = logicalOr(isLoad, isSet, isArith, isLogic, logicalAnd(isCond, shouldBranch));
+    const isBranchingCond = logicalAnd(isCond, shouldBranch);
+
+    regs.in.load = logicalOr(isLoad, isSet, isArith, isLogic, isBranchingCond);
+
+    flags.in.load = logicalOr(isCtrl, isArith, isBranchingCond);
+    flags.in.rst = inp.rst;
+    flags.in.clk = inp.clk;
+    flags.in.d[0] = alu.out.isZero;
+    flags.in.d[1] = alu.out.carryOut;
+    flags.in.d[2] = isCtrl;
 
     out.inst = inst;
-    out.z = alu.out.zeroFlag;
-    out.c = alu.out.carryFlag;
-    out.halted = isCtrl;
+    out.z = zeroFlag;
+    out.c = carryFlag;
+    out.halted = haltedFlag;
   }
 });
 
