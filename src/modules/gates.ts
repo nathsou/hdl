@@ -65,7 +65,7 @@ const bitwiseBinaryGateShorthand = (name: string, gate: () => Module<{ a: 1, b: 
   });
 };
 
-export const logicalNot = (d: Connection): Connection => createModuleGroup('logical_not', () => {
+export const lnot = (d: Connection): Connection => createModuleGroup('logical_not', () => {
   const gate = gates.not();
   gate.in.d = d;
   return gate.out.q;
@@ -79,12 +79,12 @@ const bitwiseNot = <N extends Num>(d: IO<N>): IO<N> => createModuleGroup('bitwis
 });
 
 // shorthands
-export const logicalAnd = logicalBinaryGateShorthand('and', gates.and);
-export const logicalNand = logicalBinaryGateShorthand('nand', gates.nand);
-export const logicalOr = logicalBinaryGateShorthand('or', gates.or);
-export const logicalNor = logicalBinaryGateShorthand('nor', gates.nor);
-export const logicalXor = logicalBinaryGateShorthand('xor', gates.xor);
-export const logicalXnor = logicalBinaryGateShorthand('xnor', gates.xnor);
+export const land = logicalBinaryGateShorthand('and', gates.and);
+export const lnand = logicalBinaryGateShorthand('nand', gates.nand);
+export const lor = logicalBinaryGateShorthand('or', gates.or);
+export const lnor = logicalBinaryGateShorthand('nor', gates.nor);
+export const lxor = logicalBinaryGateShorthand('xor', gates.xor);
+export const lxnor = logicalBinaryGateShorthand('xnor', gates.xnor);
 export const not = bitwiseNot;
 export const and = bitwiseBinaryGateShorthand('and', gates.and);
 export const nand = bitwiseBinaryGateShorthand('nand', gates.nand);

@@ -1,6 +1,6 @@
 import { Connection, defineModule, Module } from "../core";
 import { adder } from './arith';
-import { logicalAnd, logicalNand, logicalNor, logicalNot, logicalOr, logicalXnor, logicalXor } from "./gates";
+import { land, lnand, lnor, lnot, lor, lxnor, lxor } from "./gates";
 
 // https://en.wikipedia.org/wiki/List_of_7400-series_integrated_circuits
 
@@ -36,42 +36,42 @@ const create74xQuadLogicalGatesModule = (id: string, gate: (a: Connection, b: Co
  * quad 2-input NAND gates
  * https://www.ti.com/lit/ds/symlink/sn74ls00.pdf
  */
-export const u74x00 = create74xQuadLogicalGatesModule('00', logicalNand);
+export const u74x00 = create74xQuadLogicalGatesModule('00', lnand);
 export const quad2InputNandGates74x00 = u74x00;
 
 /**
  * quad 2-input NOR gates
  * https://www.ti.com/lit/ds/symlink/sn74ls02.pdf
  */
-export const u74x02 = create74xQuadLogicalGatesModule('02', logicalNor);
+export const u74x02 = create74xQuadLogicalGatesModule('02', lnor);
 export const quad2InputNorGates74x02 = u74x02;
 
 /**
  * quad 2-input AND gates
  * https://www.ti.com/lit/ds/symlink/sn74ls08.pdf
  */
-export const u74x08 = create74xQuadLogicalGatesModule('08', logicalAnd);
+export const u74x08 = create74xQuadLogicalGatesModule('08', land);
 export const quad2InputAndGates74x08 = u74x08;
 
 /**
  * quad 2-input OR gates
  * https://www.ti.com/lit/ds/symlink/sn74ls32.pdf
  */
-export const u74x32 = create74xQuadLogicalGatesModule('32', logicalOr);
+export const u74x32 = create74xQuadLogicalGatesModule('32', lor);
 export const quad2InputOrGates74x32 = u74x32;
 
 /**
  * quad 2-input XOR gates
  * https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf
  */
-export const u74x86 = create74xQuadLogicalGatesModule('86', logicalXor);
+export const u74x86 = create74xQuadLogicalGatesModule('86', lxor);
 export const quad2InputXorGates74x86 = u74x86;
 
 /**
  * quad 2-input XNOR gates
  * https://archive.org/details/bitsavers_tidataBookogicDataBook_23574286/page/n461/mode/2up
  */
-export const u74x7266 = create74xQuadLogicalGatesModule('7266', logicalXnor);
+export const u74x7266 = create74xQuadLogicalGatesModule('7266', lxnor);
 export const quad2InputXnorGates74x7266 = u74x7266;
 
 export const u74x04 = (footprint = defaultFootprint(14)) => defineModule({
@@ -90,12 +90,12 @@ export const u74x04 = (footprint = defaultFootprint(14)) => defineModule({
   },
   connect(inp, out) {
     out.y = [
-      logicalNot(inp.a[0]),
-      logicalNot(inp.a[1]),
-      logicalNot(inp.a[2]),
-      logicalNot(inp.a[3]),
-      logicalNot(inp.a[4]),
-      logicalNot(inp.a[5]),
+      lnot(inp.a[0]),
+      lnot(inp.a[1]),
+      lnot(inp.a[2]),
+      lnot(inp.a[3]),
+      lnot(inp.a[4]),
+      lnot(inp.a[5]),
     ];
   },
 })();

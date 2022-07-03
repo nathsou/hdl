@@ -1,6 +1,6 @@
 import { Connection, defineModule, IO, Multi, Num, State } from "../core";
 import { last, Range, Tuple } from "../utils";
-import { and, logicalAnd, logicalNot, logicalOr, nor, not, or, xnor, xor } from "./gates";
+import { and, land, lnot, lor, nor, not, or, xnor, xor } from "./gates";
 import * as mux from './mux';
 
 const log2 = { 2: 4, 4: 2, 8: 3, 16: 4, 32: 5 } as const;
@@ -110,11 +110,11 @@ export const arith = {
 };
 
 export const isEqualConst = <N extends Num>(cnst: Tuple<State, N>, d: IO<N>): Connection => {
-  return logicalAnd(...IO.asArray(cnst).map((state, i) => state === 1 ? IO.at(d, i) : logicalNot(IO.at(d, i))));
+  return land(...IO.asArray(cnst).map((state, i) => state === 1 ? IO.at(d, i) : lnot(IO.at(d, i))));
 };
 
 export const isEqual = <N extends Num>(a: IO<N>, b: IO<N>): Connection => {
-  return logicalAnd(...IO.asArray(xnor<N>(a, b)));
+  return land(...IO.asArray(xnor<N>(a, b)));
 };
 
 export const add = <N extends Multi>(a: IO<N>, b: IO<N>, carryIn: Connection = State.zero): IO<N> => {
@@ -176,13 +176,13 @@ export const comparator4 = defineModule({
     const [notb3, notb2, notb1, notb0] = not<4>(b);
     const [eq3, eq2, eq1, eq0] = xnor<4>(a, b);
 
-    const equ = logicalAnd(eq3, eq2, eq1, eq0);
+    const equ = land(eq3, eq2, eq1, eq0);
 
-    const gtr = logicalOr(
-      logicalAnd(a3, notb3),
-      logicalAnd(a2, notb2, eq3),
-      logicalAnd(a1, notb1, eq3, eq2),
-      logicalAnd(a0, notb0, eq3, eq2, eq1)
+    const gtr = lor(
+      land(a3, notb3),
+      land(a2, notb2, eq3),
+      land(a1, notb1, eq3, eq2),
+      land(a0, notb0, eq3, eq2, eq1)
     );
 
     const lss = nor<1>(gtr, equ);

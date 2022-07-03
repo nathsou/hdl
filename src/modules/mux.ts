@@ -1,6 +1,6 @@
 import { Connection, defineModule, createModuleGroup, IO, Num } from "../core";
 import { Range, Tuple } from "../utils";
-import { and, logicalAnd, logicalOr, not, or } from "./gates";
+import { and, land, lor, not, or } from "./gates";
 
 export const mux = {
   mux2: <N extends Num>(N: N) => defineModule({
@@ -262,7 +262,7 @@ const match = <N extends Num>(N: N) => <T extends IO<Num>>(
   for (const [n, c] of casesExceptDefault) {
     const connectionTuple = IO.asArray(c);
     const bits = Tuple.bin(Number(n), valueTuple.length);
-    const selected = logicalAnd(...bits.map((b, i) => b === 1 ? valueTuple[i] : not<1>(valueTuple[i])));
+    const selected = land(...bits.map((b, i) => b === 1 ? valueTuple[i] : not<1>(valueTuple[i])));
     ors.push(connectionTuple.map(c => and(selected, c)) as Tuple<Connection, N>);
 
     if (!isExhaustive) {
@@ -275,7 +275,7 @@ const match = <N extends Num>(N: N) => <T extends IO<Num>>(
     const defaultValueArray = IO.asArray(defaultValue);
 
     if (casesExceptDefault.length > 0) {
-      const isMatched = logicalOr(...isMatchedOrs);
+      const isMatched = lor(...isMatchedOrs);
       const isNotMatched = not(isMatched);
       ors.push(defaultValueArray.map(c => and(isNotMatched, c)) as Tuple<Connection, N>);
     } else {
@@ -283,7 +283,7 @@ const match = <N extends Num>(N: N) => <T extends IO<Num>>(
     }
   }
 
-  return IO.gen(N, i => logicalOr(...ors.map(o => o[i])));
+  return IO.gen(N, i => lor(...ors.map(o => o[i])));
 });
 
 // export const decoder = <N extends 2 | 4 | 8 | 16 | 32>(N: N, sel: IO<Log2[N]>): IO<N> => {
