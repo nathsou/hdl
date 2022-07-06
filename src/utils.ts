@@ -1,4 +1,4 @@
-import { Circuit, Connection, CoreUtils, isRawConnection, Num, State, Subtract, Successor } from "./core";
+import { Num, State, Subtract, Successor } from "./core";
 
 export const Iter = {
   join: function* <T>(a: Iterable<T>, b: Iterable<T>): IterableIterator<T> {
