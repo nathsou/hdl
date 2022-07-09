@@ -7,6 +7,8 @@ import { triStateBuffer } from "../src/modules/tristate";
 import { createSimulator } from '../src/sim/sim';
 import { Range, Tuple } from "../src/utils";
 
+// 16-bit load-store CPU
+
 const { bin } = Tuple;
 
 enum Inst {
@@ -159,7 +161,7 @@ const createALU = defineModule({
   name: 'alu',
   inputs: { a: 16, b: 16, op: 3, isLogic: 1, carryIn: 1, outputEnable: 1 },
   outputs: { q: 16, isZero: 1, carryOut: 1 },
-  connect({ a, b, op, isLogic, carryIn, outputEnable }, out) {
+  connect({ a, b, op, isLogic, carryIn, outputEnable }) {
     const adders = adder(16);
     const outputBuffer = triStateBuffer(16);
     const outputMux = mux2(16);
@@ -188,9 +190,11 @@ const createALU = defineModule({
     outputBuffer.in.d = outputMux.out.q;
     outputBuffer.in.enable = outputEnable;
 
-    out.q = outputBuffer.out.q;
-    out.isZero = isEqualConst(bin(0, 16), outputMux.out.q);
-    out.carryOut = adders.out.carryOut;
+    return {
+      q: outputBuffer.out.q,
+      isZero: isEqualConst(bin(0, 16), outputMux.out.q),
+      carryOut: adders.out.carryOut,
+    };
   }
 });
 
@@ -198,7 +202,7 @@ const createLoadStore = (Ram: Uint16Array) => defineModule({
   name: 'load_store',
   inputs: { clk: 1, rst: 1, isLoad: 1, isStore: 1, addr: 16, d: 16, offsetLow: 4, offsetHigh1: 3, offsetHigh2: 3 },
   outputs: { q: 16 },
-  connect(inp, out) {
+  connect(inp) {
     const ram = createRAM(Ram);
 
     IO.forward({ clk: inp.clk, rst: inp.rst }, [ram]);
@@ -219,7 +223,7 @@ const createLoadStore = (Ram: Uint16Array) => defineModule({
     outputBuffer.in.d = ram.out.q;
     outputBuffer.in.enable = inp.isLoad;
 
-    out.q = outputBuffer.out.q;
+    return { q: outputBuffer.out.q };
   }
 })();
 
@@ -227,7 +231,7 @@ const createCPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
   name: 'cpu',
   inputs: { clk: 1, rst: 1 },
   outputs: { z: 1, c: 1, inst: 16, halted: 1, regs: 112 },
-  connect(inp, out) {
+  connect(inp) {
     const flags = reg(3);
     const rom = createROM(Rom);
     const regs = createRegisters();
@@ -302,11 +306,13 @@ const createCPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
     flags.in.d[1] = alu.out.carryOut;
     flags.in.d[2] = isCtrl;
 
-    out.inst = inst;
-    out.z = zeroFlag;
-    out.c = carryFlag;
-    out.halted = haltedFlag;
-    out.regs = regs.out.regs;
+    return {
+      inst,
+      z: zeroFlag,
+      c: carryFlag,
+      halted: haltedFlag,
+      regs: regs.out.regs,
+    };
   }
 })();
 

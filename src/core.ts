@@ -472,7 +472,12 @@ export function defineModule<In extends Record<string, Num>, Out extends Record<
       // register connections
       if (mod.type === 'compound') {
         globalState.subModulesStack.push(node.subModules);
-        mod.connect(inputs, outputs);
+        const out = mod.connect(inputs, outputs);
+        if (out) {
+          Object.entries(out).forEach(([k, v]) => {
+            outputs[k] = v;
+          });
+        }
         globalState.subModulesStack.pop();
 
         for (const [pin, width] of Object.entries(mod.outputs)) {
@@ -596,7 +601,7 @@ export type SimulatedModuleDef<
 
 export type CompoundModuleDef<In extends Record<string, Num>, Out extends Record<string, Num>> = BaseModuleDef<In, Out> & {
   type: 'compound',
-  connect: (inputs: MapConnections<In>, outputs: MapConnections<Out>) => void,
+  connect: (inputs: MapConnections<In>, outputs: MapConnections<Out>) => MapConnections<Out> | void,
 };
 
 export type ModuleDef<

@@ -35,7 +35,7 @@ export const raw = {
     name: `counter${N}`,
     inputs: { count_enable: 1, clk: 1 },
     outputs: { q: N },
-    connect(inp, out) {
+    connect(inp) {
       const adder = arith.adder(N);
       const count = raw.reg(N)();
 
@@ -46,7 +46,7 @@ export const raw = {
       adder.in.b = IO.gen(N, () => State.zero);
       count.in.d = adder.out.sum;
 
-      out.q = count.out.q;
+      return { q: count.out.q };
     },
   }),
   counterSim: <N extends Multi>(N: N) => defineModule({
@@ -90,12 +90,54 @@ export const raw = {
       },
     })()
   },
+  counterReg: <N extends Multi>(N: N) => {
+    const zero = State.gen(N, () => State.zero);
+
+    return defineModule({
+      name: `counter_reg${N}`,
+      inputs: { d: N, load: 1, countEnable: 1, clk: 1, rst: 1 },
+      outputs: { q: N, carryOut: 1 },
+      state: {
+        bits: State.gen(N, () => State.zero),
+        lastClk: State.zero,
+        carryOut: State.zero,
+      },
+      simulate(inp, out, state) {
+        const rising = state.lastClk === 0 && inp.clk;
+
+        if (inp.rst === 1) {
+          state.bits = zero;
+        } else if (rising) {
+          if (inp.load) {
+            state.bits = inp.d;
+          }
+
+          if (inp.countEnable) {
+            state.carryOut = 1;
+            for (let i = N - 1; i >= 0; i--) {
+              const prev = state.bits[i];
+              state.bits[i] = prev === 0 ? 1 : 0;
+              if (prev !== 1) {
+                state.carryOut = 0;
+                break;
+              }
+            }
+          }
+        }
+
+        state.lastClk = inp.clk;
+        out.q = state.bits;
+        out.carryOut = state.carryOut;
+      },
+    })();
+  },
 };
 
 
 export const counter = <N extends Multi>(N: N) => raw.counter(N)();
 export const jkCounter = <N extends Multi>(N: N) => raw.jkCounter(N)();
 export const counterSim = <N extends Multi>(N: N) => raw.counterSim(N)();
+export const counterReg = <N extends Multi>(N: N) => raw.counterReg(N);
 export const reg2 = raw.reg(2);
 export const reg4 = raw.reg(4);
 export const reg8 = raw.reg(8);
