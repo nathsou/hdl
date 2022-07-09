@@ -166,20 +166,20 @@ const createALU = defineModule({
     const outputBuffer = triStateBuffer(16);
     const outputMux = mux2(16);
     // arithmetic unit
-    const [_isAdd, isSub, isAdc, isSbc] = decoder(4, Tuple.slice(1, 3, op));
+    const [_isAdd, isSub, isAdc, isSbc] = decoder(4, Tuple.slice(op, 1, 3));
     const subtract = lor(isSub, isSbc);
     adders.in.a = a;
-    adders.in.b = xor<16>(b, Tuple.repeat(16, subtract));
+    adders.in.b = xor(b, Tuple.repeat(16, subtract));
     adders.in.carryIn = lor(isSub, lor(land(isAdc, carryIn), land(isSbc, lnot(carryIn))));
 
     // logic unit
     const logicOutput = match16(op, {
-      [LogicOp.and]: and<16>(a, b),
-      [LogicOp.or]: or<16>(a, b),
-      [LogicOp.nand]: nand<16>(a, b),
-      [LogicOp.xor]: xor<16>(a, b),
-      [LogicOp.shl]: shiftLeft<16>(a, Tuple.slice(12, 16, b)),
-      [LogicOp.shr]: shiftRight<16>(a, Tuple.slice(12, 16, b)),
+      [LogicOp.and]: and(a, b),
+      [LogicOp.or]: or(a, b),
+      [LogicOp.nand]: nand(a, b),
+      [LogicOp.xor]: xor(a, b),
+      [LogicOp.shl]: shiftLeft<16>(a, Tuple.slice(b, 12, 16)),
+      [LogicOp.shr]: shiftRight<16>(a, Tuple.slice(b, 12, 16)),
       _: Tuple.repeat(16, 0),
     });
 
@@ -238,16 +238,16 @@ const createCPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
     const alu = createALU();
     const setBuffer = triStateBuffer(16);
     const loadStore = createLoadStore(Ram);
-    const pc = Tuple.slice(96, 112, regs.out.regs);
+    const pc = Tuple.slice(regs.out.regs, 96, 112);
 
     rom.in.clk = lnot(inp.clk);
     rom.in.addr = pc;
     const inst = rom.out.inst;
-    const opcode = Tuple.slice(0, 3, inst);
-    const dest = Tuple.slice(3, 6, inst);
-    const src1 = Tuple.slice(6, 9, inst);
-    const src2 = Tuple.slice(9, 12, inst);
-    const sel = Tuple.slice(12, 16, inst);
+    const opcode = Tuple.slice(inst, 0, 3);
+    const dest = Tuple.slice(inst, 3, 6);
+    const src1 = Tuple.slice(inst, 6, 9);
+    const src2 = Tuple.slice(inst, 9, 12);
+    const sel = Tuple.slice(inst, 12, 16);
 
     IO.forward({
       clk: inp.clk, rst: inp.rst,
@@ -263,7 +263,7 @@ const createCPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
     const carryFlag = flags.out.q[1];
     const haltedFlag = flags.out.q[2];
 
-    const shouldBranch = match1(Tuple.slice(0, 2, sel), {
+    const shouldBranch = match1(Tuple.slice(sel, 0, 2), {
       [Cond.ifZeroSet]: zeroFlag,
       [Cond.ifZeroNotSet]: lnot(zeroFlag),
       [Cond.ifCarrySet]: carryFlag,
@@ -276,11 +276,11 @@ const createCPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
     loadStore.in.d = regs.out.b;
     loadStore.in.offsetHigh1 = src2;
     loadStore.in.offsetHigh2 = dest;
-    loadStore.in.offsetLow = Tuple.slice(12, 16, inst);
+    loadStore.in.offsetLow = Tuple.slice(inst, 12, 16);
     loadStore.in.isLoad = isLoad;
     loadStore.in.isStore = isStore;
 
-    alu.in.op = Tuple.slice(1, 4, sel);
+    alu.in.op = Tuple.slice(sel, 1, 4);
     alu.in.isLogic = isLogic;
     alu.in.a = regs.out.a;
     alu.in.b = regs.out.b;
@@ -288,7 +288,7 @@ const createCPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
     alu.in.outputEnable = opcode[0]; // <=> or(isArith, isCond, isLogic)
 
     setBuffer.in.enable = isSet;
-    setBuffer.in.d = [0, 0, 0, 0, 0, 0, ...Tuple.slice(6, 16, inst)];
+    setBuffer.in.d = [0, 0, 0, 0, 0, 0, ...Tuple.slice(inst, 6, 16)];
 
     // registers input
     regs.in.d = alu.out.q;

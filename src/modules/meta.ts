@@ -1,8 +1,8 @@
-import { defineModule, IO, Module, Num } from "../core";
+import { defineModule, IO, Module, Nat } from "../core";
 import { Tuple } from "../utils";
 
 export const extendN = <
-  N extends Num,
+  N extends Nat,
   InputPin extends string,
   OutputPin extends string,
   Comp extends Module<Record<InputPin, 1>, Record<OutputPin, 1>>,

@@ -173,7 +173,7 @@ export const Tuple = {
   high: <T, N extends number>(count: N, values: Tuple<T, Num>): Tuple<T, N> => {
     return Tuple.gen(count, i => values[i]);
   },
-  slice: <T, A extends number, B extends number>(start: A, end: B, tuple: Tuple<T, Num>): Tuple<T, Subtract<B, A>> => {
+  slice: <T, A extends number, B extends number>(tuple: Tuple<T, Num>, start: A, end: B): Tuple<T, Subtract<B, A>> => {
     return tuple.slice(start, end) as any;
   },
   bin: <W extends number>(n: number | bigint, width: W): Tuple<State, W> => {
@@ -183,6 +183,12 @@ export const Tuple = {
       .padStart(width, '0')
       .split('')
       .map(x => x === '1' ? 1 : 0) as Tuple<State, W>;
+  },
+  append: <T, N extends number>(tuple: Tuple<T, N>, value: T): Tuple<T, Successor<N>> => {
+    return [...tuple, value] as Tuple<T, Successor<N>>;
+  },
+  prepend: <T, N extends number>(tuple: Tuple<T, N>, value: T): Tuple<T, Successor<N>> => {
+    return [value, ...tuple] as Tuple<T, Successor<N>>;
   },
 };
 

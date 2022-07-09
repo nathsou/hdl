@@ -27,8 +27,8 @@ export const srLatchWithEnable = defineModule({
   connect(inp, out) {
     const sr = srLatch();
 
-    sr.in.s = and<1>(inp.s, inp.enable);
-    sr.in.r = and<1>(inp.r, inp.enable);
+    sr.in.s = and(inp.s, inp.enable);
+    sr.in.r = and(inp.r, inp.enable);
 
     out.q = sr.out.q;
     out.qbar = sr.out.qbar;
@@ -43,7 +43,7 @@ export const dLatch = defineModule({
     const sr = srLatchWithEnable();
 
     sr.in.s = inp.d;
-    sr.in.r = not<1>(inp.d);
+    sr.in.r = not(inp.d);
     sr.in.enable = inp.enable;
 
     out.q = sr.out.q;
@@ -74,10 +74,10 @@ export const leaderFollowerJKFlipFlop = defineModule({
     const follower = srLatchWithEnable();
 
     leader.in.enable = inp.clk;
-    leader.in.s = and<1>(inp.j, follower.out.qbar);
-    leader.in.r = and<1>(inp.k, follower.out.q);
+    leader.in.s = and(inp.j, follower.out.qbar);
+    leader.in.r = and(inp.k, follower.out.q);
 
-    follower.in.enable = not<1>(inp.clk);
+    follower.in.enable = not(inp.clk);
     follower.in.s = leader.out.q;
     follower.in.r = leader.out.qbar;
 

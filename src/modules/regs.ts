@@ -24,7 +24,7 @@ export const raw = {
         jks[i].in.k = andChain;
 
         if (i !== N - 1) {
-          andChain = and<1>(andChain, jks[i].out.q);
+          andChain = and(andChain, jks[i].out.q);
         }
       }
 
@@ -132,7 +132,6 @@ export const raw = {
     })();
   },
 };
-
 
 export const counter = <N extends Multi>(N: N) => raw.counter(N)();
 export const jkCounter = <N extends Multi>(N: N) => raw.jkCounter(N)();

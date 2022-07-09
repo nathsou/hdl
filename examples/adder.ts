@@ -19,7 +19,7 @@ const top = defineModule({
     adder.in.subtract = inp.subtract;
 
     out.leds = adder.out.sum;
-    out.overflow = adder.out.carry_out;
+    out.overflow = adder.out.carryOut;
   },
 });
 

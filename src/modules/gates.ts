@@ -1,4 +1,4 @@
-import { Connection, createModuleGroup, defineModule, IO, Module, Num } from "../core";
+import { Connection, createModuleGroup, defineModule, IO, Module, Nat, Width } from "../core";
 import { assert } from "../utils";
 import { extendN } from "./meta";
 
@@ -54,11 +54,15 @@ const logicalBinaryGateShorthand = (name: string, gate: () => Module<{ a: 1, b: 
 };
 
 const bitwiseBinaryGateShorthand = (name: string, gate: () => Module<{ a: 1, b: 1 }, { q: 1 }>) => {
-  return <N extends Num>(a: IO<N>, b: IO<N>): IO<N> => createModuleGroup(`bitwise_${name}${IO.width(a)}`, () => {
+  // @ts-ignore
+  return <A extends IO<Nat>>(a: A, b: A): A => createModuleGroup(`bitwise_${name}${IO.width(a)}`, () => {
     assert(IO.width(a) === IO.width(b));
+
     const N = IO.width(a);
     const extended = extendN(N, gate, ['a', 'b'], ['q'], `${name}${N}`)();
+    // @ts-ignore
     extended.in.a = a;
+    // @ts-ignore
     extended.in.b = b;
 
     return extended.out.q;
@@ -71,9 +75,11 @@ export const lnot = (d: Connection): Connection => createModuleGroup('logical_no
   return gate.out.q;
 });
 
-const bitwiseNot = <N extends Num>(d: IO<N>): IO<N> => createModuleGroup('bitwise_not', () => {
+// @ts-ignore
+const bitwiseNot = <A extends IO<Nat>>(d: A): A => createModuleGroup('bitwise_not', () => {
   const N = IO.width(d);
   const extended = extendN(N, gates.not, ['d'], ['q'], `not${N}`)();
+  // @ts-ignore
   extended.in.d = d;
   return extended.out.q;
 });

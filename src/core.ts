@@ -9,8 +9,8 @@ export type Circuit = {
 export type CircuitNets = Map<string, { in: string[], out: string[], id: ModuleId }>;
 
 export type CircuitSignatures = Map<string, {
-  inputs: Record<string, Num>,
-  outputs: Record<string, Num>,
+  inputs: Record<string, Nat>,
+  outputs: Record<string, Nat>,
   kicad?: KiCadConfig<any, any>,
 }>;
 
@@ -54,9 +54,11 @@ export const State = {
 
 export type Connection = RawConnection | State;
 
-export type Multi = Exclude<Num, 0 | 1>;
-
 export type IO<N extends number> = N extends 1 ? Connection : Tuple<Connection, N>;
+
+export type Len<T extends Tuple<any, number>> = T extends [] ? 0 : T extends [any, ...infer L extends Tuple<any, number>] ? Successor<Len<L>> : never;
+
+export type Width<A extends IO<Num>> = A extends Connection ? 1 : A extends Tuple<Connection, number> ? Len<A> : never;
 
 export const IO = {
   gen: <N extends number>(count: N, factory: (n: number) => Connection): IO<N> => {
@@ -77,10 +79,10 @@ export const IO = {
 
     return (res.length === 1 ? res[0] : res) as IO<N>;
   },
-  width: <N extends Num>(connections: IO<N>): N => {
-    return (Array.isArray(connections) ? connections.length : 1) as N;
+  width: <A extends IO<Nat>>(connections: A): Width<A> => {
+    return (Array.isArray(connections) ? connections.length : 1) as Width<A>;
   },
-  at: <N extends number>(connections: IO<N>, index: number): Connection => {
+  at: <N extends Nat>(connections: IO<N>, index: number): Connection => {
     assert(index >= 0 && index < IO.width(connections), 'IO.at: index out of range');
     return Array.isArray(connections) ? connections[index] : connections;
   },
@@ -137,6 +139,15 @@ export const IO = {
     }
 
     return [...notLinearized, ...linearized];
+  },
+  slice: <A extends number, B extends number>(io: IO<Num>, start: A, end: B): IO<Subtract<B, A>> => {
+    return IO.asArray(io).slice(start, end) as any;
+  },
+  append: <N extends Num>(io: IO<N>, connection: Connection): IO<Successor<N>> => {
+    return [...IO.asArray(io), connection] as IO<Successor<N>>;
+  },
+  prepend: <N extends Num>(io: IO<N>, connection: Connection): IO<Successor<N>> => {
+    return [connection, ...IO.asArray(io)] as IO<Successor<N>>;
   },
 };
 
@@ -294,7 +305,7 @@ export const createModuleGroup = <T>(name: string, f: () => T): T => {
   return f();
 };
 
-export const createBus = <N extends Num>(name: string, width: N) => {
+export const createBus = <N extends Nat>(name: string, width: N) => {
   const busModule = defineModule({
     name,
     inputs: { d: width },
@@ -397,20 +408,20 @@ const isSimulatedModuleDef = <
 };
 
 export function defineModule<
-  In extends Record<string, Num>,
-  Out extends Record<string, Num>
+  In extends Record<string, Nat>,
+  Out extends Record<string, Nat>
 >(def: Omit<CompoundModuleDef<In, Out>, 'type'>): (() => Module<In, Out>);
 export function defineModule<
-  In extends Record<string, Num>,
-  Out extends Record<string, Num>,
+  In extends Record<string, Nat>,
+  Out extends Record<string, Nat>,
   State extends {}
 >(def: Omit<SimulatedModuleDef<In, Out, State>, 'type'>): (() => Module<In, Out>);
-export function defineModule<In extends Record<string, Num>, Out extends Record<string, Num>, State extends {}>(
+export function defineModule<In extends Record<string, Nat>, Out extends Record<string, Nat>, State extends {}>(
   def: Omit<CompoundModuleDef<In, Out> | SimulatedModuleDef<In, Out, State>, 'type'>
 ): (() => Module<In, Out>) {
   const _defineModule = <
-    In extends Record<string, Num>,
-    Out extends Record<string, Num>,
+    In extends Record<string, Nat>,
+    Out extends Record<string, Nat>,
     State extends {}
   >(
     mod: ModuleDef<In, Out, State>
@@ -624,6 +635,9 @@ export type Num =
   | 96 | 97 | 98 | 99 | 100 | 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 | 109 | 110 | 111
   | 112 | 113 | 114 | 115 | 116 | 117 | 118 | 119 | 120 | 121 | 122 | 123 | 124 | 125 | 126 | 127 | 128;
 
+export type Nat = Exclude<Num, 0>;
+export type Multi = Exclude<Nat, 0 | 1>;
+
 export type Successor<N extends number> =
   N extends 0 ? 1 :
   N extends 1 ? 2 :
@@ -753,3 +767,5 @@ export type Successor<N extends number> =
   N extends 125 ? 126 :
   N extends 126 ? 127 :
   N extends 127 ? 128 : number;
+
+export const successor = <N extends Num>(n: N): Successor<N> => (n + 1) as Successor<N>;

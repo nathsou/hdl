@@ -1,4 +1,4 @@
-import { Connection, defineModule, IO, Multi, Num, State } from "../core";
+import { Connection, defineModule, IO, Multi, Nat, State, successor } from "../core";
 import { last, Range, Tuple } from "../utils";
 import { and, land, lnot, lor, nor, not, or, xnor, xor } from "./gates";
 import * as mux from './mux';
@@ -12,8 +12,8 @@ export const arith = {
     inputs: { a: 1, b: 1 },
     outputs: { sum: 1, carry: 1 },
     connect(inp, out) {
-      out.sum = xor<1>(inp.a, inp.b);
-      out.carry = and<1>(inp.a, inp.b);
+      out.sum = xor(inp.a, inp.b);
+      out.carry = and(inp.a, inp.b);
     },
   }),
   fullAdder1: defineModule({
@@ -21,15 +21,15 @@ export const arith = {
     inputs: { a: 1, b: 1, carryIn: 1 },
     outputs: { sum: 1, carryOut: 1 },
     connect(inp, out) {
-      const xor1 = xor<1>(inp.a, inp.b);
+      const xor1 = xor(inp.a, inp.b);
 
       // sum
-      out.sum = xor<1>(xor1, inp.carryIn);
+      out.sum = xor(xor1, inp.carryIn);
 
       // carry
-      out.carryOut = or<1>(
-        and<1>(inp.carryIn, xor1),
-        and<1>(inp.a, inp.b)
+      out.carryOut = or(
+        and(inp.carryIn, xor1),
+        and(inp.a, inp.b)
       );
     },
   }),
@@ -52,20 +52,22 @@ export const arith = {
   }),
   adderSubtractor: <N extends Multi>(N: N) => defineModule({
     name: `adder_subtractor${N}`,
-    inputs: { a: N, b: N, subtract: 1 },
-    outputs: { sum: N, carry_out: 1 },
-    connect(inp, out) {
+    inputs: { a: N, b: N, subtract: 1, carryIn: 1 },
+    outputs: { sum: N, carryOut: 1 },
+    connect({ a, b, subtract, carryIn }) {
       const sum = arith.adder(N)();
-      sum.in.carryIn = inp.subtract;
-      sum.in.a = inp.a;
-      sum.in.b = xor(IO.repeat(N, inp.subtract), inp.b);
+      sum.in.carryIn = lor(land(lnot(subtract), carryIn), land(subtract, lnot(carryIn)));
+      sum.in.a = a;
+      sum.in.b = xor(IO.repeat(N, subtract), b);
 
-      out.sum = sum.out.sum;
-      out.carry_out = sum.out.carryOut;
+      return {
+        sum: sum.out.sum,
+        carryOut: sum.out.carryOut
+      };
     },
   }),
-  rightShifter: <N extends keyof Log2>(N: N) => defineModule({
-    name: `right_shifter${N}`,
+  rightBarrelShifter: <N extends keyof Log2>(N: N) => defineModule({
+    name: `right_barrel_shifter${N}`,
     inputs: { d: N, amount: log2[N] },
     outputs: { q: N },
     connect({ d, amount }, out) {
@@ -83,8 +85,8 @@ export const arith = {
       out.q = IO.gen(N, n => muxes[n].out.q);
     }
   }),
-  leftShifter: <N extends keyof Log2>(N: N) => defineModule({
-    name: `left_shifter${N}`,
+  leftBarrelShifter: <N extends keyof Log2>(N: N) => defineModule({
+    name: `left_barrel_shifter${N}`,
     inputs: { d: N, amount: log2[N] },
     outputs: { q: N },
     connect({ d, amount }, out) {
@@ -109,12 +111,12 @@ export const arith = {
   }),
 };
 
-export const isEqualConst = <N extends Num>(cnst: Tuple<State, N>, d: IO<N>): Connection => {
+export const isEqualConst = <N extends Nat>(cnst: Tuple<State, N>, d: IO<N>): Connection => {
   return land(...IO.asArray(cnst).map((state, i) => state === 1 ? IO.at(d, i) : lnot(IO.at(d, i))));
 };
 
-export const isEqual = <N extends Num>(a: IO<N>, b: IO<N>): Connection => {
-  return land(...IO.asArray(xnor<N>(a, b)));
+export const isEqual = <N extends Nat>(a: IO<N>, b: IO<N>): Connection => {
+  return land(...IO.asArray(xnor(a, b)));
 };
 
 export const add = <N extends Multi>(a: IO<N>, b: IO<N>, carryIn: Connection = State.zero): IO<N> => {
@@ -138,8 +140,8 @@ export const subtract = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
 };
 
 export const shiftLeft = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>): IO<N> => {
-  const N = IO.width(d);
-  const shifter = arith.leftShifter(N)();
+  const N = IO.width(d) as N;
+  const shifter = arith.leftBarrelShifter(N)();
   shifter.in.d = d;
   shifter.in.amount = amount;
 
@@ -147,22 +149,43 @@ export const shiftLeft = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>): 
 };
 
 export const shiftRight = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>): IO<N> => {
-  const N = IO.width(d);
-  const shifter = arith.rightShifter(N)();
+  const N = IO.width(d) as N;
+  const shifter = arith.rightBarrelShifter(N)();
   shifter.in.d = d;
   shifter.in.amount = amount;
 
   return shifter.out.q;
 };
 
+export const bidirectionalShifter = <N extends Multi>(N: N) => defineModule({
+  name: 'bidirectional_shifter',
+  inputs: { d: N, dir: 1, carryIn: 1 },
+  outputs: { q: N, carryOut: 1 },
+  connect({ d, dir, carryIn }) {
+    const left = IO.slice(IO.append(d, carryIn), 1, successor(N)) as IO<N>;
+    const right = IO.slice(IO.prepend(d, carryIn), 0, N) as IO<N>;
+
+    return {
+      q: mux.matchN(N)(dir, {
+        0: left,
+        1: right,
+      }),
+      carryOut: mux.match1(dir, {
+        0: d[0],
+        1: d[N as number],
+      }),
+    };
+  },
+});
+
 export const comparator1 = defineModule({
   name: 'comparator1',
   inputs: { a: 1, b: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
   connect({ a, b }, out) {
-    out.lss = and<1>(not<1>(a), b);
-    out.equ = xnor<1>(a, b);
-    out.gtr = and<1>(a, not<1>(b));
+    out.lss = and(not(a), b);
+    out.equ = xnor(a, b);
+    out.gtr = and(a, not(b));
   }
 });
 
@@ -173,8 +196,8 @@ export const comparator4 = defineModule({
   outputs: { lss: 1, equ: 1, gtr: 1 },
   connect({ a, b, cascaded_lss, cascaded_equ, cascaded_gtr }, out) {
     const [a3, a2, a1, a0] = a;
-    const [notb3, notb2, notb1, notb0] = not<4>(b);
-    const [eq3, eq2, eq1, eq0] = xnor<4>(a, b);
+    const [notb3, notb2, notb1, notb0] = not(b);
+    const [eq3, eq2, eq1, eq0] = xnor(a, b);
 
     const equ = land(eq3, eq2, eq1, eq0);
 
@@ -185,11 +208,11 @@ export const comparator4 = defineModule({
       land(a0, notb0, eq3, eq2, eq1)
     );
 
-    const lss = nor<1>(gtr, equ);
+    const lss = nor(gtr, equ);
 
-    out.lss = or<1>(and<1>(equ, cascaded_lss), lss);
-    out.equ = and<1>(cascaded_equ, equ);
-    out.gtr = or<1>(and<1>(equ, cascaded_gtr), gtr);
+    out.lss = or(and(equ, cascaded_lss), lss);
+    out.equ = and(cascaded_equ, equ);
+    out.gtr = or(and(equ, cascaded_gtr), gtr);
   }
 });
 
@@ -288,5 +311,5 @@ export const compare8 = (a: IO<8>, b: IO<8>) => {
 
 export const adder = <N extends Multi>(N: N) => arith.adder(N)();
 export const adderSubtractor = <N extends Multi>(N: N) => arith.adderSubtractor(N)();
-export const rightShifter = <N extends keyof Log2>(N: N) => arith.rightShifter(N)();
-export const leftShifer = <N extends keyof Log2>(N: N) => arith.leftShifter(N)();
+export const rightBarrelShifter = <N extends keyof Log2>(N: N) => arith.rightBarrelShifter(N)();
+export const leftBarrelShifter = <N extends keyof Log2>(N: N) => arith.leftBarrelShifter(N)();

@@ -1,20 +1,20 @@
-import { Connection, defineModule, createModuleGroup, IO, Num } from "../core";
+import { Connection, defineModule, createModuleGroup, IO, Nat } from "../core";
 import { Range, Tuple } from "../utils";
 import { and, land, lor, not, or } from "./gates";
 
 export const mux = {
-  mux2: <N extends Num>(N: N) => defineModule({
+  mux2: <N extends Nat>(N: N) => defineModule({
     name: `mux2_${N}`,
     inputs: { d0: N, d1: N, sel: 1 },
     outputs: { q: N },
     connect({ sel, d0, d1 }, out) {
       out.q = or(
-        and(d0, IO.repeat(N, not<1>(sel))),
+        and(d0, IO.repeat(N, not(sel))),
         and(d1, IO.repeat(N, sel))
       );
     }
   }),
-  mux4: <N extends Num>(N: N) => defineModule({
+  mux4: <N extends Nat>(N: N) => defineModule({
     name: `mux4_${N}`,
     inputs: { d0: N, d1: N, d2: N, d3: N, sel: 2 },
     outputs: { q: N },
@@ -38,7 +38,7 @@ export const mux = {
       out.q = m3.out.q;
     }
   }),
-  mux8: <N extends Num>(N: N) => defineModule({
+  mux8: <N extends Nat>(N: N) => defineModule({
     name: `mux8_${N}`,
     inputs: { d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N, sel: 3 },
     outputs: { q: N },
@@ -68,7 +68,7 @@ export const mux = {
       out.q = m3.out.q;
     }
   }),
-  mux16: <N extends Num>(N: N) => defineModule({
+  mux16: <N extends Nat>(N: N) => defineModule({
     name: `mux16_${N}`,
     inputs: {
       d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N,
@@ -99,7 +99,7 @@ export const mux = {
       out.q = m3.out.q;
     }
   }),
-  mux32: <N extends Num>(N: N) => defineModule({
+  mux32: <N extends Nat>(N: N) => defineModule({
     name: `mux32_${N}`,
     inputs: {
       d0: N, d1: N, d2: N, d3: N, d4: N, d5: N, d6: N, d7: N,
@@ -132,16 +132,16 @@ export const mux = {
       out.q = m3.out.q;
     }
   }),
-  demux2: <N extends Num>(N: N) => defineModule({
+  demux2: <N extends Nat>(N: N) => defineModule({
     name: `demux2_${N}`,
     inputs: { d: N, sel: 1 },
     outputs: { q0: N, q1: N },
     connect(inp, out) {
-      out.q0 = and(inp.d, IO.repeat(N, not<1>(inp.sel)));
+      out.q0 = and(inp.d, IO.repeat(N, not(inp.sel)));
       out.q1 = and(inp.d, IO.repeat(N, inp.sel));
     }
   }),
-  demux4: <N extends Num>(N: N) => defineModule({
+  demux4: <N extends Nat>(N: N) => defineModule({
     name: `demux4_${N}`,
     inputs: { d: N, sel: 2 },
     outputs: { q0: N, q1: N, q2: N, q3: N },
@@ -166,7 +166,7 @@ export const mux = {
       out.q3 = m2.out.q1;
     }
   }),
-  demux8: <N extends Num>(N: N) => defineModule({
+  demux8: <N extends Nat>(N: N) => defineModule({
     name: `demux8_${N}`,
     inputs: { d: N, sel: 3 },
     outputs: Object.fromEntries(Range.map(0, 8, i => [`q${i}`, N])) as Record<`q${Range<0, 8>}`, N>,
@@ -191,7 +191,7 @@ export const mux = {
       });
     }
   }),
-  demux16: <N extends Num>(N: N) => defineModule({
+  demux16: <N extends Nat>(N: N) => defineModule({
     name: `demux16_${N}`,
     inputs: { d: N, sel: 4 },
     outputs: Object.fromEntries(Range.map(0, 16, i => [`q${i}`, N])) as Record<`q${Range<0, 16>}`, N>,
@@ -216,7 +216,7 @@ export const mux = {
       });
     }
   }),
-  demux32: <N extends Num>(N: N) => defineModule({
+  demux32: <N extends Nat>(N: N) => defineModule({
     name: `demux32_${N}`,
     inputs: { d: N, sel: 5 },
     outputs: Object.fromEntries(Range.map(0, 32, i => [`q${i}`, N])) as Record<`q${Range<0, 32>}`, N>,
@@ -248,7 +248,7 @@ type Log2 = { 2: 1, 4: 2, 8: 3, 16: 4, 32: 5, 64: 6, 128: 7 };
 
 type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, IO<N>>;
 type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: IO<N> });
-const match = <N extends Num>(N: N) => <T extends IO<Num>>(
+const match = <N extends Nat>(N: N) => <T extends IO<Nat>>(
   value: T,
   cases: CasesWithDefault<T extends any[] ? T['length'] : 1, N>
 ): IO<N> => createModuleGroup(`match${N}${IO.width(value)}`, () => {
@@ -262,7 +262,7 @@ const match = <N extends Num>(N: N) => <T extends IO<Num>>(
   for (const [n, c] of casesExceptDefault) {
     const connectionTuple = IO.asArray(c);
     const bits = Tuple.bin(Number(n), valueTuple.length);
-    const selected = land(...bits.map((b, i) => b === 1 ? valueTuple[i] : not<1>(valueTuple[i])));
+    const selected = land(...bits.map((b, i) => b === 1 ? valueTuple[i] : not(valueTuple[i])));
     ors.push(connectionTuple.map(c => and(selected, c)) as Tuple<Connection, N>);
 
     if (!isExhaustive) {
@@ -298,7 +298,7 @@ const match = <N extends Num>(N: N) => <T extends IO<Num>>(
 export const decoder = <N extends 2 | 4 | 8 | 16 | 32>(N: N, sel: IO<Log2[N]>): IO<N> => {
   const d = defineModule({
     name: `decoder_sim_${N}`,
-    inputs: { sel: IO.width(sel) },
+    inputs: { sel: IO.width(sel) as Log2[N] },
     outputs: { q: N },
     simulate(inp, out) {
       const n = parseInt(IO.asArray(inp.sel).join(''), 2);
@@ -312,16 +312,16 @@ export const decoder = <N extends 2 | 4 | 8 | 16 | 32>(N: N, sel: IO<Log2[N]>): 
   return d.out.q;
 };
 
-export const mux2 = <N extends Num>(N: N) => mux.mux2(N)();
-export const mux4 = <N extends Num>(N: N) => mux.mux4(N)();
-export const mux8 = <N extends Num>(N: N) => mux.mux8(N)();
-export const mux16 = <N extends Num>(N: N) => mux.mux16(N)();
-export const mux32 = <N extends Num>(N: N) => mux.mux32(N)();
-export const demux2 = <N extends Num>(N: N) => mux.demux2(N)();
-export const demux4 = <N extends Num>(N: N) => mux.demux4(N)();
-export const demux8 = <N extends Num>(N: N) => mux.demux8(N)();
-export const demux16 = <N extends Num>(N: N) => mux.demux16(N)();
-export const demux32 = <N extends Num>(N: N) => mux.demux32(N)();
+export const mux2 = <N extends Nat>(N: N) => mux.mux2(N)();
+export const mux4 = <N extends Nat>(N: N) => mux.mux4(N)();
+export const mux8 = <N extends Nat>(N: N) => mux.mux8(N)();
+export const mux16 = <N extends Nat>(N: N) => mux.mux16(N)();
+export const mux32 = <N extends Nat>(N: N) => mux.mux32(N)();
+export const demux2 = <N extends Nat>(N: N) => mux.demux2(N)();
+export const demux4 = <N extends Nat>(N: N) => mux.demux4(N)();
+export const demux8 = <N extends Nat>(N: N) => mux.demux8(N)();
+export const demux16 = <N extends Nat>(N: N) => mux.demux16(N)();
+export const demux32 = <N extends Nat>(N: N) => mux.demux32(N)();
 export const matchN = match;
 export const match1 = match(1);
 export const match2 = match(2);

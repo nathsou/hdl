@@ -1,7 +1,7 @@
-import { defineModule, Num } from "../core";
+import { defineModule, Nat, Num } from "../core";
 import { Range } from "../utils";
 
-const definePinHeaders = <N extends Num>(cols: N) => {
+const definePinHeaders = <N extends Nat>(cols: N) => {
   const nPadded = cols.toString().padStart(2, '0');
   return (orientation: 'Vertical' | 'Horizontal' = 'Vertical') => defineModule({
     name: `pin_header_1x${cols}`,

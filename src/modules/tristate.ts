@@ -1,4 +1,4 @@
-import { defineModule, IO, metadata, Module, Num } from "../core";
+import { defineModule, IO, metadata, Module, Nat, Num } from "../core";
 import { Tuple } from "../utils";
 
 export const triStateBuffer1 = defineModule({
@@ -10,12 +10,12 @@ export const triStateBuffer1 = defineModule({
   }
 });
 
-export const triStateBuffer = <N extends Num>(N: N) => defineModule({
+export const triStateBuffer = <N extends Nat>(N: N) => defineModule({
   name: `tristate_buffer_${N}`,
   inputs: { d: N, enable: 1 },
   outputs: { q: N },
   connect({ d, enable }, out) {
-    const N = IO.width(d);
+    const N = IO.width(d) as N;
     const buffers = Tuple.gen(N, triStateBuffer1);
 
     IO.forward({ enable }, buffers);
@@ -29,8 +29,8 @@ export const triStateBuffer = <N extends Num>(N: N) => defineModule({
 })();
 
 export const withTriStateOutput = <
-  In extends Record<string, Num>,
-  Out extends Record<string, Num>
+  In extends Record<string, Nat>,
+  Out extends Record<string, Nat>
 >(mod: Module<In, Out>, triStateOutputs: (keyof Out)[]): Module<In & { outputEnable: 1 }, Out> => {
   const { circuit, id } = metadata(mod);
   const node = circuit.modules.get(id)!;
@@ -63,8 +63,8 @@ export const withTriStateOutput = <
 };
 
 export const withTriStateInput = <
-  In extends Record<string, Num>,
-  Out extends Record<string, Num>
+  In extends Record<string, Nat>,
+  Out extends Record<string, Nat>
 >(mod: Module<In, Out>, triStateInputs: (keyof Out)[]): Module<In & { inputEnable: 1 }, Out> => {
   const { circuit, id } = metadata(mod);
   const node = circuit.modules.get(id)!;
