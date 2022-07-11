@@ -56,9 +56,9 @@ export type Connection = RawConnection | State;
 
 export type IO<N extends number> = N extends 1 ? Connection : Tuple<Connection, N>;
 
-export type Len<T extends Tuple<any, number>> = T extends [] ? 0 : T extends [any, ...infer L extends Tuple<any, number>] ? Successor<Len<L>> : never;
+export type Len<T extends Tuple<any, number>, Acc extends number = 0> = T extends [] ? Acc : T extends [any, ...infer L extends Tuple<any, number>] ? Len<L, Successor<Acc>> : never;
 
-export type Width<A extends IO<Num>> = A extends Connection ? 1 : A extends Tuple<Connection, number> ? Len<A> : never;
+export type Width<A extends IO<Nat>> = A extends Connection ? 1 : A extends Tuple<Connection, number> ? Len<A> : never;
 
 export const IO = {
   gen: <N extends number>(count: N, factory: (n: number) => Connection): IO<N> => {
@@ -89,7 +89,7 @@ export const IO = {
   forward: <
     Pins extends keyof Mapping,
     Mapping extends Record<Pins, IO<number>>,
-    Mods extends Module<Record<Pins, number>, any>[]
+    Mods extends readonly Module<Record<Pins, number>, any>[]
   >(
     mapping: Mapping,
     modules: Mods

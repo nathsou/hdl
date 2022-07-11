@@ -1,4 +1,4 @@
-import { Connection, defineModule, createModuleGroup, IO, Nat } from "../core";
+import { Connection, createModuleGroup, defineModule, IO, Nat, Width } from "../core";
 import { Range, Tuple } from "../utils";
 import { and, land, lor, not, or } from "./gates";
 
@@ -246,54 +246,62 @@ export const mux = {
 type Pow2 = { 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128 } & Record<number, number>;
 type Log2 = { 2: 1, 4: 2, 8: 3, 16: 4, 32: 5, 64: 6, 128: 7 };
 
-type Cases<Len extends keyof Pow2, N extends number> = Record<Range<0, Pow2[Len]>, IO<N>>;
-type CasesWithDefault<Len extends keyof Pow2, N extends number> = Cases<Len, N> | (Partial<Cases<Len, N>> & { _: IO<N> });
-const match = <N extends Nat>(N: N) => <T extends IO<Nat>>(
-  value: T,
-  cases: CasesWithDefault<T extends any[] ? T['length'] : 1, N>
-): IO<N> => createModuleGroup(`match${N}${IO.width(value)}`, () => {
-  const ors: Tuple<Connection, N>[] = [];
-  const valueTuple = IO.asArray(value);
-  const isExhaustive = !Object.keys(cases).some(key => key === '_');
-  const isMatchedOrs: Connection[] = [];
+type Cases<Len extends keyof Pow2, N extends Nat> = Record<Range<0, Pow2[Len]>, IO<N>>;
+type CasesWithDefault<Len extends keyof Pow2, N extends Nat> = Partial<Cases<Len, N>> & { _: IO<N> };
+const matchAny = <
+  N extends Nat,
+  T extends IO<Nat>,
+  C extends Cases<Width<T>, N> | CasesWithDefault<Width<T>, N>
+>(value: T, cases: C): C[keyof C] => {
+  const firstCase = Object.values(cases)[0];
+  const N = Array.isArray(firstCase) ? firstCase.length : 1;
 
-  const casesExceptDefault = Object.entries(cases).filter(([key]) => key !== '_');
+  return createModuleGroup(`match${N}${IO.width(value)}`, () => {
+    const ors: Tuple<Connection, N>[] = [];
+    const valueTuple = IO.asArray(value);
+    const isExhaustive = !Object.keys(cases).some(key => key === '_');
+    const isMatchedOrs: Connection[] = [];
 
-  for (const [n, c] of casesExceptDefault) {
-    const connectionTuple = IO.asArray(c);
-    const bits = Tuple.bin(Number(n), valueTuple.length);
-    const selected = land(...bits.map((b, i) => b === 1 ? valueTuple[i] : not(valueTuple[i])));
-    ors.push(connectionTuple.map(c => and(selected, c)) as Tuple<Connection, N>);
+    const casesExceptDefault = Object.entries(cases).filter(([key]) => key !== '_');
+
+    for (const [n, c] of casesExceptDefault) {
+      const connectionTuple = IO.asArray(c);
+      const bits = Tuple.bin(Number(n), valueTuple.length);
+      const selected = land(...bits.map((b, i) => b === 1 ? valueTuple[i] : not(valueTuple[i])));
+      ors.push(connectionTuple.map(c => and(selected, c)) as Tuple<Connection, N>);
+
+      if (!isExhaustive) {
+        isMatchedOrs.push(selected);
+      }
+    }
 
     if (!isExhaustive) {
-      isMatchedOrs.push(selected);
+      const defaultValue = (cases as { _: IO<N> })['_'];
+      const defaultValueArray = IO.asArray(defaultValue);
+
+      if (casesExceptDefault.length > 0) {
+        const isMatched = lor(...isMatchedOrs);
+        const isNotMatched = not(isMatched);
+        ors.push(defaultValueArray.map(c => and(isNotMatched, c)) as Tuple<Connection, N>);
+      } else {
+        ors.push(defaultValueArray as Tuple<Connection, N>);
+      }
     }
-  }
 
-  if (!isExhaustive) {
-    const defaultValue = (cases as { _: IO<N> })['_'];
-    const defaultValueArray = IO.asArray(defaultValue);
+    return IO.gen(N, i => lor(...ors.map(o => o[i]))) as C[keyof C];
+  });
+};
 
-    if (casesExceptDefault.length > 0) {
-      const isMatched = lor(...isMatchedOrs);
-      const isNotMatched = not(isMatched);
-      ors.push(defaultValueArray.map(c => and(isNotMatched, c)) as Tuple<Connection, N>);
-    } else {
-      ors.push(defaultValueArray as Tuple<Connection, N>);
-    }
-  }
+export const match = <
+  N extends Width<C[keyof C]>,
+  T extends IO<Nat>,
+  C extends Cases<Width<T>, Nat>,
+  >(value: T, cases: C): C[keyof C] => matchAny<N, T, C>(value, cases);
 
-  return IO.gen(N, i => lor(...ors.map(o => o[i])));
-});
-
-// export const decoder = <N extends 2 | 4 | 8 | 16 | 32>(N: N, sel: IO<Log2[N]>): IO<N> => {
-//   const demux = raw[`demux${N}`](1)();
-//   demux.in.d = 1;
-//   demux.in.sel = sel;
-
-//   /// @ts-ignore
-//   return Range.map(0, N, n => demux.out[`q${n}`]);
-// };
+export const matchWithDefault = <
+  T extends IO<Nat>,
+  C extends CasesWithDefault<Width<T>, Nat>,
+  >(value: T, cases: C) => matchAny(value, cases);
 
 export const decoder = <N extends 2 | 4 | 8 | 16 | 32>(N: N, sel: IO<Log2[N]>): IO<N> => {
   const d = defineModule({
@@ -322,13 +330,3 @@ export const demux4 = <N extends Nat>(N: N) => mux.demux4(N)();
 export const demux8 = <N extends Nat>(N: N) => mux.demux8(N)();
 export const demux16 = <N extends Nat>(N: N) => mux.demux16(N)();
 export const demux32 = <N extends Nat>(N: N) => mux.demux32(N)();
-export const matchN = match;
-export const match1 = match(1);
-export const match2 = match(2);
-export const match3 = match(3);
-export const match4 = match(4);
-export const match5 = match(5);
-export const match6 = match(6);
-export const match7 = match(7);
-export const match8 = match(8);
-export const match16 = match(16);

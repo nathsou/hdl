@@ -1,4 +1,4 @@
-import { Connection, defineModule, IO, Multi, Nat, State, successor } from "../core";
+import { Connection, defineModule, IO, Multi, Nat, State, successor, Width } from "../core";
 import { last, Range, Tuple } from "../utils";
 import { and, land, lnot, lor, nor, not, or, xnor, xor } from "./gates";
 import * as mux from './mux';
@@ -166,17 +166,17 @@ export const bidirectionalShifter = <N extends Multi>(N: N) => defineModule({
     const right = IO.slice(IO.prepend(d, carryIn), 0, N) as IO<N>;
 
     return {
-      q: mux.matchN(N)(dir, {
+      q: mux.match(dir, {
         0: left,
         1: right,
       }),
-      carryOut: mux.match1(dir, {
+      carryOut: mux.match(dir, {
         0: d[0],
         1: d[N as number],
       }),
     };
   },
-});
+})();
 
 export const comparator1 = defineModule({
   name: 'comparator1',

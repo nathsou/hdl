@@ -1,6 +1,6 @@
 import { defineModule } from "../src/core";
+import { matchWithDefault } from '../src/modules/mux';
 import { createSimulator } from '../src/sim/sim';
-import { match3 } from '../src/modules/mux';
 import { Tuple } from "../src/utils";
 
 const { bin } = Tuple;
@@ -10,7 +10,7 @@ const top = defineModule({
   inputs: {},
   outputs: { leds: 3 },
   connect(_, out) {
-    out.leds = match3(bin(4, 3), {
+    out.leds = matchWithDefault(bin(4, 3), {
       0: bin(0, 3),
       1: bin(1, 3),
       2: bin(2, 3),

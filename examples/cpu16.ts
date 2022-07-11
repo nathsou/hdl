@@ -1,7 +1,7 @@
 import { defineModule, IO, Multi, State } from "../src/core";
 import { add, adder, isEqualConst, shiftLeft, shiftRight } from "../src/modules/arith";
 import { and, land, lnot, lor, nand, or, xor } from "../src/modules/gates";
-import { decoder, match1, match16, match3, mux2 } from "../src/modules/mux";
+import { decoder, match, matchWithDefault, mux2 } from "../src/modules/mux";
 import { reg, reg16 } from "../src/modules/regs";
 import { triStateBuffer } from "../src/modules/tristate";
 import { createSimulator } from '../src/sim/sim';
@@ -173,7 +173,7 @@ const createALU = defineModule({
     adders.in.carryIn = lor(isSub, lor(land(isAdc, carryIn), land(isSbc, lnot(carryIn))));
 
     // logic unit
-    const logicOutput = match16(op, {
+    const logicOutput = matchWithDefault(op, {
       [LogicOp.and]: and(a, b),
       [LogicOp.or]: or(a, b),
       [LogicOp.nand]: nand(a, b),
@@ -207,7 +207,7 @@ const createLoadStore = (Ram: Uint16Array) => defineModule({
 
     IO.forward({ clk: inp.clk, rst: inp.rst }, [ram]);
 
-    const offsetHigh = match3(inp.isStore, {
+    const offsetHigh = match(inp.isStore, {
       0: inp.offsetHigh1,
       1: inp.offsetHigh2,
     });
@@ -263,7 +263,7 @@ const createCPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
     const carryFlag = flags.out.q[1];
     const haltedFlag = flags.out.q[2];
 
-    const shouldBranch = match1(Tuple.slice(sel, 0, 2), {
+    const shouldBranch = match(Tuple.slice(sel, 0, 2), {
       [Cond.ifZeroSet]: zeroFlag,
       [Cond.ifZeroNotSet]: lnot(zeroFlag),
       [Cond.ifCarrySet]: carryFlag,
