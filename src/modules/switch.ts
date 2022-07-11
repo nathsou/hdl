@@ -1,6 +1,6 @@
 import { defineModule } from "../core";
 
-export const dipSwitch8 = (
+export const DipSwitch8 = (
   footprint = 'Button_Switch_THT:SW_DIP_SPSTx08_Slide_9.78x22.5mm_W7.62mm_P2.54mm'
 ) => defineModule({
   name: 'dip_sw_8',

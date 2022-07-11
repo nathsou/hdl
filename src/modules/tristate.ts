@@ -1,7 +1,7 @@
-import { defineModule, IO, metadata, Module, Nat, Num } from "../core";
+import { defineModule, IO, metadata, Module, Nat } from "../core";
 import { Tuple } from "../utils";
 
-export const triStateBuffer1 = defineModule({
+export const TriStateBuffer1 = defineModule({
   name: 'tristate_buffer',
   inputs: { d: 1, enable: 1 },
   outputs: { q: 1 },
@@ -10,13 +10,13 @@ export const triStateBuffer1 = defineModule({
   }
 });
 
-export const triStateBuffer = <N extends Nat>(N: N) => defineModule({
+export const TriStateBuffer = <N extends Nat>(N: N) => defineModule({
   name: `tristate_buffer_${N}`,
   inputs: { d: N, enable: 1 },
   outputs: { q: N },
   connect({ d, enable }, out) {
     const N = IO.width(d) as N;
-    const buffers = Tuple.gen(N, triStateBuffer1);
+    const buffers = Tuple.gen(N, TriStateBuffer1);
 
     IO.forward({ enable }, buffers);
 
@@ -48,7 +48,7 @@ export const withTriStateOutput = <
 
       Object.entries(sig.outputs).forEach(([output, width]) => {
         if (triStateOutputs.includes(output)) {
-          const buffer = triStateBuffer(width);
+          const buffer = TriStateBuffer(width);
           buffer.in.d = mod.out[output];
           buffer.in.enable = inp.outputEnable;
           /// @ts-ignore
@@ -77,7 +77,7 @@ export const withTriStateInput = <
     connect(inp, out) {
       Object.entries(sig.inputs).forEach(([input, width]) => {
         if (triStateInputs.includes(input)) {
-          const buffer = triStateBuffer(width);
+          const buffer = TriStateBuffer(width);
           buffer.in.d = mod.in[input];
           buffer.in.enable = inp.inputEnable;
           /// @ts-ignore

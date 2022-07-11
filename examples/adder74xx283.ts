@@ -1,20 +1,20 @@
 import { writeFile } from 'fs/promises';
-import { defineModule, IO, KiCad, led, resistor, SExpr, Tuple } from '../src';
+import { defineModule, IO, KiCad, LED, Resistor, SExpr, Tuple } from '../src';
 import { createGitLabKiCadLibReader } from '../src/export/kicad/gitlabLibReader';
-import { binaryAdder74x283 } from '../src/modules/74xx';
-import { dipSwitch8 } from '../src/modules/switch';
+import { BinaryAdder74x283 } from '../src/modules/74xx';
+import { DipSwitch8 } from '../src/modules/switch';
 
-const top = defineModule({
+const Top = defineModule({
   name: 'top',
   inputs: {},
   outputs: {},
   connect() {
-    const a = dipSwitch8();
-    const b = dipSwitch8();
-    const leds = Tuple.gen(9, i => led({ value: `red_${i}` }));
-    const resistors = Tuple.gen(9, () => resistor({ value: '1k' }));
-    const adderLo = binaryAdder74x283();
-    const adderHi = binaryAdder74x283();
+    const a = DipSwitch8();
+    const b = DipSwitch8();
+    const leds = Tuple.gen(9, i => LED({ value: `red_${i}` }));
+    const resistors = Tuple.gen(9, () => Resistor({ value: '1k' }));
+    const adderLo = BinaryAdder74x283();
+    const adderHi = BinaryAdder74x283();
 
     a.in.d = Tuple.repeat(8, 0);
     b.in.d = Tuple.repeat(8, 0);
@@ -41,7 +41,7 @@ const top = defineModule({
 
 const main = async () => {
   const netlist = await KiCad.generateNetlist({
-    topModule: top,
+    topModule: Top,
     libReader: createGitLabKiCadLibReader({ logRequests: true }),
     power: {
       symbol: 'Connector_Generic:Conn_01x02',

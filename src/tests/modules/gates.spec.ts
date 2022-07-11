@@ -1,16 +1,16 @@
-import { gates } from '../../modules/gates';
+import { Not, And, Nand, Or, Nor, Xor, Xnor } from '../../modules/gates';
 import { createSimulator } from '../../sim/sim';
 
 describe('gates', () => {
   test('not', () => {
-    const not = createSimulator(gates.not());
+    const not = createSimulator(Not());
     not.expect({ d: 'x' }, { q: 'x' });
     not.expect({ d: 0 }, { q: 1 });
     not.expect({ d: 1 }, { q: 0 });
   });
 
   test('and', () => {
-    const and = createSimulator(gates.and());
+    const and = createSimulator(And());
     and.expect({ a: 0, b: 0 }, { q: 0 });
     and.expect({ a: 0, b: 0 }, { q: 0 });
     and.expect({ a: 0, b: 1 }, { q: 0 });
@@ -24,7 +24,7 @@ describe('gates', () => {
   });
 
   test('or', () => {
-    const or = createSimulator(gates.or());
+    const or = createSimulator(Or());
     or.expect({ a: 0, b: 0 }, { q: 0 });
     or.expect({ a: 0, b: 1 }, { q: 1 });
     or.expect({ a: 1, b: 0 }, { q: 1 });
@@ -32,7 +32,7 @@ describe('gates', () => {
   });
 
   test('xor', () => {
-    const xor = createSimulator(gates.xor());
+    const xor = createSimulator(Xor());
     xor.expect({ a: 0, b: 0 }, { q: 0 });
     xor.expect({ a: 0, b: 1 }, { q: 1 });
     xor.expect({ a: 1, b: 0 }, { q: 1 });
@@ -40,7 +40,7 @@ describe('gates', () => {
   });
 
   test('nand', () => {
-    const nand = createSimulator(gates.nand());
+    const nand = createSimulator(Nand());
     nand.expect({ a: 0, b: 0 }, { q: 1 });
     nand.expect({ a: 0, b: 1 }, { q: 1 });
     nand.expect({ a: 1, b: 0 }, { q: 1 });
@@ -48,7 +48,7 @@ describe('gates', () => {
   });
 
   test('nor', () => {
-    const nor = createSimulator(gates.nor());
+    const nor = createSimulator(Nor());
     nor.expect({ a: 0, b: 0 }, { q: 1 });
     nor.expect({ a: 0, b: 1 }, { q: 0 });
     nor.expect({ a: 1, b: 0 }, { q: 0 });
@@ -56,7 +56,7 @@ describe('gates', () => {
   });
 
   test('xnor', () => {
-    const xnor = createSimulator(gates.xnor());
+    const xnor = createSimulator(Xnor());
     xnor.expect({ a: 0, b: 0 }, { q: 1 });
     xnor.expect({ a: 0, b: 1 }, { q: 0 });
     xnor.expect({ a: 1, b: 0 }, { q: 0 });

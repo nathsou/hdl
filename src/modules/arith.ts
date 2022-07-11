@@ -1,4 +1,4 @@
-import { Connection, defineModule, IO, Multi, Nat, State, successor, Width } from "../core";
+import { Connection, defineModule, IO, Multi, Nat, State, successor } from "../core";
 import { last, Range, Tuple } from "../utils";
 import { and, land, lnot, lor, nor, not, or, xnor, xor } from "./gates";
 import * as mux from './mux';
@@ -6,158 +6,115 @@ import * as mux from './mux';
 const log2 = { 2: 4, 4: 2, 8: 3, 16: 4, 32: 5 } as const;
 type Log2 = typeof log2;
 
-export const arith = {
-  halfAdder1: defineModule({
-    name: 'half_adder1',
-    inputs: { a: 1, b: 1 },
-    outputs: { sum: 1, carry: 1 },
-    connect(inp, out) {
-      out.sum = xor(inp.a, inp.b);
-      out.carry = and(inp.a, inp.b);
-    },
-  }),
-  fullAdder1: defineModule({
-    name: 'full_adder1',
-    inputs: { a: 1, b: 1, carryIn: 1 },
-    outputs: { sum: 1, carryOut: 1 },
-    connect(inp, out) {
-      const xor1 = xor(inp.a, inp.b);
+export const HalfAdder1 = defineModule({
+  name: 'half_adder1',
+  inputs: { a: 1, b: 1 },
+  outputs: { sum: 1, carry: 1 },
+  connect(inp, out) {
+    out.sum = xor(inp.a, inp.b);
+    out.carry = and(inp.a, inp.b);
+  },
+});
 
-      // sum
-      out.sum = xor(xor1, inp.carryIn);
+export const FullAdder1 = defineModule({
+  name: 'full_adder1',
+  inputs: { a: 1, b: 1, carryIn: 1 },
+  outputs: { sum: 1, carryOut: 1 },
+  connect(inp, out) {
+    const xor1 = xor(inp.a, inp.b);
 
-      // carry
-      out.carryOut = or(
-        and(inp.carryIn, xor1),
-        and(inp.a, inp.b)
-      );
-    },
-  }),
-  adder: <N extends Multi>(N: N) => defineModule({
-    name: `adder${N}`,
-    inputs: { a: N, b: N, carryIn: 1 },
-    outputs: { sum: N, carryOut: 1 },
-    connect(inp, out) {
-      const adders = Tuple.gen(N, arith.fullAdder1);
+    // sum
+    out.sum = xor(xor1, inp.carryIn);
 
-      for (let i = 0; i < N; i++) {
-        adders[i].in.carryIn = i === 0 ? inp.carryIn : adders[i - 1].out.carryOut;
-        adders[i].in.a = inp.a[N - 1 - i];
-        adders[i].in.b = inp.b[N - 1 - i];
-      }
+    // carry
+    out.carryOut = or(
+      and(inp.carryIn, xor1),
+      and(inp.a, inp.b)
+    );
+  },
+});
 
-      out.sum = IO.gen(N, i => adders[N - 1 - i].out.sum);
-      out.carryOut = last(adders).out.carryOut;
-    },
-  }),
-  adderSubtractor: <N extends Multi>(N: N) => defineModule({
-    name: `adder_subtractor${N}`,
-    inputs: { a: N, b: N, subtract: 1, carryIn: 1 },
-    outputs: { sum: N, carryOut: 1 },
-    connect({ a, b, subtract, carryIn }) {
-      const sum = arith.adder(N)();
-      sum.in.carryIn = lor(land(lnot(subtract), carryIn), land(subtract, lnot(carryIn)));
-      sum.in.a = a;
-      sum.in.b = xor(IO.repeat(N, subtract), b);
+export const Adder = <N extends Multi>(N: N) => defineModule({
+  name: `adder${N}`,
+  inputs: { a: N, b: N, carryIn: 1 },
+  outputs: { sum: N, carryOut: 1 },
+  connect(inp, out) {
+    const adders = Tuple.gen(N, FullAdder1);
 
-      return {
-        sum: sum.out.sum,
-        carryOut: sum.out.carryOut
-      };
-    },
-  }),
-  rightBarrelShifter: <N extends keyof Log2>(N: N) => defineModule({
-    name: `right_barrel_shifter${N}`,
-    inputs: { d: N, amount: log2[N] },
-    outputs: { q: N },
-    connect({ d, amount }, out) {
-      const muxes = Tuple.gen(N, () => mux[`mux${N}`](1));
-
-      IO.forward({ sel: amount }, muxes);
-
-      Range.iter(0, N, n => {
-        Range.iter(0, N, stage => {
-          /// @ts-ignore
-          muxes[stage].in[`d${n}`] = n > stage ? 0 : d[stage - n];
-        });
-      });
-
-      out.q = IO.gen(N, n => muxes[n].out.q);
+    for (let i = 0; i < N; i++) {
+      adders[i].in.carryIn = i === 0 ? inp.carryIn : adders[i - 1].out.carryOut;
+      adders[i].in.a = inp.a[N - 1 - i];
+      adders[i].in.b = inp.b[N - 1 - i];
     }
-  }),
-  leftBarrelShifter: <N extends keyof Log2>(N: N) => defineModule({
-    name: `left_barrel_shifter${N}`,
-    inputs: { d: N, amount: log2[N] },
-    outputs: { q: N },
-    connect({ d, amount }, out) {
-      const muxes = Tuple.gen(N, () => mux[`mux${N}`](1));
 
-      IO.forward({ sel: amount }, muxes);
+    out.sum = IO.gen(N, i => adders[N - 1 - i].out.sum);
+    out.carryOut = last(adders).out.carryOut;
+  },
+})();
 
-      // [d0, d1, d2, d3]
-      // [d1, d2, d3, 0 ]
-      // [d2, d3, 0,  0 ]
-      // [d3, 0,  0,  0 ]
+export const AdderSubtractor = <N extends Multi>(N: N) => defineModule({
+  name: `adder_subtractor${N}`,
+  inputs: { a: N, b: N, subtract: 1, carryIn: 1 },
+  outputs: { sum: N, carryOut: 1 },
+  connect({ a, b, subtract, carryIn }) {
+    const sum = Adder(N);
+    sum.in.carryIn = lor(land(lnot(subtract), carryIn), land(subtract, lnot(carryIn)));
+    sum.in.a = a;
+    sum.in.b = xor(IO.repeat(N, subtract), b);
 
+    return {
+      sum: sum.out.sum,
+      carryOut: sum.out.carryOut
+    };
+  },
+})();
+
+export const RightBarrelShifter = <N extends keyof Log2>(N: N) => defineModule({
+  name: `right_barrel_shifter${N}`,
+  inputs: { d: N, amount: log2[N] },
+  outputs: { q: N },
+  connect({ d, amount }, out) {
+    const muxes = Tuple.gen(N, () => mux[`Mux${N}`](1));
+
+    IO.forward({ sel: amount }, muxes);
+
+    Range.iter(0, N, n => {
       Range.iter(0, N, stage => {
-        Range.iter(0, N, n => {
-          /// @ts-ignore
-          muxes[stage].in[`d${n}`] = n + stage < N ? d[n + stage] : 0;
-        });
+        /// @ts-ignore
+        muxes[stage].in[`d${n}`] = n > stage ? 0 : d[stage - n];
       });
+    });
 
-      out.q = IO.gen(N, n => muxes[n].out.q);
-    }
-  }),
-};
+    out.q = IO.gen(N, n => muxes[n].out.q);
+  }
+})();
 
-export const isEqualConst = <N extends Nat>(cnst: Tuple<State, N>, d: IO<N>): Connection => {
-  return land(...IO.asArray(cnst).map((state, i) => state === 1 ? IO.at(d, i) : lnot(IO.at(d, i))));
-};
+export const LeftBarrelShifter = <N extends keyof Log2>(N: N) => defineModule({
+  name: `left_barrel_shifter${N}`,
+  inputs: { d: N, amount: log2[N] },
+  outputs: { q: N },
+  connect({ d, amount }, out) {
+    const muxes = Tuple.gen(N, () => mux[`Mux${N}`](1));
 
-export const isEqual = <N extends Nat>(a: IO<N>, b: IO<N>): Connection => {
-  return land(...IO.asArray(xnor(a, b)));
-};
+    IO.forward({ sel: amount }, muxes);
 
-export const add = <N extends Multi>(a: IO<N>, b: IO<N>, carryIn: Connection = State.zero): IO<N> => {
-  const sum = arith.adder(a.length as N)();
+    // [d0, d1, d2, d3]
+    // [d1, d2, d3, 0 ]
+    // [d2, d3, 0,  0 ]
+    // [d3, 0,  0,  0 ]
 
-  sum.in.a = a;
-  sum.in.b = b;
-  sum.in.carryIn = carryIn;
+    Range.iter(0, N, stage => {
+      Range.iter(0, N, n => {
+        /// @ts-ignore
+        muxes[stage].in[`d${n}`] = n + stage < N ? d[n + stage] : 0;
+      });
+    });
 
-  return sum.out.sum;
-};
+    out.q = IO.gen(N, n => muxes[n].out.q);
+  }
+})();
 
-export const subtract = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
-  const subtractor = arith.adderSubtractor(a.length as N)();
-
-  subtractor.in.subtract = 1;
-  subtractor.in.a = a;
-  subtractor.in.b = b;
-
-  return subtractor.out.sum;
-};
-
-export const shiftLeft = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>): IO<N> => {
-  const N = IO.width(d) as N;
-  const shifter = arith.leftBarrelShifter(N)();
-  shifter.in.d = d;
-  shifter.in.amount = amount;
-
-  return shifter.out.q;
-};
-
-export const shiftRight = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>): IO<N> => {
-  const N = IO.width(d) as N;
-  const shifter = arith.rightBarrelShifter(N)();
-  shifter.in.d = d;
-  shifter.in.amount = amount;
-
-  return shifter.out.q;
-};
-
-export const bidirectionalShifter = <N extends Multi>(N: N) => defineModule({
+export const BidirectionalShifter = <N extends Multi>(N: N) => defineModule({
   name: 'bidirectional_shifter',
   inputs: { d: N, dir: 1, carryIn: 1 },
   outputs: { q: N, carryOut: 1 },
@@ -178,7 +135,7 @@ export const bidirectionalShifter = <N extends Multi>(N: N) => defineModule({
   },
 })();
 
-export const comparator1 = defineModule({
+export const Comparator1 = defineModule({
   name: 'comparator1',
   inputs: { a: 1, b: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
@@ -190,7 +147,7 @@ export const comparator1 = defineModule({
 });
 
 // amplitude comparator with cascade
-export const comparator4 = defineModule({
+export const Comparator4 = defineModule({
   name: 'comparator4',
   inputs: { a: 4, b: 4, cascaded_lss: 1, cascaded_equ: 1, cascaded_gtr: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
@@ -216,13 +173,13 @@ export const comparator4 = defineModule({
   }
 });
 
-export const comparator8 = defineModule({
+export const Comparator8 = defineModule({
   name: 'comparator8',
   inputs: { a: 8, b: 8, cascaded_lss: 1, cascaded_equ: 1, cascaded_gtr: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
   connect({ a, b, cascaded_lss, cascaded_equ, cascaded_gtr }, out) {
-    const lsb = comparator4();
-    const msb = comparator4();
+    const lsb = Comparator4();
+    const msb = Comparator4();
 
     lsb.in.a = Tuple.low(4, a);
     lsb.in.b = Tuple.low(4, b);
@@ -242,13 +199,13 @@ export const comparator8 = defineModule({
   }
 });
 
-export const comparator16 = defineModule({
+export const Comparator16 = defineModule({
   name: 'comparator16',
   inputs: { a: 16, b: 16, cascaded_lss: 1, cascaded_equ: 1, cascaded_gtr: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
   connect({ a, b, cascaded_lss, cascaded_equ, cascaded_gtr }, out) {
-    const lsb = comparator8();
-    const msb = comparator8();
+    const lsb = Comparator8();
+    const msb = Comparator8();
 
     lsb.in.a = Tuple.low(8, a);
     lsb.in.b = Tuple.low(8, b);
@@ -268,13 +225,13 @@ export const comparator16 = defineModule({
   }
 });
 
-export const comparator32 = defineModule({
+export const Comparator32 = defineModule({
   name: 'comparator32',
   inputs: { a: 32, b: 32, cascaded_lss: 1, cascaded_equ: 1, cascaded_gtr: 1 },
   outputs: { lss: 1, equ: 1, gtr: 1 },
   connect({ a, b, cascaded_lss, cascaded_equ, cascaded_gtr }, out) {
-    const lsb = comparator16();
-    const msb = comparator16();
+    const lsb = Comparator16();
+    const msb = Comparator16();
 
     lsb.in.a = Tuple.low(16, a);
     lsb.in.b = Tuple.low(16, b);
@@ -295,7 +252,7 @@ export const comparator32 = defineModule({
 });
 
 export const compare8 = (a: IO<8>, b: IO<8>) => {
-  const comp = comparator8();
+  const comp = Comparator8();
   comp.in.a = a;
   comp.in.b = b;
   comp.in.cascaded_lss = 0;
@@ -309,7 +266,50 @@ export const compare8 = (a: IO<8>, b: IO<8>) => {
   };
 };
 
-export const adder = <N extends Multi>(N: N) => arith.adder(N)();
-export const adderSubtractor = <N extends Multi>(N: N) => arith.adderSubtractor(N)();
-export const rightBarrelShifter = <N extends keyof Log2>(N: N) => arith.rightBarrelShifter(N)();
-export const leftBarrelShifter = <N extends keyof Log2>(N: N) => arith.leftBarrelShifter(N)();
+// shorthands
+
+export const isEqualConst = <N extends Nat>(cnst: Tuple<State, N>, d: IO<N>): Connection => {
+  return land(...IO.asArray(cnst).map((state, i) => state === 1 ? IO.at(d, i) : lnot(IO.at(d, i))));
+};
+
+export const isEqual = <N extends Nat>(a: IO<N>, b: IO<N>): Connection => {
+  return land(...IO.asArray(xnor(a, b)));
+};
+
+export const add = <N extends Multi>(a: IO<N>, b: IO<N>, carryIn: Connection = State.zero): IO<N> => {
+  const sum = Adder(a.length as N);
+
+  sum.in.a = a;
+  sum.in.b = b;
+  sum.in.carryIn = carryIn;
+
+  return sum.out.sum;
+};
+
+export const subtract = <N extends Multi>(a: IO<N>, b: IO<N>): IO<N> => {
+  const subtractor = AdderSubtractor(a.length as N);
+
+  subtractor.in.subtract = 1;
+  subtractor.in.a = a;
+  subtractor.in.b = b;
+
+  return subtractor.out.sum;
+};
+
+export const shiftLeft = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>): IO<N> => {
+  const N = IO.width(d) as N;
+  const shifter = LeftBarrelShifter(N);
+  shifter.in.d = d;
+  shifter.in.amount = amount;
+
+  return shifter.out.q;
+};
+
+export const shiftRight = <N extends keyof Log2>(d: IO<N>, amount: IO<Log2[N]>): IO<N> => {
+  const N = IO.width(d) as N;
+  const shifter = RightBarrelShifter(N);
+  shifter.in.d = d;
+  shifter.in.amount = amount;
+
+  return shifter.out.q;
+};

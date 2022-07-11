@@ -5,7 +5,7 @@ type ResistorOptions = {
   footprint?: string,
 };
 
-export const resistor = (options: ResistorOptions) => defineModule({
+export const Resistor = (options: ResistorOptions) => defineModule({
   name: `R${options.value}`,
   inputs: { lhs: 1 },
   outputs: { rhs: 1 },
@@ -24,7 +24,7 @@ type LedOptions = {
   footprint?: string,
 };
 
-export const led = (options: LedOptions) => defineModule({
+export const LED = (options: LedOptions) => defineModule({
   name: `LED_${options.value}`,
   inputs: { lhs: 1 },
   outputs: { rhs: 1 },

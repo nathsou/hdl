@@ -1,4 +1,4 @@
-import { adderSubtractor } from "../src/modules/arith";
+import { AdderSubtractor } from "../src/modules/arith";
 import { defineModule } from "../src/core";
 import { createSimulator } from '../src/sim/sim';
 import { Tuple } from "../src/utils";
@@ -7,12 +7,12 @@ const { bin } = Tuple;
 
 const N = 32;
 
-const top = defineModule({
+const Top = defineModule({
   name: 'top',
   inputs: { a: N, b: N, subtract: 1 },
   outputs: { leds: N, overflow: 1 },
   connect(inp, out) {
-    const adder = adderSubtractor(N);
+    const adder = AdderSubtractor(N);
 
     adder.in.a = inp.a;
     adder.in.b = inp.b;
@@ -25,7 +25,7 @@ const top = defineModule({
 
 
 const main = () => {
-  const mod = top();
+  const mod = Top();
   const sim = createSimulator(mod, {
     approach: 'levelization',
     checkConnections: true,

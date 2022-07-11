@@ -3,19 +3,19 @@ import { writeFile } from 'fs/promises';
 import { defineModule, KiCad, metadata, Rewire, SExpr, Tuple } from '../src';
 import { Elk } from '../src/export/elk/elk';
 import { createFileSystemKicadLibReader } from '../src/export/kicad/nodeLibReader';
-import { isolateGates, u74x08, u74x32, u74x86 } from '../src/modules/74xx';
-import { pinHeaders1x8, pinHeaders1x9 } from '../src/modules/connectors';
+import { isolateGates, U74x08, U74x32, U74x86 } from '../src/modules/74xx';
+import { PinHeaders1x8, PinHeaders1x9 } from '../src/modules/connectors';
 
-const adder4 = defineModule({
+const Adder4 = defineModule({
   name: '74xx.full_adder4',
   inputs: { a: 4, b: 4, cin: 1 },
   outputs: { sum: 4, cout: 1 },
   connect({ a: [a3, a2, a1, a0], b: [b3, b2, b1, b0], cin: cin0 }, out) {
-    const [xor1, xor2, xor3, xor4] = isolateGates(u74x86());
-    const [xor5, xor6, xor7, xor8] = isolateGates(u74x86());
-    const [and1, and2, and3, and4] = isolateGates(u74x08());
-    const [and5, and6, and7, and8] = isolateGates(u74x08());
-    const [or1, or2, or3, or4] = isolateGates(u74x32());
+    const [xor1, xor2, xor3, xor4] = isolateGates(U74x86());
+    const [xor5, xor6, xor7, xor8] = isolateGates(U74x86());
+    const [and1, and2, and3, and4] = isolateGates(U74x08());
+    const [and5, and6, and7, and8] = isolateGates(U74x08());
+    const [or1, or2, or3, or4] = isolateGates(U74x32());
 
     const inter0 = xor1(a0, b0);
     const s0 = xor2(inter0, cin0);
@@ -38,13 +38,13 @@ const adder4 = defineModule({
   }
 });
 
-const adder8 = defineModule({
+const Adder8 = defineModule({
   name: '74xx.full_adder8',
   inputs: { a: 8, b: 8, cin: 1 },
   outputs: { cout: 1, sum: 8 },
   connect({ a, b, cin }, out) {
-    const adderLo = adder4();
-    const adderHi = adder4();
+    const adderLo = Adder4();
+    const adderHi = Adder4();
 
     adderLo.in.a = Tuple.low(4, a);
     adderLo.in.b = Tuple.low(4, b);
@@ -59,15 +59,15 @@ const adder8 = defineModule({
   },
 });
 
-const top = defineModule({
+const Top = defineModule({
   name: 'top',
   inputs: {},
   outputs: {},
   connect() {
-    const a = pinHeaders1x8();
-    const b = pinHeaders1x8();
-    const outputPins = pinHeaders1x9();
-    const uAdder = adder8();
+    const a = PinHeaders1x8();
+    const b = PinHeaders1x8();
+    const outputPins = PinHeaders1x9();
+    const uAdder = Adder8();
 
     uAdder.in.cin = 0;
     uAdder.in.a = a.out.pins;
@@ -78,10 +78,10 @@ const top = defineModule({
 })();
 
 const main = async () => {
-  const { circuit } = metadata(top);
+  const { circuit } = metadata(Top);
   const svg = await Elk.renderSvg(new ELK(), Rewire.keepKiCadModules(circuit));
   const netlist = await KiCad.generateNetlist({
-    topModule: top,
+    topModule: Top,
     libReader: createFileSystemKicadLibReader({
       symbolsDir: '/mnt/c/Program Files/KiCad/6.0/share/kicad/symbols/',
       footprintsDir: '/mnt/c/Program Files/KiCad/6.0/share/kicad/footprints/',

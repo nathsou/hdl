@@ -1,5 +1,5 @@
 import { GlobalState } from '../../core';
-import { dLatch, leaderFollowerJKFlipFlop, srLatch, srLatchWithEnable } from '../../modules/mem';
+import { DLatch, LeaderFollowerJKFlipFlop, SRLatch, SRLatchWithEnable } from '../../modules/mem';
 import { createSimulator } from '../../sim/sim';
 
 describe('mem', () => {
@@ -8,7 +8,7 @@ describe('mem', () => {
   });
 
   test('srLatch', () => {
-    const sr = createSimulator(srLatch());
+    const sr = createSimulator(SRLatch());
 
     sr.expect({ s: 0, r: 0 }, { q: 0, qbar: 1 });
     sr.expect({ s: 1, r: 0 }, { q: 1, qbar: 0 });
@@ -18,7 +18,7 @@ describe('mem', () => {
   });
 
   test('srLatchWithEnable', () => {
-    const sr = createSimulator(srLatchWithEnable());
+    const sr = createSimulator(SRLatchWithEnable());
 
     sr.expect({ s: 0, r: 0, enable: 1 }, { q: 'x', qbar: 'x' });
     sr.expect({ s: 1, r: 0, enable: 1 }, { q: 1, qbar: 0 });
@@ -29,7 +29,7 @@ describe('mem', () => {
   });
 
   test('dLatch', () => {
-    const latch = createSimulator(dLatch());
+    const latch = createSimulator(DLatch());
 
     latch.expect({ d: 0, enable: 0 }, { q: 1, qbar: 0 });
     latch.expect({ d: 1, enable: 1 }, { q: 1, qbar: 0 });
@@ -38,7 +38,7 @@ describe('mem', () => {
   });
 
   test('leaderFollowerJKFlipFlop', () => {
-    const jk = createSimulator(leaderFollowerJKFlipFlop());
+    const jk = createSimulator(LeaderFollowerJKFlipFlop());
 
     jk.expect({ j: 1, k: 0, clk: 0 }, { q: 0, qbar: 1 });
     jk.expect({ j: 1, k: 0, clk: 1 }, { q: 1, qbar: 0 });

@@ -1,7 +1,7 @@
 import { defineModule, State } from "../core";
 import { and, not } from "./gates";
 
-export const srLatch = defineModule({
+export const SRLatch = defineModule({
   name: 'sr_latch',
   inputs: { s: 1, r: 1 },
   outputs: { q: 1, qbar: 1 },
@@ -20,12 +20,12 @@ export const srLatch = defineModule({
   },
 });
 
-export const srLatchWithEnable = defineModule({
+export const SRLatchWithEnable = defineModule({
   name: 'sr_latch_with_enable',
   inputs: { s: 1, r: 1, enable: 1 },
   outputs: { q: 1, qbar: 1 },
   connect(inp, out) {
-    const sr = srLatch();
+    const sr = SRLatch();
 
     sr.in.s = and(inp.s, inp.enable);
     sr.in.r = and(inp.r, inp.enable);
@@ -35,12 +35,12 @@ export const srLatchWithEnable = defineModule({
   },
 });
 
-export const dLatch = defineModule({
+export const DLatch = defineModule({
   name: 'd_latch',
   inputs: { d: 1, enable: 1 },
   outputs: { q: 1, qbar: 1 },
   connect(inp, out) {
-    const sr = srLatchWithEnable();
+    const sr = SRLatchWithEnable();
 
     sr.in.s = inp.d;
     sr.in.r = not(inp.d);
@@ -51,12 +51,12 @@ export const dLatch = defineModule({
   },
 });
 
-export const dFlipFlop = defineModule({
+export const DFlipFlop = defineModule({
   name: 'd_flip_flop',
   inputs: { d: 1, clk: 1 },
   outputs: { q: 1, qbar: 1 },
   connect(inp, out) {
-    const latch = dLatch();
+    const latch = DLatch();
     latch.in.d = inp.d;
     latch.in.enable = inp.clk;
     out.q = latch.out.q;
@@ -65,13 +65,13 @@ export const dFlipFlop = defineModule({
 });
 
 // also known as master-slave JK flip-flop
-export const leaderFollowerJKFlipFlop = defineModule({
+export const LeaderFollowerJKFlipFlop = defineModule({
   name: 'leader_follower_jk_flip_flop',
   inputs: { j: 1, k: 1, clk: 1 },
   outputs: { q: 1, qbar: 1 },
   connect(inp, out) {
-    const leader = srLatchWithEnable();
-    const follower = srLatchWithEnable();
+    const leader = SRLatchWithEnable();
+    const follower = SRLatchWithEnable();
 
     leader.in.enable = inp.clk;
     leader.in.s = and(inp.j, follower.out.qbar);

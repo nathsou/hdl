@@ -1,6 +1,6 @@
 import { defineModule } from "../core";
 
-export const npn = defineModule({
+export const NPN = defineModule({
   name: 'npn',
   inputs: { base: 1, collector: 1 },
   outputs: { emitter: 1 },

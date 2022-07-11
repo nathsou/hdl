@@ -1,5 +1,5 @@
 import { Connection, defineModule, Module } from "../core";
-import { adder } from './arith';
+import { Adder } from './arith';
 import { land, lnand, lnor, lnot, lor, lxnor, lxor } from "./gates";
 
 // https://en.wikipedia.org/wiki/List_of_7400-series_integrated_circuits
@@ -36,45 +36,45 @@ const create74xQuadLogicalGatesModule = (id: string, gate: (a: Connection, b: Co
  * quad 2-input NAND gates
  * https://www.ti.com/lit/ds/symlink/sn74ls00.pdf
  */
-export const u74x00 = create74xQuadLogicalGatesModule('00', lnand);
-export const quad2InputNandGates74x00 = u74x00;
+export const U74x00 = create74xQuadLogicalGatesModule('00', lnand);
+export const Quad2InputNandGates74x00 = U74x00;
 
 /**
  * quad 2-input NOR gates
  * https://www.ti.com/lit/ds/symlink/sn74ls02.pdf
  */
-export const u74x02 = create74xQuadLogicalGatesModule('02', lnor);
-export const quad2InputNorGates74x02 = u74x02;
+export const U74x02 = create74xQuadLogicalGatesModule('02', lnor);
+export const Quad2InputNorGates74x02 = U74x02;
 
 /**
  * quad 2-input AND gates
  * https://www.ti.com/lit/ds/symlink/sn74ls08.pdf
  */
-export const u74x08 = create74xQuadLogicalGatesModule('08', land);
-export const quad2InputAndGates74x08 = u74x08;
+export const U74x08 = create74xQuadLogicalGatesModule('08', land);
+export const Quad2InputAndGates74x08 = U74x08;
 
 /**
  * quad 2-input OR gates
  * https://www.ti.com/lit/ds/symlink/sn74ls32.pdf
  */
-export const u74x32 = create74xQuadLogicalGatesModule('32', lor);
-export const quad2InputOrGates74x32 = u74x32;
+export const U74x32 = create74xQuadLogicalGatesModule('32', lor);
+export const Quad2InputOrGates74x32 = U74x32;
 
 /**
  * quad 2-input XOR gates
  * https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf
  */
-export const u74x86 = create74xQuadLogicalGatesModule('86', lxor);
-export const quad2InputXorGates74x86 = u74x86;
+export const U74x86 = create74xQuadLogicalGatesModule('86', lxor);
+export const Quad2InputXorGates74x86 = U74x86;
 
 /**
  * quad 2-input XNOR gates
  * https://archive.org/details/bitsavers_tidataBookogicDataBook_23574286/page/n461/mode/2up
  */
-export const u74x7266 = create74xQuadLogicalGatesModule('7266', lxnor);
-export const quad2InputXnorGates74x7266 = u74x7266;
+export const U74x7266 = create74xQuadLogicalGatesModule('7266', lxnor);
+export const Quad2InputXnorGates74x7266 = U74x7266;
 
-export const u74x04 = (footprint = defaultFootprint(14)) => defineModule({
+export const U74x04 = (footprint = defaultFootprint(14)) => defineModule({
   name: '74x04',
   inputs: { gnd: 1, vcc: 1, a: 6 },
   outputs: { y: 6 },
@@ -100,7 +100,7 @@ export const u74x04 = (footprint = defaultFootprint(14)) => defineModule({
   },
 })();
 
-export const hexInverters74x04 = u74x04;
+export const HexInverters74x04 = U74x04;
 
 export const isolateGates = (
   gates: Module<{ a: 4, b: 4, gnd: 1, vcc: 1 }, { y: 4 }>,
@@ -138,7 +138,7 @@ export const isolateGates = (
  * 4-bit binary full adder with fast carry
  * https://www.ti.com/lit/ds/symlink/sn74ls283.pdf
  */
-export const u74x283 = (footprint = defaultFootprint(16)) => defineModule({
+export const U74x283 = (footprint = defaultFootprint(16)) => defineModule({
   name: '74x283',
   inputs: { gnd: 1, vcc: 1, a: 4, b: 4, c0: 1 },
   outputs: { s: 4, c4: 1 },
@@ -147,15 +147,15 @@ export const u74x283 = (footprint = defaultFootprint(16)) => defineModule({
     footprint,
   },
   connect(inp, out) {
-    const s = adder(4);
-    s.in.a = inp.a;
-    s.in.b = inp.b;
-    s.in.carryIn = inp.c0;
+    const sum = Adder(4);
+    sum.in.a = inp.a;
+    sum.in.b = inp.b;
+    sum.in.carryIn = inp.c0;
 
-    out.s = s.out.sum;
-    out.c4 = s.out.carryOut;
+    out.s = sum.out.sum;
+    out.c4 = sum.out.carryOut;
   },
 })();
 
 // 4-bit binary full adder with fast carry
-export const binaryAdder74x283 = u74x283;
+export const BinaryAdder74x283 = U74x283;

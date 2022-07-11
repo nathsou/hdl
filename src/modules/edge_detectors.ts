@@ -1,6 +1,6 @@
 import { defineModule, State } from "../core";
 
-export const risingEdgeDetector = defineModule({
+export const RisingEdgeDetector = defineModule({
   name: 'rising_edge_detector',
   inputs: { d: 1 },
   outputs: { q: 1 },
@@ -11,7 +11,7 @@ export const risingEdgeDetector = defineModule({
   }
 });
 
-export const fallingEdgeDetector = defineModule({
+export const FallingEdgeDetector = defineModule({
   name: 'rising_edge_detector',
   inputs: { d: 1 },
   outputs: { q: 1 },

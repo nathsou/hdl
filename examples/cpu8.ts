@@ -1,7 +1,7 @@
-import { adderSubtractor, bidirectionalShifter, decoder, land, match, nand, nor, Range, Tuple } from '../src';
+import { AdderSubtractor, BidirectionalShifter, decoder, land, match, nand, nor, Range, Tuple } from '../src';
 import { defineModule, IO } from '../src/core';
-import { counterReg, reg8 } from '../src/modules/regs';
-import { triStateBuffer } from '../src/modules/tristate';
+import { CounterReg, Reg8 } from '../src/modules/regs';
+import { TriStateBuffer } from '../src/modules/tristate';
 
 enum Regs { r0 = 0, r1, r2, r3, r4, r5, mh, ml }
 enum AluOp { add = 0, shift, nand, nor }
@@ -12,14 +12,14 @@ const Registers = defineModule({
   outputs: { a: 8, b: 8 },
   connect({ clk, rst, d, selDst, selA, selB, incPC, load }, out) {
     const regs = [
-      ...Tuple.gen(6, reg8), // general purpose registers
-      ...Tuple.gen(2, () => counterReg(8)), // memory address register
+      ...Tuple.gen(6, Reg8), // general purpose registers
+      ...Tuple.gen(2, () => CounterReg(8)), // memory address register
     ] as const;
 
     IO.forward({ clk, rst }, regs);
 
-    const buffersA = Tuple.gen(8, () => triStateBuffer(8));
-    const buffersB = Tuple.gen(8, () => triStateBuffer(8));
+    const buffersA = Tuple.gen(8, () => TriStateBuffer(8));
+    const buffersB = Tuple.gen(8, () => TriStateBuffer(8));
 
     const selADecoder = decoder(8, selA);
     const selBDecoder = decoder(8, selB);
@@ -50,14 +50,14 @@ const ALU = defineModule({
   inputs: { op: 2, a: 8, b: 8, carryIn: 1, subtract: 1, shiftDir: 1 },
   outputs: { q: 8 },
   connect({ op, a, b, carryIn, subtract, shiftDir }) {
-    const adder = adderSubtractor(8);
+    const adder = AdderSubtractor(8);
 
     adder.in.a = a;
     adder.in.b = b;
     adder.in.carryIn = carryIn;
     adder.in.subtract = subtract;
 
-    const shifter = bidirectionalShifter(8);
+    const shifter = BidirectionalShifter(8);
     shifter.in.dir = shiftDir;
     shifter.in.d = a;
 

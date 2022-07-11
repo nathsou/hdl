@@ -5,7 +5,7 @@ import { Tuple } from "../src/utils";
 
 const { bin } = Tuple;
 
-const top = defineModule({
+const Top = defineModule({
   name: 'top',
   inputs: {},
   outputs: { leds: 3 },
@@ -21,7 +21,7 @@ const top = defineModule({
 });
 
 const main = () => {
-  const mod = top();
+  const mod = Top();
   const sim = createSimulator(mod);
 
   sim.input({});

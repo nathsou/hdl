@@ -1,5 +1,5 @@
 import { GlobalState } from '../../core';
-import { mux2, mux4, mux8, mux16, mux32 } from '../../modules/mux';
+import { Mux2, Mux4, Mux8, Mux16, Mux32 } from '../../modules/mux';
 import { createSimulator } from '../../sim/sim';
 import { Range, Tuple } from '../../utils';
 
@@ -9,14 +9,14 @@ describe('mux', () => {
   });
 
   test('mux2', () => {
-    const m = createSimulator(mux2(1));
+    const m = createSimulator(Mux2(1));
 
     m.expect({ d0: 0, d1: 1, sel: 0 }, { q: 0 });
     m.expect({ d0: 0, d1: 1, sel: 1 }, { q: 1 });
   });
 
   test('mux4', () => {
-    const m = createSimulator(mux4(2));
+    const m = createSimulator(Mux4(2));
 
     for (let i = 0; i < 4; i++) {
       m.expect({
@@ -32,7 +32,7 @@ describe('mux', () => {
   });
 
   test('mux8', () => {
-    const m = createSimulator(mux8(3));
+    const m = createSimulator(Mux8(3));
     const cases = Tuple.mapObject(Range.map(0, 8, n => [`d${n}`, Tuple.bin(n, 3)]));
 
     for (let i = 0; i < 8; i++) {
@@ -43,7 +43,7 @@ describe('mux', () => {
   });
 
   test('mux16', () => {
-    const m = createSimulator(mux16(4));
+    const m = createSimulator(Mux16(4));
     const cases = Tuple.mapObject(Range.map(0, 16, n => [`d${n}`, Tuple.bin(n, 4)]));
 
     for (let i = 0; i < 16; i++) {
@@ -54,7 +54,7 @@ describe('mux', () => {
   });
 
   test('mux32', () => {
-    const m = createSimulator(mux32(5));
+    const m = createSimulator(Mux32(5));
     const cases = Tuple.mapObject(Range.map(0, 32, n => [`d${n}`, Tuple.bin(n, 5)]));
 
     for (let i = 0; i < 32; i++) {

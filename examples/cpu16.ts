@@ -1,9 +1,9 @@
 import { defineModule, IO, Multi, State } from "../src/core";
-import { add, adder, isEqualConst, shiftLeft, shiftRight } from "../src/modules/arith";
+import { add, Adder, isEqualConst, shiftLeft, shiftRight } from "../src/modules/arith";
 import { and, land, lnot, lor, nand, or, xor } from "../src/modules/gates";
-import { decoder, match, matchWithDefault, mux2 } from "../src/modules/mux";
-import { reg, reg16 } from "../src/modules/regs";
-import { triStateBuffer } from "../src/modules/tristate";
+import { decoder, match, matchWithDefault, Mux2 } from "../src/modules/mux";
+import { Reg, Reg16 } from "../src/modules/regs";
+import { TriStateBuffer } from "../src/modules/tristate";
 import { createSimulator } from '../src/sim/sim';
 import { Range, Tuple } from "../src/utils";
 
@@ -33,7 +33,7 @@ enum Cond {
   ifCarryNotSet,
 }
 
-const createROM = (rom: Uint16Array) => defineModule({
+const ROM = (rom: Uint16Array) => defineModule({
   name: 'instructions_rom',
   inputs: { clk: 1, addr: 16 },
   outputs: { inst: 16 },
@@ -51,7 +51,7 @@ const createROM = (rom: Uint16Array) => defineModule({
   }
 })();
 
-const createRAM = (ram: Uint16Array) => defineModule({
+const RAM = (ram: Uint16Array) => defineModule({
   name: 'ram',
   inputs: { clk: 1, rst: 1, d: 16, read: 1, write: 1, addr: 16 },
   outputs: { q: 16 },
@@ -79,7 +79,7 @@ const createRAM = (ram: Uint16Array) => defineModule({
   }
 })();
 
-const createProgramCounter = <N extends Multi>(N: N) => {
+const PC = <N extends Multi>(N: N) => {
   const zero = State.gen(N, () => State.zero);
 
   return defineModule({
@@ -112,15 +112,15 @@ const createProgramCounter = <N extends Multi>(N: N) => {
   })();
 };
 
-const createRegisters = defineModule({
+const Registers = defineModule({
   name: 'registers',
   inputs: { d: 16, clk: 1, rst: 1, load: 1, dest: 3, src1: 3, src2: 3 },
   outputs: { a: 16, b: 16, regs: 112 },
   connect(inp, out) {
-    const pc = createProgramCounter(16);
-    const regs = [...Tuple.gen(7, reg16), pc];
-    const buffersA = Tuple.gen(8, () => triStateBuffer(16));
-    const buffersB = Tuple.gen(8, () => triStateBuffer(16));
+    const pc = PC(16);
+    const regs = [...Tuple.gen(7, Reg16), pc];
+    const buffersA = Tuple.gen(8, () => TriStateBuffer(16));
+    const buffersB = Tuple.gen(8, () => TriStateBuffer(16));
     const selDst = decoder(8, inp.dest);
     const selA = decoder(8, inp.src1);
     const selB = decoder(8, inp.src2);
@@ -157,14 +157,14 @@ const createRegisters = defineModule({
   }
 });
 
-const createALU = defineModule({
+const ALU = defineModule({
   name: 'alu',
   inputs: { a: 16, b: 16, op: 3, isLogic: 1, carryIn: 1, outputEnable: 1 },
   outputs: { q: 16, isZero: 1, carryOut: 1 },
   connect({ a, b, op, isLogic, carryIn, outputEnable }) {
-    const adders = adder(16);
-    const outputBuffer = triStateBuffer(16);
-    const outputMux = mux2(16);
+    const adders = Adder(16);
+    const outputBuffer = TriStateBuffer(16);
+    const outputMux = Mux2(16);
     // arithmetic unit
     const [_isAdd, isSub, isAdc, isSbc] = decoder(4, Tuple.slice(op, 1, 3));
     const subtract = lor(isSub, isSbc);
@@ -198,12 +198,12 @@ const createALU = defineModule({
   }
 });
 
-const createLoadStore = (Ram: Uint16Array) => defineModule({
+const LoadStore = (Ram: Uint16Array) => defineModule({
   name: 'load_store',
   inputs: { clk: 1, rst: 1, isLoad: 1, isStore: 1, addr: 16, d: 16, offsetLow: 4, offsetHigh1: 3, offsetHigh2: 3 },
   outputs: { q: 16 },
   connect(inp) {
-    const ram = createRAM(Ram);
+    const ram = RAM(Ram);
 
     IO.forward({ clk: inp.clk, rst: inp.rst }, [ram]);
 
@@ -219,7 +219,7 @@ const createLoadStore = (Ram: Uint16Array) => defineModule({
     ram.in.read = inp.isLoad;
     ram.in.write = inp.isStore;
 
-    const outputBuffer = triStateBuffer(16);
+    const outputBuffer = TriStateBuffer(16);
     outputBuffer.in.d = ram.out.q;
     outputBuffer.in.enable = inp.isLoad;
 
@@ -227,17 +227,17 @@ const createLoadStore = (Ram: Uint16Array) => defineModule({
   }
 })();
 
-const createCPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
+const CPU = (Rom: Uint16Array, Ram: Uint16Array) => defineModule({
   name: 'cpu',
   inputs: { clk: 1, rst: 1 },
   outputs: { z: 1, c: 1, inst: 16, halted: 1, regs: 112 },
   connect(inp) {
-    const flags = reg(3);
-    const rom = createROM(Rom);
-    const regs = createRegisters();
-    const alu = createALU();
-    const setBuffer = triStateBuffer(16);
-    const loadStore = createLoadStore(Ram);
+    const flags = Reg(3);
+    const rom = ROM(Rom);
+    const regs = Registers();
+    const alu = ALU();
+    const setBuffer = TriStateBuffer(16);
+    const loadStore = LoadStore(Ram);
     const pc = Tuple.slice(regs.out.regs, 96, 112);
 
     rom.in.clk = lnot(inp.clk);
@@ -365,7 +365,7 @@ const main = () => {
     0x4016, 0x4027, 0x2408, 0x2809, 0x8941, 0x84b3, 0x7420, 0xbfd9, 0x2406, 0x2807, 0x0000
   ], 0);
   const ram = new Uint16Array(2 ** 16);
-  const cpu = createCPU(rom, ram);
+  const cpu = CPU(rom, ram);
 
   const sim = createSimulator(cpu);
 

@@ -1,7 +1,7 @@
 import { defineModule, IO, Module, Nat } from "../core";
 import { Tuple } from "../utils";
 
-export const extendN = <
+export const extend = <
   N extends Nat,
   InputPin extends string,
   OutputPin extends string,
